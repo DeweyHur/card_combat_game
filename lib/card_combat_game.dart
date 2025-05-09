@@ -65,9 +65,19 @@ class CardCombatGame extends FlameGame with TapDetector {
       print('Game initialization started');
       print('Screen size: ${size.x}x${size.y}');
       
-      // Initialize audio player
-      await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
-      print('Audio player initialized');
+      // Initialize audio player with error handling
+      try {
+        print('Initializing audio player...');
+        await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
+        print('Audio player initialized successfully');
+        
+        // Test sound playback
+        print('Testing sound playback...');
+        await _audioPlayer.play(AssetSource('sounds/card_play.mp3'));
+        print('Test sound played successfully');
+      } catch (e) {
+        print('Error initializing audio player: $e');
+      }
 
       // Create game areas
       _playerArea = RectangleComponent(
@@ -261,14 +271,22 @@ class CardCombatGame extends FlameGame with TapDetector {
     final effect = RectangleComponent(
       size: Vector2(100, 100),
       position: Vector2(size.x / 2, size.y / 2),
-      paint: Paint()..color = effectColor.withValues(alpha: 0.5),
+      paint: Paint()..color = effectColor.withOpacity(0.5),
     );
     add(effect);
 
     // Fade out effect
     effect.add(
-      OpacityEffect.fadeOut(
-        EffectController(duration: 0.5),
+      SequenceEffect(
+        [
+          ScaleEffect.by(
+            Vector2.all(2.0),
+            EffectController(duration: 0.3),
+          ),
+          OpacityEffect.fadeOut(
+            EffectController(duration: 0.2),
+          ),
+        ],
         onComplete: () {
           remove(effect);
         },
@@ -277,8 +295,17 @@ class CardCombatGame extends FlameGame with TapDetector {
   }
 
   void _playDamageEffect(Vector2 position, bool isPlayer) {
-    // Play damage sound
-    _audioPlayer.play(AssetSource('sounds/damage.mp3'));
+    // Play damage sound with error handling
+    try {
+      print('Playing damage sound effect...');
+      _audioPlayer.play(AssetSource('sounds/damage.mp3')).then((_) {
+        print('Damage sound played successfully');
+      }).catchError((error) {
+        print('Error playing damage sound: $error');
+      });
+    } catch (e) {
+      print('Error setting up damage sound: $e');
+    }
 
     // Create damage number effect
     final damageText = TextComponent(
@@ -303,7 +330,7 @@ class CardCombatGame extends FlameGame with TapDetector {
             EffectController(duration: 0.5, curve: Curves.easeOut),
           ),
           OpacityEffect.fadeOut(
-            EffectController(duration: 0.3, curve: Curves.easeOut),
+            EffectController(duration: 0.3),
           ),
         ],
         onComplete: () {
@@ -331,13 +358,30 @@ class CardCombatGame extends FlameGame with TapDetector {
   void _executeCard(Card card) {
     print('\n=== Playing Card ===');
     print('Card played: ${card.name} (${card.type})');
+    print('Current game state:');
+    print('- Player HP: $playerHp/$maxPlayerHp');
+    print('- Enemy HP: $enemyHp/$maxEnemyHp');
+    print('- Is player turn: $isPlayerTurn');
+    
+    // Play card sound effect with error handling
+    try {
+      print('Playing card sound effect...');
+      _audioPlayer.play(AssetSource('sounds/card_play.mp3')).then((_) {
+        print('Card sound played successfully');
+      }).catchError((error) {
+        print('Error playing card sound: $error');
+      });
+    } catch (e) {
+      print('Error setting up card sound: $e');
+    }
     
     // Play card effect
+    print('Playing card visual effect...');
     _playCardEffect(card);
     
     switch (card.type) {
       case CardType.attack:
-        print('Attack card: ${card.value} damage');
+        print('Processing attack card: ${card.value} damage');
         enemyHp -= card.value;
         if (enemyHp < 0) enemyHp = 0;
         _enemyHpText.text = 'Goblin HP: $enemyHp/$maxEnemyHp';
@@ -349,18 +393,18 @@ class CardCombatGame extends FlameGame with TapDetector {
         );
         break;
       case CardType.heal:
-        print('Heal card: ${card.value} HP');
+        print('Processing heal card: ${card.value} HP');
         playerHp += card.value;
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
         _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
         print('Player HP increased to: $playerHp');
         break;
       case CardType.statusEffect:
-        print('Status effect card: ${card.statusEffectToApply}');
+        print('Processing status effect card: ${card.statusEffectToApply}');
         // TODO: Implement status effects
         break;
       case CardType.cure:
-        print('Cure card: ${card.value} HP');
+        print('Processing cure card: ${card.value} HP');
         playerHp += card.value;
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
         _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
@@ -381,15 +425,20 @@ class CardCombatGame extends FlameGame with TapDetector {
     _cardAreaText.text = 'Enemy Turn';
     
     // Remove cards from hand
+    print('Removing cards from hand...');
     for (var visual in _cardVisuals) {
       remove(visual);
     }
     _cardVisuals.clear();
     _currentHand.clear();
+    print('Cards removed from hand');
 
     // Schedule enemy turn
-    print('Scheduling enemy turn');
-    Future.delayed(Duration(seconds: 1), _executeEnemyTurn);
+    print('Scheduling enemy turn...');
+    Future.delayed(Duration(seconds: 1), () {
+      print('Executing scheduled enemy turn');
+      _executeEnemyTurn();
+    });
   }
 
   Component _createCardVisual(Card cardData, int index) {
@@ -439,6 +488,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     }
     
     // Start new player turn
+    print('Starting new player turn...');
     isPlayerTurn = true;
     turnCount++;
     _turnText.text = 'Turn $turnCount';
