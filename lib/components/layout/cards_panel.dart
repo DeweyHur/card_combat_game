@@ -23,10 +23,6 @@ class CardsPanel extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
-    GameLogger.info(LogCategory.ui, 'Cards Panel:');
-    GameLogger.info(LogCategory.ui, '  Position: (${position.x}, ${position.y})');
-    GameLogger.info(LogCategory.ui, '  Size: ${size.x} x ${size.y}');
-
     // Create background (make it more visible)
     background = RectangleComponent(
       size: size,
@@ -101,5 +97,37 @@ class CardsPanel extends PositionComponent {
       startX + (index * (cardWidth + cardSpacing)),
       cardTopMargin,
     );
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    
+    // Debug rendering
+    final debugPaint = Paint()
+      ..color = Colors.red.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    // Draw panel boundary
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      debugPaint,
+    );
+    
+    // Draw card positions
+    for (int i = 0; i < maxCards; i++) {
+      final pos = calculateCardPosition(i);
+      canvas.drawRect(
+        Rect.fromLTWH(pos.x, pos.y, cardWidth, cardHeight),
+        debugPaint..color = Colors.blue.withOpacity(0.3),
+      );
+    }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    // Remove the frequent logging
   }
 } 

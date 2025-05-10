@@ -157,4 +157,21 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
   bool onTapCancel(TapCancelEvent event) {
     return enabled;
   }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    
+    // Debug rendering
+    final debugPaint = Paint()
+      ..color = Colors.green.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    // Draw card boundary
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      debugPaint,
+    );
+  }
 } 

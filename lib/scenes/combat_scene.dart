@@ -5,32 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/models/player/player.dart';
-import 'package:card_combat_app/models/enemies/goblin.dart';
+import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/character.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/components/layout/game_ui.dart';
+import 'package:card_combat_app/components/layout/cards_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 
 class CombatScene extends BaseScene {
-  late Character player;
-  late Character enemy;
+  final PlayerBase player;
+  final EnemyBase enemy;
   late List<GameCard> playerDeck;
   late List<GameCard> playerHand;
   late List<GameCard> discardPile;
   bool isPlayerTurn = true;
   late TextComponent turnText;
   late TextComponent enemyNextActionText;
-  late GameUI gameUI;
 
   CombatScene({
-    required CardCombatGame game,
     required this.player,
     required this.enemy,
-  }) : super(game: game) {
-    playerDeck = List.from(gameCards);
-  }
+  }) : super(
+    backgroundColor: const Color(0xFF1A1A2E),
+  );
 
   @override
   void onTapDown(TapDownEvent event) {
@@ -41,11 +40,7 @@ class CombatScene extends BaseScene {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    // Initialize game UI
-    gameUI = GameUI(game.size);
-    add(gameUI);
-    GameLogger.info(LogCategory.system, 'GameUI added to combat scene');
+    GameLogger.debug(LogCategory.game, 'CombatScene loading...');
 
     // Initialize game areas
     _createGameAreas();
@@ -54,9 +49,12 @@ class CombatScene extends BaseScene {
     _createUI();
 
     // Initialize player's deck
-    playerDeck.shuffle();
+    playerDeck = List.from(gameCards);
     playerHand = [];
     discardPile = [];
+
+    // Update UI with initial values
+    _updateUI();
 
     // Draw initial hand
     _drawInitialHand();
@@ -65,60 +63,13 @@ class CombatScene extends BaseScene {
   }
 
   void _createGameAreas() {
-    // Player area (bottom)
-    final playerArea = RectangleComponent(
-      size: Vector2(game.size.x, game.size.y * 0.4),
-      position: Vector2(0, game.size.y * 0.6),
-      paint: Paint()..color = Colors.blue.withOpacity(0.1),
-    );
-    add(playerArea);
-
-    // Enemy area (top)
-    final enemyArea = RectangleComponent(
-      size: Vector2(game.size.x, game.size.y * 0.4),
-      position: Vector2(0, 0),
-      paint: Paint()..color = Colors.red.withOpacity(0.1),
-    );
-    add(enemyArea);
-
-    // Center area (for effects, etc.)
-    final centerArea = RectangleComponent(
-      size: Vector2(game.size.x, game.size.y * 0.2),
-      position: Vector2(0, game.size.y * 0.4),
-      paint: Paint()..color = Colors.grey.withOpacity(0.1),
-    );
-    add(centerArea);
+    // Remove the old game areas since we're using GameUI now
+    // The GameUI component will handle the layout
   }
 
   void _createUI() {
-    // Turn indicator
-    turnText = TextComponent(
-      text: "Player's Turn",
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      position: Vector2(game.size.x / 2, game.size.y * 0.4),
-      anchor: Anchor.center,
-    );
-    add(turnText);
-
-    // Enemy next action display
-    enemyNextActionText = TextComponent(
-      text: 'Next: ${enemy.getNextAction()}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
-      position: Vector2(game.size.x - 20, 20),
-      anchor: Anchor.topRight,
-    );
-    add(enemyNextActionText);
+    // Remove the old UI components since we're using GameUI now
+    // The GameUI component will handle the UI elements
   }
 
   void _drawInitialHand() {
@@ -133,22 +84,17 @@ class CombatScene extends BaseScene {
   }
 
   void _addCardToHand(GameCard card, int index) {
-    final cardWidth = 140.0;
-    final cardHeight = 180.0;
+    final cardWidth = CardsPanel.cardWidth;
+    final cardHeight = CardsPanel.cardHeight;
     
-    // Calculate position: start at 5, add 140 for each card
-    final position = Vector2(
-      5 + (index * 140),
-      60, // Position cards relative to the cards panel
-    );
-    
-    GameLogger.info(LogCategory.ui, 'Card ${index + 1} Position: (${position.x}, ${position.y})');
+    // Calculate position using the CardsPanel's helper method
+    final position = (game as CardCombatGame).gameUI.cardsPanel.calculateCardPosition(index);
     
     final cardComponent = CardVisualComponent(
       card,
       position: position,
       size: Vector2(cardWidth, cardHeight),
-      onCardPlayed: _executeCard,
+      onCardPlayed: executeCard,
       enabled: isPlayerTurn,
     );
     
@@ -156,7 +102,7 @@ class CombatScene extends BaseScene {
     (game as CardCombatGame).gameUI.cardsPanel.add(cardComponent);
   }
 
-  void _executeCard(GameCard card) {
+  void executeCard(GameCard card) {
     if (!isPlayerTurn) return;
 
     GameLogger.info(LogCategory.game, 'Executing card: ${card.name}');
@@ -165,10 +111,12 @@ class CombatScene extends BaseScene {
       case CardType.attack:
         enemy.takeDamage(card.value);
         GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${enemy.name}');
+        (game as CardCombatGame).gameUI.updateEnemyHp(enemy.currentHealth, enemy.maxHealth);
         break;
       case CardType.heal:
         player.heal(card.value);
         GameLogger.info(LogCategory.game, 'Healed ${player.name} for ${card.value} HP');
+        (game as CardCombatGame).gameUI.updatePlayerHp(player.currentHealth, player.maxHealth);
         break;
       case CardType.statusEffect:
         if (card.statusEffectToApply != null) {
@@ -212,10 +160,12 @@ class CombatScene extends BaseScene {
       case CardType.attack:
         player.takeDamage(action.value);
         GameLogger.info(LogCategory.game, 'Enemy dealt ${action.value} damage to ${player.name}');
+        (game as CardCombatGame).gameUI.updatePlayerHp(player.currentHealth, player.maxHealth);
         break;
       case CardType.heal:
         enemy.heal(action.value);
         GameLogger.info(LogCategory.game, 'Enemy healed for ${action.value} HP');
+        (game as CardCombatGame).gameUI.updateEnemyHp(enemy.currentHealth, enemy.maxHealth);
         break;
       case CardType.statusEffect:
         if (action.statusEffectToApply != null) {
@@ -268,10 +218,14 @@ class CombatScene extends BaseScene {
   void _updateUI() {
     // Update enemy's next action
     enemyNextActionText.text = 'Next: ${enemy.getNextAction()}';
+    
+    // Update HP displays
+    (game as CardCombatGame).gameUI.updateEnemyHp(enemy.currentHealth, enemy.maxHealth);
+    (game as CardCombatGame).gameUI.updatePlayerHp(player.currentHealth, player.maxHealth);
   }
 
   void _endCombat(bool playerWon) {
     GameLogger.info(LogCategory.game, 'Combat ended: ${playerWon ? "Player won" : "Enemy won"}');
-    // TODO: Implement combat end logic (rewards, scene transition, etc.)
+    (game as CardCombatGame).gameUI.showGameMessage(playerWon ? 'Victory!' : 'Defeat!');
   }
 } 
