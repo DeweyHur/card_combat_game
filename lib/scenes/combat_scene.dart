@@ -140,7 +140,7 @@ class CombatScene extends BaseScene {
   }
 
   void _drawInitialHand() {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       if (playerDeck.isNotEmpty) {
         final card = playerDeck.removeLast();
         playerHand.add(card);
@@ -151,20 +151,27 @@ class CombatScene extends BaseScene {
   }
 
   void _addCardToHand(GameCard card, int index) {
-    final cardWidth = 120.0;
+    final cardWidth = 140.0;
     final cardHeight = 180.0;
-    final spacing = 20.0;
-    final startX = (game.size.x - (cardWidth * 5 + spacing * 4)) / 2;
-    final y = game.size.y * 0.8;
-
+    
+    // Calculate position: start at 5, add 140 for each card
+    final position = Vector2(
+      5 + (index * 140),
+      60, // Position cards relative to the cards panel
+    );
+    
+    GameLogger.info(LogCategory.ui, 'Card ${index + 1} Position: (${position.x}, ${position.y})');
+    
     final cardComponent = CardVisualComponent(
       card,
-      position: Vector2(startX + (cardWidth + spacing) * index, y),
+      position: position,
       size: Vector2(cardWidth, cardHeight),
       onCardPlayed: _executeCard,
       enabled: isPlayerTurn,
     );
-    add(cardComponent);
+    
+    // Add card to the game's cards panel
+    (game as CardCombatGame).gameUI.cardsPanel.add(cardComponent);
   }
 
   void _executeCard(GameCard card) {

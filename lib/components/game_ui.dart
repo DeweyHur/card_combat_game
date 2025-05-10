@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'enemy_panel.dart';
 import 'player_panel.dart';
 import 'cards_panel.dart';
+import '../utils/game_logger.dart';
 
 class GameUI extends PositionComponent {
   late EnemyPanel enemyPanel;
@@ -34,6 +35,7 @@ class GameUI extends PositionComponent {
       size: cardsPanelSize,
     );
     add(cardsPanel);
+    GameLogger.info(LogCategory.ui, 'CardsPanel added to GameUI');
   }
 
   void updateEnemyHp(int currentHp, int maxHp) {
@@ -66,6 +68,15 @@ class GameUI extends PositionComponent {
 
   void updateCardAreaText(String text) {
     cardsPanel.updateGameInfo(text);
+  }
+
+  void showGameMessage(String message) {
+    cardsPanel.updateGameInfo(message);
+  }
+
+  void updateTurnInfo(String turnText, int turnCount) {
+    cardsPanel.updateGameInfo(turnText);
+    cardsPanel.updateTurn(turnCount);
   }
 
   Vector2 get cardAreaPosition => cardsPanel.position;
