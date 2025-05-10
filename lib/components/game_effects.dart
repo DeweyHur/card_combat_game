@@ -1,7 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flutter/material.dart';
-import '../models/card.dart';
+import 'package:flutter/material.dart' hide Card;
+import '../card.dart';
+import '../card_combat_game.dart';
+import 'cards_panel.dart';
+import 'damage_effect.dart';
+import 'heal_effect.dart';
+import 'dot_effect.dart';
+import 'status_effect.dart';
 
 class GameEffects {
   static Color _getEffectColor(CardType type) {
@@ -24,50 +30,65 @@ class GameEffects {
       position: position,
       paint: Paint()..color = effectColor.withValues(alpha: 0.5),
     );
-
-    // Add fade out effect
-    effect.add(
-      OpacityEffect.fadeOut(
-        EffectController(duration: 0.5),
-      ),
-    );
-
     return effect;
   }
 
-  static TextComponent createDamageEffect(
+  static Component createDamageEffect(
     Vector2 position,
     int damage,
     bool isPlayer,
   ) {
-    final damageText = TextComponent(
-      text: '-$damage',
+    return DamageEffect.create(position, damage, isPlayer);
+  }
+
+  static Component createHealEffect(
+    Vector2 position,
+    int healAmount,
+    bool isPlayer,
+  ) {
+    return HealEffect.create(position, healAmount, isPlayer);
+  }
+
+  static Component createDoTEffect(
+    Vector2 position,
+    int damage,
+    StatusEffect effectType,
+    bool isPlayer,
+  ) {
+    return DoTEffect.create(position, damage, effectType, isPlayer);
+  }
+
+  static Component createStatusEffect(
+    Vector2 position,
+    StatusEffect effectType,
+    bool isPlayer,
+  ) {
+    return StatusEffectComponent.create(position, effectType, isPlayer);
+  }
+
+  static Component createCardVisual(
+    Card cardData,
+    int index,
+    Vector2 cardAreaPosition,
+    Vector2 cardAreaSize,
+    Function(Card) onCardPlayed,
+    bool isPlayerTurn,
+  ) {
+    final totalWidth = (CardsPanel.maxCards * CardsPanel.cardWidth) + 
+        ((CardsPanel.maxCards - 1) * CardsPanel.cardSpacing);
+    final startX = cardAreaPosition.x + (cardAreaSize.x - totalWidth) / 2;
+
+    final position = Vector2(
+      startX + (index * (CardsPanel.cardWidth + CardsPanel.cardSpacing)),
+      cardAreaPosition.y + CardsPanel.cardTopMargin,
+    );
+
+    return CardVisualComponent(
+      cardData,
       position: position,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
+      size: Vector2(CardsPanel.cardWidth, CardsPanel.cardHeight),
+      onCardPlayed: onCardPlayed,
+      enabled: isPlayerTurn,
     );
-
-    // Add floating animation
-    damageText.add(
-      SequenceEffect(
-        [
-          MoveEffect.by(
-            Vector2(0, -50),
-            EffectController(duration: 0.5, curve: Curves.easeOut),
-          ),
-          OpacityEffect.fadeOut(
-            EffectController(duration: 0.3, curve: Curves.easeOut),
-          ),
-        ],
-      ),
-    );
-
-    return damageText;
   }
 } 

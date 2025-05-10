@@ -10,6 +10,7 @@ import 'package:card_combat_app/card.dart'; // Import our Card class
 import 'package:card_combat_app/cards_data.dart'; // Import our card data
 import 'package:audioplayers/audioplayers.dart'; // For sound effects
 import 'package:card_combat_app/components/game_ui.dart';
+import 'package:card_combat_app/components/game_effects.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {
   late GameUI _gameUI;
@@ -90,7 +91,7 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   void _setNextEnemyAction() {
     _currentEnemyAction = _goblinActions[_random.nextInt(_goblinActions.length)];
-    enemyNextAction = _currentEnemyAction['description'];
+    enemyNextAction = '⚔️ ' + _currentEnemyAction['description'] as String;
     _gameUI.updateEnemyAction(enemyNextAction);
   }
 
@@ -118,7 +119,14 @@ class CardCombatGame extends FlameGame with TapDetector {
     // Create visuals for the new hand
     for (int i = 0; i < _currentHand.length; i++) {
       final cardData = _currentHand[i];
-      final cardVisual = _createCardVisual(cardData, i);
+      final cardVisual = GameEffects.createCardVisual(
+        cardData,
+        i,
+        _gameUI.cardAreaPosition,
+        _gameUI.cardAreaSize,
+        _executeCard,
+        isPlayerTurn,
+      );
       add(cardVisual);
       _cardVisuals.add(cardVisual);
     }
@@ -142,57 +150,12 @@ class CardCombatGame extends FlameGame with TapDetector {
             Vector2.all(2.0),
             EffectController(duration: 0.3),
           ),
-          OpacityEffect.to(
-            0.0,
-            EffectController(duration: 0.2),
-          ),
         ],
         onComplete: () {
           remove(effect);
         },
       ),
     );
-  }
-
-  void _playDamageEffect(Vector2 position, bool isPlayer) {
-    // Play damage sound with error handling
-    try {
-      print('Playing damage sound effect...');
-      _audioPlayer.play(AssetSource('sounds/damage.mp3')).then((_) {
-        print('Damage sound played successfully');
-      }).catchError((error) {
-        print('Error playing damage sound: $error');
-      });
-    } catch (e) {
-      print('Error setting up damage sound: $e');
-    }
-
-    // Create damage number effect with Unicode symbol
-    final damageText = TextComponent(
-      text: isPlayer ? '💥 ${_currentEnemyAction['damage']}' : '💥 ${_currentHand.first.value}',
-      position: position,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
-    );
-
-    // Add simple floating animation
-    damageText.add(
-      MoveEffect.by(
-        Vector2(0, -50),
-        EffectController(duration: 0.5, curve: Curves.easeOut),
-        onComplete: () {
-          remove(damageText);
-        },
-      ),
-    );
-
-    add(damageText);
   }
 
   Color _getEffectColor(CardType type) {
@@ -211,27 +174,15 @@ class CardCombatGame extends FlameGame with TapDetector {
   void _executeCard(Card card) {
     print('\n=== Playing Card ===');
     print('Card played: ${card.name} (${card.type})');
-    print('Current game state:');
-    print('- Player HP: $playerHp/$maxPlayerHp');
-    print('- Enemy HP: $enemyHp/$maxEnemyHp');
-    print('- Is player turn: $isPlayerTurn');
     
-    // Play card sound effect with error handling
+    // Play card sound effect
     try {
-      print('Playing card sound effect...');
-      _audioPlayer.play(AssetSource('sounds/card_play.mp3')).then((_) {
-        print('Card sound played successfully');
-      }).catchError((error) {
-        print('Error playing card sound: $error');
-      });
+      _audioPlayer.play(AssetSource('sounds/card_play.mp3'));
     } catch (e) {
-      print('Error setting up card sound: $e');
+      print('Error playing card sound: $e');
     }
     
-    // Play card effect
-    print('Playing card visual effect...');
-    _playCardEffect(card);
-    
+    // Process card effect
     switch (card.type) {
       case CardType.attack:
         print('Processing attack card: ${card.value} damage');
@@ -239,22 +190,38 @@ class CardCombatGame extends FlameGame with TapDetector {
         if (enemyHp < 0) enemyHp = 0;
         _gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
         // Play damage effect on enemy
-        _playDamageEffect(
+        final damageEffect = GameEffects.createDamageEffect(
           Vector2(_gameUI.enemyAreaPosition.x + _gameUI.enemyAreaSize.x / 2, _gameUI.enemyAreaPosition.y + 40),
+          card.value,
           false,
         );
+        add(damageEffect);
         break;
       case CardType.heal:
         print('Processing heal card: ${card.value} HP');
         playerHp += card.value;
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
         _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+        // Play heal effect on player
+        final healEffect = GameEffects.createHealEffect(
+          Vector2(_gameUI.playerAreaPosition.x + _gameUI.playerAreaSize.x / 2, _gameUI.playerAreaPosition.y + 40),
+          card.value,
+          true,
+        );
+        add(healEffect);
         break;
       case CardType.statusEffect:
         print('Processing status effect card: ${card.statusEffectToApply}');
         if (card.statusEffectToApply != StatusEffect.none && card.statusDuration != null) {
           _playerStatusEffects[card.statusEffectToApply] = card.statusDuration!;
           _gameUI.updatePlayerStatus(_getStatusText());
+          // Show status effect application
+          final statusEffect = GameEffects.createStatusEffect(
+            Vector2(_gameUI.enemyAreaPosition.x + _gameUI.enemyAreaSize.x / 2, _gameUI.enemyAreaPosition.y + 40),
+            card.statusEffectToApply,
+            false,
+          );
+          add(statusEffect);
         }
         break;
       case CardType.cure:
@@ -281,70 +248,120 @@ class CardCombatGame extends FlameGame with TapDetector {
     _gameUI.updateCardAreaText('Enemy Turn');
     
     // Remove cards from hand
-    print('Removing cards from hand...');
     for (var visual in _cardVisuals) {
       remove(visual);
     }
     _cardVisuals.clear();
     _currentHand.clear();
-    print('Cards removed from hand');
 
-    // Schedule enemy turn
-    print('Scheduling enemy turn...');
-    Future.delayed(Duration(seconds: 1), () {
-      print('Executing scheduled enemy turn');
+    // Schedule enemy turn with a delay to allow effects to complete
+    Future.delayed(const Duration(milliseconds: 800), () {
       _executeEnemyTurn();
     });
   }
 
-  Component _createCardVisual(Card cardData, int index) {
-    final totalWidth = (maxCards * cardWidth) + ((maxCards - 1) * cardSpacing);
-    final startX = (_gameUI.cardAreaSize.x - totalWidth) / 2;
-
-    final position = Vector2(
-      _gameUI.cardAreaPosition.x + startX + (index * (cardWidth + cardSpacing)),
-      _gameUI.cardAreaPosition.y + (_gameUI.cardAreaSize.y - cardHeight) / 2,
-    );
-
-    return CardVisualComponent(
-      cardData,
-      position: position,
-      size: Vector2(cardWidth, cardHeight),
-      onCardPlayed: _executeCard,
-      enabled: isPlayerTurn,
-    );
-  }
-
   void _executeEnemyTurn() {
     print('\n=== Enemy Turn ===');
-    final damage = _currentEnemyAction['damage'] as int;
-    print('Enemy action: ${_currentEnemyAction['name']} for $damage damage');
     
-    // Apply enemy action
-    playerHp -= damage;
-    if (playerHp < 0) playerHp = 0;
-    print('Player HP reduced to: $playerHp');
+    // First, apply DoT effects if any
+    _applyDoTEffects().then((_) {
+      // Check if enemy is frozen
+      if (_playerStatusEffects.containsKey(StatusEffect.freeze)) {
+        print('Enemy is frozen! Skipping action.');
+        // Show freeze effect
+        final freezeEffect = GameEffects.createStatusEffect(
+          Vector2(_gameUI.enemyAreaPosition.x + _gameUI.enemyAreaSize.x / 2, _gameUI.enemyAreaPosition.y + 40),
+          StatusEffect.freeze,
+          false,
+        );
+        add(freezeEffect);
+        
+        // Remove freeze effect after it's shown
+        _playerStatusEffects.remove(StatusEffect.freeze);
+        _gameUI.updatePlayerStatus(_getStatusText());
+        
+        // Start new player turn after a delay
+        Future.delayed(const Duration(milliseconds: 800), () {
+          _startNewPlayerTurn();
+        });
+        return;
+      }
+      
+      // If not frozen, execute normal enemy action
+      final damage = _currentEnemyAction['damage'] as int;
+      print('Enemy action: ${_currentEnemyAction['name']} for $damage damage');
+      
+      // Apply enemy action
+      playerHp -= damage;
+      if (playerHp < 0) playerHp = 0;
+      print('Player HP reduced to: $playerHp');
+      
+      // Play damage effect on player
+      final damageEffect = GameEffects.createDamageEffect(
+        Vector2(_gameUI.playerAreaPosition.x + _gameUI.playerAreaSize.x / 2, _gameUI.playerAreaPosition.y + 40),
+        damage,
+        true,
+      );
+      add(damageEffect);
+      
+      // Update UI
+      _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+      
+      // Check for game over
+      if (playerHp <= 0) {
+        print('Game Over: Player defeated!');
+        _gameUI.updateGameInfo('Game Over! You were defeated by the Goblin!');
+        return;
+      }
+      
+      // Start new player turn after a delay
+      Future.delayed(const Duration(milliseconds: 800), () {
+        _startNewPlayerTurn();
+      });
+    });
+  }
+
+  Future<void> _applyDoTEffects() async {
+    // Update status effect durations and apply damage
+    final effectsToApply = Map<StatusEffect, int>.from(_playerStatusEffects);
     
-    // Play damage effect on player
-    _playDamageEffect(
-      Vector2(_gameUI.playerAreaPosition.x + _gameUI.playerAreaSize.x / 2, _gameUI.playerAreaPosition.y + 40),
-      true,
-    );
-    
-    // Update UI
-    _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
-    
-    // Update status effects
-    _updateStatusEffects();
-    
-    // Check for game over
-    if (playerHp <= 0) {
-      print('Game Over: Player defeated!');
-      _gameUI.updateGameInfo('Game Over! You were defeated by the Goblin!');
-      return;
+    for (var entry in effectsToApply.entries) {
+      final effect = entry.key;
+      final duration = entry.value;
+      
+      // Apply DoT damage if applicable
+      if (effect == StatusEffect.poison || effect == StatusEffect.burn) {
+        final damage = effect == StatusEffect.poison ? 2 : 3; // Poison does 2 damage, Burn does 3
+        enemyHp -= damage;
+        if (enemyHp < 0) enemyHp = 0;
+        _gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
+        
+        // Show DoT effect
+        final dotEffect = GameEffects.createDoTEffect(
+          Vector2(_gameUI.enemyAreaPosition.x + _gameUI.enemyAreaSize.x / 2, _gameUI.enemyAreaPosition.y + 40),
+          damage,
+          effect,
+          false,
+        );
+        add(dotEffect);
+        
+        // Wait for the effect to complete
+        await Future.delayed(const Duration(milliseconds: 800));
+      }
+      
+      final newDuration = duration - 1;
+      if (newDuration <= 0) {
+        _playerStatusEffects.remove(effect);
+      } else {
+        _playerStatusEffects[effect] = newDuration;
+      }
     }
     
-    // Start new player turn
+    // Update status text
+    _gameUI.updatePlayerStatus(_getStatusText());
+  }
+
+  void _startNewPlayerTurn() {
     print('Starting new player turn...');
     isPlayerTurn = true;
     turnCount++;
@@ -362,7 +379,14 @@ class CardCombatGame extends FlameGame with TapDetector {
       if (_cardPool.isNotEmpty) {
         final card = _cardPool.removeAt(_random.nextInt(_cardPool.length));
         _currentHand.add(card);
-        final cardVisual = _createCardVisual(card, i);
+        final cardVisual = GameEffects.createCardVisual(
+          card,
+          i,
+          _gameUI.cardAreaPosition,
+          _gameUI.cardAreaSize,
+          _executeCard,
+          isPlayerTurn,
+        );
         _cardVisuals.add(cardVisual);
         add(cardVisual);
       }
@@ -371,34 +395,30 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   String _getStatusText() {
     if (_playerStatusEffects.isEmpty) {
-      return 'No Status Effects';
+      return '✨ No Status Effects';
     }
     
     final statusStrings = _playerStatusEffects.entries.map((entry) {
       final effect = entry.key;
       final duration = entry.value;
-      String effectText = effect.toString().split('.').last;
+      String effectText = _getStatusEmoji(effect) + ' ' + effect.toString().split('.').last;
       return '$effectText ($duration)';
     }).join(', ');
     
-    return 'Status: $statusStrings';
+    return '✨ Status: $statusStrings';
   }
 
-  void _updateStatusEffects() {
-    // Update status effect durations
-    _playerStatusEffects = Map.fromEntries(
-      _playerStatusEffects.entries.where((entry) {
-        final newDuration = entry.value - 1;
-        if (newDuration <= 0) {
-          return false;
-        }
-        _playerStatusEffects[entry.key] = newDuration;
-        return true;
-      })
-    );
-    
-    // Update status text
-    _gameUI.updatePlayerStatus(_getStatusText());
+  String _getStatusEmoji(StatusEffect effect) {
+    switch (effect) {
+      case StatusEffect.poison:
+        return '☠️';
+      case StatusEffect.burn:
+        return '🔥';
+      case StatusEffect.freeze:
+        return '❄️';
+      case StatusEffect.none:
+        return '✨';
+    }
   }
 
   @override
