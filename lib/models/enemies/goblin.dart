@@ -1,7 +1,7 @@
+import 'package:card_combat_app/models/game_card.dart';
 import 'package:flutter/material.dart';
-import '../game_card.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'enemy_base.dart';
-import '../../utils/game_logger.dart';
 
 class Goblin extends EnemyBase {
   Goblin() : super(

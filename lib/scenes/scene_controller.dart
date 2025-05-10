@@ -1,10 +1,12 @@
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flame/game.dart';
-import '../utils/game_logger.dart';
+import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+import 'package:card_combat_app/game/card_combat_game.dart';
+import 'package:card_combat_app/models/player/player_base.dart';
 import 'base_scene.dart';
 import 'player_selection_scene.dart';
 import 'combat_scene.dart';
-import '../game/card_combat_game.dart';
-import '../models/player/player_base.dart';
 
 class SceneController {
   final FlameGame game;

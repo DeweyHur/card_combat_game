@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:flutter/material.dart';
-import '../game/card_combat_game.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'scene_controller.dart';
-import '../utils/game_logger.dart';
 
 class BaseScene extends Component {
   final FlameGame game;

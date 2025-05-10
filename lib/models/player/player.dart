@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../game_card.dart';
-import '../character.dart';
-import '../../utils/game_logger.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/character.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 class Player extends Character {
   Player({

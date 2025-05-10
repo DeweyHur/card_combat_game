@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/game_card.dart';
+import 'package:card_combat_app/models/game_card.dart';
 import 'enemy_base.dart';
 
 class Goblin extends EnemyBase {

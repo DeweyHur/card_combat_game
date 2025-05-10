@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../game_card.dart';
-import '../character.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/character.dart';
 import 'package:flame/components.dart';
 
 abstract class PlayerBase extends Character {

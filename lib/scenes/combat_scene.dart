@@ -2,14 +2,14 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import '../game/card_combat_game.dart';
-import '../models/game_cards_data.dart';
-import '../models/game_card.dart';
-import '../models/player/player.dart';
-import '../models/enemies/goblin.dart';
-import '../models/character.dart';
-import '../components/card_visual_component.dart';
-import '../utils/game_logger.dart';
+import 'package:card_combat_app/game/card_combat_game.dart';
+import 'package:card_combat_app/models/game_cards_data.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/player/player.dart';
+import 'package:card_combat_app/models/enemies/goblin.dart';
+import 'package:card_combat_app/models/character.dart';
+import 'package:card_combat_app/components/layout/card_visual_component.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 
 class CombatScene extends BaseScene {

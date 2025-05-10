@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../game_card.dart';
+import 'package:card_combat_app/models/game_card.dart';
 import 'player_base.dart';
+import 'package:flutter/material.dart';
 
 class Sorcerer extends PlayerBase {
   Sorcerer() : super(

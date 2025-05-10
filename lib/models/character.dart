@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'game_card.dart';
-import '../utils/game_logger.dart';
 
 class Character {
   final String name;

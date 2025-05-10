@@ -1,7 +1,7 @@
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/character.dart';
+import 'package:card_combat_app/components/effects/status_effect.dart';
 import 'package:flutter/material.dart';
-import '../game_card.dart';
-import '../character.dart';
-import '../../components/status_effect.dart';
 
 abstract class EnemyBase extends Character {
   final String emoji;

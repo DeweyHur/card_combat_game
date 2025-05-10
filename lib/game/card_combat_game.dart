@@ -5,18 +5,18 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:audioplayers/audioplayers.dart';
 
-import '../models/game_card.dart';
-import '../models/game_cards_data.dart';
-import '../components/card_visual_component.dart';
-import '../components/game_effects.dart';
-import '../components/game_ui.dart';
-import '../scenes/player_selection_scene.dart';
-import '../scenes/scene_controller.dart';
-import '../utils/game_logger.dart';
-import '../scenes/base_scene.dart';
-import '../scenes/combat_scene.dart';
-import '../models/player/player.dart';
-import '../models/enemies/goblin.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/game_cards_data.dart';
+import 'package:card_combat_app/components/layout/card_visual_component.dart';
+import 'package:card_combat_app/components/effects/game_effects.dart';
+import 'package:card_combat_app/components/layout/game_ui.dart';
+import 'package:card_combat_app/scenes/player_selection_scene.dart';
+import 'package:card_combat_app/scenes/scene_controller.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/scenes/base_scene.dart';
+import 'package:card_combat_app/scenes/combat_scene.dart';
+import 'package:card_combat_app/models/player/player.dart';
+import 'package:card_combat_app/models/enemies/goblin.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {
   late List<GameCard> _cardPool;
@@ -83,9 +83,6 @@ class CardCombatGame extends FlameGame with TapDetector {
       add(gameUI);
       GameLogger.info(LogCategory.system, 'GameUI added to game');
 
-      // Initialize card pool
-      initializeCardPool();
-
       // Create a test player
       final player = Player(
         name: 'Hero',
@@ -100,8 +97,21 @@ class CardCombatGame extends FlameGame with TapDetector {
       );
       sceneController.registerScene('combat', combatScene);
 
+      // Sync HP values with character objects
+      playerHp = player.currentHealth;
+      maxPlayerHp = player.maxHealth;
+      enemyHp = combatScene.enemy.currentHealth;
+      maxEnemyHp = combatScene.enemy.maxHealth;
+
       // Start with combat scene
       sceneController.go('combat');
+
+      // Update UI with initial HP values
+      gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+      gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
+
+      // Initialize card pool
+      initializeCardPool();
 
       GameLogger.info(LogCategory.system, '=== Game Initialization Completed ===');
     } catch (e, stackTrace) {

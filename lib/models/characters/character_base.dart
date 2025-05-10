@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../../models/game_card.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 abstract class CharacterBase {
   final String name;

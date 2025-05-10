@@ -1,14 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import '../game/card_combat_game.dart';
-import '../models/game_card.dart';
-import '../models/player/fighter.dart';
-import '../models/player/paladin.dart';
-import '../models/player/sorcerer.dart';
-import '../models/player/warlock.dart';
-import '../models/player/player_base.dart';
-import '../utils/game_logger.dart';
+import 'package:card_combat_app/game/card_combat_game.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/player/fighter.dart';
+import 'package:card_combat_app/models/player/paladin.dart';
+import 'package:card_combat_app/models/player/sorcerer.dart';
+import 'package:card_combat_app/models/player/warlock.dart';
+import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 import 'combat_scene.dart';
 
