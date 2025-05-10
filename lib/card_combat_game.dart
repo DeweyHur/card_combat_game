@@ -63,6 +63,11 @@ class CardCombatGame extends FlameGame with TapDetector {
       await add(_gameUI);  // Wait for GameUI to fully initialize
       print('Game UI initialized');
 
+      // Update initial HP values in UI
+      _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+      _gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
+      print('Initial HP values set in UI');
+
       // Initialize card pool
       _cardPool = initializeCardPool();
       print('Card pool initialized');
