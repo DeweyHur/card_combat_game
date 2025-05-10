@@ -1,5 +1,5 @@
 name: card_combat_app
-description: "A turn-based card combat game"
+description: A turn-based card combat game
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -32,10 +32,7 @@ dependencies:
     sdk: flutter
   flame: ^1.16.0
   audioplayers: ^5.2.1
-  xdg_directories: ^1.1.0  # Added missing dependency
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  xdg_directories: ^1.1.0
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
@@ -62,6 +59,8 @@ flutter:
 
   assets:
     - assets/sounds/
+    - assets/images/
+    - assets/audio/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

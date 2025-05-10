@@ -8,6 +8,13 @@ class CardsPanel extends PositionComponent {
   late TextComponent gameInfoText;
   late TextComponent turnText;
 
+  // Card layout constants
+  static const double cardWidth = 140.0;
+  static const double cardHeight = 180.0;
+  static const double cardSpacing = 0.0;
+  static const double cardTopMargin = 60.0;
+  static const int maxCards = 3;
+
   CardsPanel({
     required Vector2 position,
     required Vector2 size,
@@ -79,5 +86,15 @@ class CardsPanel extends PositionComponent {
 
   void updateTurn(int turn) {
     turnText.text = 'Turn: $turn';
+  }
+
+  Vector2 calculateCardPosition(int index) {
+    final totalWidth = (maxCards * cardWidth) + ((maxCards - 1) * cardSpacing);
+    final startX = (size.x - totalWidth) / 2;
+
+    return Vector2(
+      startX + (index * (cardWidth + cardSpacing)),
+      cardTopMargin,
+    );
   }
 } 

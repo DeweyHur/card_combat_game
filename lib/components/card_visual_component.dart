@@ -1,13 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/palette.dart';
-import 'package:flutter/material.dart';
-import '../models/card.dart';
+import 'package:flutter/material.dart' hide Card;
+import '../models/game_card.dart';
 import '../game/card_combat_game.dart';
+import '../utils/game_logger.dart';
 
 class CardVisualComponent extends PositionComponent with TapCallbacks {
-  final Card cardData;
-  final Function(Card) onCardPlayed;
+  final GameCard cardData;
+  final Function(GameCard) onCardPlayed;
   final bool enabled;
 
   CardVisualComponent(
@@ -16,9 +17,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     required Vector2 size,
     required this.onCardPlayed,
     required this.enabled,
-  }) : super(position: position, size: size) {
-    opacity = 1.0; // Set initial opacity
-  }
+  }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
@@ -31,7 +30,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     final cardBackground = RectangleComponent(
       size: size,
       paint: backgroundPaint,
-    )..opacity = 1.0;
+    );
     add(cardBackground);
 
     // Card border with pixel art style
@@ -42,7 +41,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     final cardBorder = RectangleComponent(
       size: size,
       paint: borderPaint,
-    )..opacity = 1.0;
+    );
     add(cardBorder);
 
     // Add pixel art corner decorations
@@ -56,7 +55,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
       size: Vector2(cornerSize, cornerSize),
       position: Vector2(0, 0),
       paint: cornerPaint,
-    )..opacity = 1.0;
+    );
     add(topLeftCorner);
 
     // Top-right corner
@@ -64,7 +63,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
       size: Vector2(cornerSize, cornerSize),
       position: Vector2(size.x - cornerSize, 0),
       paint: cornerPaint,
-    )..opacity = 1.0;
+    );
     add(topRightCorner);
 
     // Bottom-left corner
@@ -72,7 +71,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
       size: Vector2(cornerSize, cornerSize),
       position: Vector2(0, size.y - cornerSize),
       paint: cornerPaint,
-    )..opacity = 1.0;
+    );
     add(bottomLeftCorner);
 
     // Bottom-right corner
@@ -80,7 +79,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
       size: Vector2(cornerSize, cornerSize),
       position: Vector2(size.x - cornerSize, size.y - cornerSize),
       paint: cornerPaint,
-    )..opacity = 1.0;
+    );
     add(bottomRightCorner);
 
     // Card Name with pixel art style
@@ -143,12 +142,9 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    if (!enabled) {
-      print('Card is disabled, ignoring tap');
-      return;
-    }
-    print('Card tapped: ${cardData.name} (${cardData.type})');
-    onCardPlayed(cardData);
+    super.onTapDown(event);
+    final game = findGame() as CardCombatGame;
+    game.onCardTap(this);
   }
 
   @override

@@ -5,10 +5,17 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:audioplayers/audioplayers.dart';
 
-import '../models/card.dart';
-import '../models/cards_data.dart';
+import '../models/game_card.dart';
+import '../models/game_cards_data.dart';
 import '../components/card_visual_component.dart';
 import '../components/game_effects.dart';
+import '../scenes/player_selection_scene.dart';
+import '../scenes/scene_controller.dart';
+import '../utils/game_logger.dart';
+import '../scenes/base_scene.dart';
+import '../scenes/combat_scene.dart';
+import '../models/player.dart';
+import '../models/enemies/goblin.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {
   late TextComponent _playerHpText;
@@ -21,8 +28,8 @@ class CardCombatGame extends FlameGame with TapDetector {
   late RectangleComponent _enemyArea;
   late RectangleComponent _cardArea;
 
-  late List<Card> _cardPool;
-  final List<Card> _currentHand = [];
+  late List<GameCard> _cardPool;
+  final List<GameCard> _currentHand = [];
   final List<Component> _cardVisuals = [];
   final Random _random = Random();
 
@@ -44,56 +51,95 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   static final cardTextStyle = TextPaint(
     style: const TextStyle(
-      color: Colors.black,
-      fontSize: 14,
+      color: Colors.white,
+      fontSize: 16,
       fontWeight: FontWeight.bold,
     ),
   );
 
   static final cardDescriptionStyle = TextPaint(
     style: const TextStyle(
-      color: Colors.black,
+      color: Colors.white,
       fontSize: 12,
     ),
   );
 
-  AudioPlayer? _audioPlayer;
   bool _audioEnabled = false;
+  late SceneController sceneController;
+  late BaseScene currentScene;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  CardCombatGame() {
+    sceneController = SceneController(this);
+  }
 
   @override
   Future<void> onLoad() async {
-    try {
-      print('Game initialization started');
-      print('Screen size: ${size.x}x${size.y}');
-      
-      _audioPlayer = AudioPlayer();
-      try {
-        await _audioPlayer?.setSource(AssetSource('sounds/card_play.mp3'));
-        _audioEnabled = true;
-        print('Audio player initialized successfully');
-      } catch (e) {
-        print('Warning: Could not initialize audio player: $e');
-        print('Game will continue without sound effects');
-        _audioEnabled = false;
-      }
+    await super.onLoad();
+    GameLogger.info(LogCategory.game, 'CardCombatGame initialized');
 
-      await _createGameAreas();
-      await _createCharacters();
-      await _createUI();
+    try {
+      GameLogger.info(LogCategory.system, '=== Game Initialization Started ===');
       
-      // Initialize card pool and draw initial hand
-      _cardPool = initializeCardPool();
-      _drawInitialHand();
-      
-      // Set initial enemy action
-      _setNextEnemyAction();
-      
-      print('Game initialization completed successfully');
+      // Initialize audio
+      _audioEnabled = await _initializeAudio();
+      GameLogger.info(LogCategory.system, 'Audio initialized: $_audioEnabled');
+
+      // Create a test player
+      final player = Player(
+        name: 'Hero',
+        maxHealth: 50,
+      );
+
+      // Create and register combat scene
+      final combatScene = CombatScene(
+        game: this,
+        player: player,
+        enemy: Goblin(),
+      );
+      sceneController.registerScene('combat', combatScene);
+
+      // Start with combat scene
+      sceneController.go('combat');
+
+      GameLogger.info(LogCategory.system, '=== Game Initialization Completed ===');
     } catch (e, stackTrace) {
-      print('Error during game initialization: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
+      GameLogger.error(LogCategory.system, 'Error during game initialization: $e\n$stackTrace');
     }
+  }
+
+  Future<bool> _initializeAudio() async {
+    try {
+      await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
+      GameLogger.info(LogCategory.audio, 'Audio player initialized successfully');
+      return true;
+    } catch (e) {
+      GameLogger.error(LogCategory.audio, 'Failed to initialize audio: $e');
+      return false;
+    }
+  }
+
+  Future<void> playCardSound() async {
+    if (_audioEnabled) {
+      try {
+        await _audioPlayer.play(AssetSource('sounds/card_play.mp3'));
+      } catch (e) {
+        GameLogger.error(LogCategory.audio, 'Failed to play card sound: $e');
+      }
+    }
+  }
+
+  void changeScene(BaseScene newScene) {
+    remove(currentScene);
+    currentScene = newScene;
+    add(currentScene);
+    GameLogger.info(LogCategory.game, 'Scene changed to ${newScene.runtimeType}');
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    GameLogger.info(LogCategory.system, 'Game mounted');
   }
 
   Future<void> _createGameAreas() async {
@@ -118,7 +164,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     );
     add(_cardArea);
     
-    print('Game areas created');
+    GameLogger.info(LogCategory.system, 'Game areas created');
   }
 
   Future<void> _createCharacters() async {
@@ -136,7 +182,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     );
     add(enemyCharacter);
     
-    print('Characters created');
+    GameLogger.info(LogCategory.system, 'Characters created');
   }
 
   Future<void> _createUI() async {
@@ -216,7 +262,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     );
     add(_turnText);
     
-    print('UI elements created');
+    GameLogger.info(LogCategory.system, 'UI elements created');
   }
 
   void _drawInitialHand() {
@@ -229,11 +275,11 @@ class CardCombatGame extends FlameGame with TapDetector {
         add(cardVisual);
       }
     }
-    print('Initial hand drawn');
+    GameLogger.info(LogCategory.system, 'Initial hand drawn');
   }
 
   void _drawNewHand() {
-    print('\n=== Drawing New Hand ===');
+    GameLogger.info(LogCategory.system, '\n=== Drawing New Hand ===');
     // Remove old card visuals
     for (var visual in _cardVisuals) {
       remove(visual);
@@ -242,7 +288,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     _currentHand.clear();
 
     if (_cardPool.isEmpty) {
-      print('ERROR: Card pool is empty!');
+      GameLogger.error(LogCategory.system, 'ERROR: Card pool is empty!');
       return;
     }
 
@@ -250,7 +296,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     for (int i = 0; i < 3; i++) {
       final card = _cardPool[_random.nextInt(_cardPool.length)];
       _currentHand.add(card);
-      print('Drew card: ${card.name} (${card.type})');
+      GameLogger.info(LogCategory.system, 'Drew card: ${card.name} (${card.type})');
     }
 
     // Create visuals for the new hand
@@ -260,10 +306,10 @@ class CardCombatGame extends FlameGame with TapDetector {
       add(cardVisual);
       _cardVisuals.add(cardVisual);
     }
-    print('Hand drawn and visuals created');
+    GameLogger.info(LogCategory.system, 'Hand drawn and visuals created');
   }
 
-  Component _createCardVisual(Card cardData, int index) {
+  Component _createCardVisual(GameCard cardData, int index) {
     final cardWidth = 140.0;
     final cardHeight = 180.0;
     final spacing = 20.0;
@@ -283,9 +329,9 @@ class CardCombatGame extends FlameGame with TapDetector {
     );
   }
 
-  void _executeCard(Card card) {
-    print('\n=== Playing Card ===');
-    print('Card played: ${card.name} (${card.type})');
+  void _executeCard(GameCard card) {
+    GameLogger.info(LogCategory.game, '\n=== Playing Card ===');
+    GameLogger.info(LogCategory.game, 'Card played: ${card.name} (${card.type})');
     
     // Play card effect
     final effect = GameEffects.createCardEffect(
@@ -297,16 +343,16 @@ class CardCombatGame extends FlameGame with TapDetector {
     
     switch (card.type) {
       case CardType.attack:
-        print('Attack card: ${card.value} damage');
-        enemyHp -= card.value;
+        GameLogger.info(LogCategory.game, 'Attack card: ${card.value} damage');
+        enemyHp -= card.value.toInt();
         if (enemyHp < 0) enemyHp = 0;
         _enemyHpText.text = 'Goblin HP: $enemyHp/$maxEnemyHp';
-        print('Enemy HP reduced to: $enemyHp');
+        GameLogger.info(LogCategory.game, 'Enemy HP reduced to: $enemyHp');
         
         // Play damage effect on enemy
         final damageEffect = GameEffects.createDamageEffect(
           Vector2(_enemyArea.position.x + _enemyArea.size.x / 2, _enemyArea.position.y + 40),
-          card.value,
+          card.value.toInt(),
           false,
         );
         add(damageEffect);
@@ -314,28 +360,28 @@ class CardCombatGame extends FlameGame with TapDetector {
         
       case CardType.heal:
       case CardType.cure:
-        print('${card.type} card: ${card.value} HP');
-        playerHp += card.value;
+        GameLogger.info(LogCategory.game, '${card.type} card: ${card.value} HP');
+        playerHp += card.value.toInt();
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
         _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
-        print('Player HP increased to: $playerHp');
+        GameLogger.info(LogCategory.game, 'Player HP increased to: $playerHp');
         break;
         
       case CardType.statusEffect:
-        print('Status effect card: ${card.statusEffectToApply}');
+        GameLogger.info(LogCategory.game, 'Status effect card: ${card.statusEffectToApply}');
         // TODO: Implement status effects
         break;
     }
 
     // Check for victory
     if (enemyHp <= 0) {
-      print('Victory: Enemy defeated!');
+      GameLogger.info(LogCategory.system, 'Victory: Enemy defeated!');
       _gameInfoText.text = 'Victory! You defeated the Goblin!';
       return;
     }
 
     // End player turn, start enemy turn
-    print('Ending player turn');
+    GameLogger.info(LogCategory.system, 'Ending player turn');
     isPlayerTurn = false;
     _cardAreaText.text = 'Enemy Turn';
     
@@ -347,19 +393,19 @@ class CardCombatGame extends FlameGame with TapDetector {
     _currentHand.clear();
 
     // Schedule enemy turn
-    print('Scheduling enemy turn');
+    GameLogger.info(LogCategory.system, 'Scheduling enemy turn');
     Future.delayed(Duration(seconds: 1), _executeEnemyTurn);
   }
 
   void _executeEnemyTurn() {
-    print('\n=== Enemy Turn ===');
+    GameLogger.info(LogCategory.system, '\n=== Enemy Turn ===');
     final damage = _currentEnemyAction['damage'] as int;
-    print('Enemy action: ${_currentEnemyAction['name']} for $damage damage');
+    GameLogger.info(LogCategory.system, 'Enemy action: ${_currentEnemyAction['name']} for $damage damage');
     
     // Apply enemy action
     playerHp -= damage;
     if (playerHp < 0) playerHp = 0;
-    print('Player HP reduced to: $playerHp');
+    GameLogger.info(LogCategory.system, 'Player HP reduced to: $playerHp');
     
     // Play damage effect on player
     final damageEffect = GameEffects.createDamageEffect(
@@ -374,7 +420,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     
     // Check for game over
     if (playerHp <= 0) {
-      print('Game Over: Player defeated!');
+      GameLogger.info(LogCategory.system, 'Game Over: Player defeated!');
       _gameInfoText.text = 'Game Over! You were defeated by the Goblin!';
       return;
     }
@@ -386,8 +432,8 @@ class CardCombatGame extends FlameGame with TapDetector {
     _setNextEnemyAction();
     _enemyActionText.text = 'Next: $enemyNextAction';
     _cardAreaText.text = 'Your Turn - Choose a Card';
-    print('Starting turn $turnCount');
-    print('Next enemy action: $enemyNextAction');
+    GameLogger.info(LogCategory.system, 'Starting turn $turnCount');
+    GameLogger.info(LogCategory.system, 'Next enemy action: $enemyNextAction');
     _drawNewHand();
   }
 
@@ -402,21 +448,22 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   @override
   void onRemove() {
-    _audioPlayer?.dispose();
+    GameLogger.debug(LogCategory.system, 'Game being removed, cleaning up resources');
+    _audioPlayer.dispose();
     super.onRemove();
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    print('Game resized to: ${size.x}x${size.y}');
+    GameLogger.debug(LogCategory.system, 'Game resized to: ${size.x}x${size.y}');
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     if (dt > 0.1) {
-      print('Game update with dt: $dt');
+      GameLogger.warning(LogCategory.system, 'Game update with high dt: $dt');
     }
   }
 
@@ -425,51 +472,18 @@ class CardCombatGame extends FlameGame with TapDetector {
     try {
       super.render(canvas);
     } catch (e, stackTrace) {
-      print('Error in render: $e');
-      print('Stack trace: $stackTrace');
+      GameLogger.error(LogCategory.system, 'Error in render: $e');
+      GameLogger.debug(LogCategory.system, 'Stack trace: $stackTrace');
       rethrow;
     }
   }
 
-  void _playDamageEffect(Vector2 position, bool isPlayer) {
-    if (_audioEnabled) {
-      try {
-        _audioPlayer?.play(AssetSource('sounds/damage.mp3'));
-      } catch (e) {
-        print('Warning: Could not play damage sound: $e');
-      }
-    }
+  void initializeCardPool() {
+    _cardPool = List.from(gameCards);
+  }
 
-    final damageText = TextComponent(
-      text: isPlayer ? '-${_currentEnemyAction['damage']}' : '-${_currentHand.first.value}',
-      position: position,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
-    );
-
-    damageText.add(
-      SequenceEffect(
-        [
-          MoveEffect.by(
-            Vector2(0, -50),
-            EffectController(duration: 0.5, curve: Curves.easeOut),
-          ),
-          OpacityEffect.fadeOut(
-            EffectController(duration: 0.3, curve: Curves.easeOut),
-          ),
-        ],
-        onComplete: () {
-          remove(damageText);
-        },
-      ),
-    );
-
-    add(damageText);
+  void onCardTap(CardVisualComponent cardVisual) {
+    if (!isPlayerTurn) return;
+    _executeCard(cardVisual.cardData);
   }
 } 

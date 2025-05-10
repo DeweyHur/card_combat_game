@@ -1,13 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart' hide Card;
-import '../card.dart';
-import '../card_combat_game.dart';
+import '../models/game_card.dart';
+import '../game/card_combat_game.dart';
 import 'cards_panel.dart';
 import 'damage_effect.dart';
 import 'heal_effect.dart';
 import 'dot_effect.dart';
 import 'status_effect.dart';
+import 'card_visual_component.dart';
 
 class GameEffects {
   static Color _getEffectColor(CardType type) {
@@ -23,55 +24,76 @@ class GameEffects {
     }
   }
 
-  static RectangleComponent createCardEffect(CardType type, Vector2 position, Vector2 size) {
-    final effectColor = _getEffectColor(type);
-    final effect = RectangleComponent(
-      size: size,
+  static Component createCardEffect(CardType type, Vector2 position, Vector2 size) {
+    switch (type) {
+      case CardType.attack:
+        return DamageEffect(
+          position: position,
+          size: size,
+          value: 5, // Default damage value
+          isPlayer: false,
+        );
+      case CardType.heal:
+        return HealEffect(
+          position: position,
+          size: size,
+          value: 5, // Default heal value
+        );
+      case CardType.statusEffect:
+        return StatusEffectComponent(
+          position: position,
+          size: size,
+          effect: StatusEffect.poison, // Default status effect
+        );
+      case CardType.cure:
+        return HealEffect(
+          position: position,
+          size: size,
+          value: 5, // Default heal value
+        );
+    }
+  }
+
+  static Component createDamageEffect(Vector2 position, int value, bool isPlayer) {
+    return DamageEffect(
       position: position,
-      paint: Paint()..color = effectColor.withValues(alpha: 0.5),
+      size: Vector2(100, 100),
+      value: value,
+      isPlayer: isPlayer,
     );
-    return effect;
   }
 
-  static Component createDamageEffect(
-    Vector2 position,
-    int damage,
-    bool isPlayer,
-  ) {
-    return DamageEffect.create(position, damage, isPlayer);
+  static Component createHealEffect(Vector2 position, int value) {
+    return HealEffect(
+      position: position,
+      size: Vector2(100, 100),
+      value: value,
+    );
   }
 
-  static Component createHealEffect(
-    Vector2 position,
-    int healAmount,
-    bool isPlayer,
-  ) {
-    return HealEffect.create(position, healAmount, isPlayer);
+  static Component createDoTEffect(Vector2 position, StatusEffect effect, int value) {
+    return DoTEffect(
+      position: position,
+      size: Vector2(100, 100),
+      effect: effect,
+      value: value,
+    );
   }
 
-  static Component createDoTEffect(
-    Vector2 position,
-    int damage,
-    StatusEffect effectType,
-    bool isPlayer,
-  ) {
-    return DoTEffect.create(position, damage, effectType, isPlayer);
-  }
-
-  static Component createStatusEffect(
-    Vector2 position,
-    StatusEffect effectType,
-    bool isPlayer,
-  ) {
-    return StatusEffectComponent.create(position, effectType, isPlayer);
+  static Component createStatusEffect(Vector2 position, StatusEffect effectType, bool isPlayer) {
+    return StatusEffectComponent(
+      position: position,
+      size: Vector2(100, 100),
+      effect: effectType,
+    );
   }
 
   static Component createCardVisual(
-    Card cardData,
+    GameCard cardData,
     int index,
     Vector2 cardAreaPosition,
     Vector2 cardAreaSize,
-    Function(Card) onCardPlayed,
+    Function(GameCard) onCardPlayed,
     bool isPlayerTurn,
   ) {
     final totalWidth = (CardsPanel.maxCards * CardsPanel.cardWidth) + 

@@ -1,66 +1,46 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/card_combat_game.dart'; // We'll create this file next
+import 'game/card_combat_game.dart';
+import 'utils/game_logger.dart';
 
 void main() {
-  runApp(const MyApp());
-}
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  GameLogger.info(LogCategory.system, '=== APP STARTING ===');
+  GameLogger.debug(LogCategory.system, 'Testing debug log');
+  GameLogger.warning(LogCategory.system, 'Testing warning log');
+  GameLogger.error(LogCategory.system, 'Testing error log');
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Card Combat',
+  runApp(
+    MaterialApp(
+      title: 'Card Combat Game',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyLarge: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 16,
-          ),
-        ),
       ),
-      home: const GameScreen(),
-    );
-  }
-}
-
-class GameScreen extends StatelessWidget {
-  const GameScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GameWidget(
-        game: CardCombatGame(),
-        loadingBuilder: (context) => const Center(
-          child: Text(
-            'Loading...',
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 20,
+      home: Scaffold(
+        body: GameWidget(
+          game: CardCombatGame(),
+          loadingBuilder: (context) => const Center(
+            child: Text(
+              'Loading...',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        errorBuilder: (context, error) => Center(
-          child: Text(
-            'Error: $error',
-            style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 20,
-              color: Colors.red,
+          errorBuilder: (context, error) => Center(
+            child: Text(
+              'Error: $error',
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.red,
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

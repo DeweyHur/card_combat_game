@@ -6,21 +6,23 @@ import '../utils/game_logger.dart';
 import 'fading_text_component.dart';
 import '../models/game_card.dart';
 
-class StatusEffectComponent extends PositionComponent {
+class DoTEffect extends PositionComponent {
   final StatusEffect effect;
+  final int value;
   double _opacity = 1.0;
   static const double _fadeSpeed = 2.0;
 
-  StatusEffectComponent({
+  DoTEffect({
     required Vector2 position,
     required Vector2 size,
     required this.effect,
+    required this.value,
   }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.game, 'Status effect created: $effect');
+    GameLogger.debug(LogCategory.game, 'DoT effect created: $effect for $value damage');
   }
 
   @override
@@ -29,7 +31,7 @@ class StatusEffectComponent extends PositionComponent {
     _opacity -= dt * _fadeSpeed;
     if (_opacity <= 0) {
       removeFromParent();
-      GameLogger.debug(LogCategory.game, 'Status effect faded out and removed.');
+      GameLogger.debug(LogCategory.game, 'DoT effect faded out and removed.');
     }
   }
 
@@ -45,7 +47,7 @@ class StatusEffectComponent extends PositionComponent {
 
     final textPainter = TextPainter(
       text: TextSpan(
-        text: _getEffectText(),
+        text: '-$value',
         style: TextStyle(
           color: Colors.white,
           fontSize: 24,
@@ -77,22 +79,9 @@ class StatusEffectComponent extends PositionComponent {
     }
   }
 
-  String _getEffectText() {
-    switch (effect) {
-      case StatusEffect.poison:
-        return 'POISON';
-      case StatusEffect.burn:
-        return 'BURN';
-      case StatusEffect.freeze:
-        return 'FREEZE';
-      case StatusEffect.none:
-        return 'NONE';
-    }
-  }
-
   @override
   void onRemove() {
-    GameLogger.debug(LogCategory.game, 'Status effect faded out and removed.');
+    GameLogger.debug(LogCategory.game, 'DoT effect faded out and removed.');
     super.onRemove();
   }
 } 
