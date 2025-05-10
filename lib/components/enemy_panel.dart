@@ -28,14 +28,14 @@ class EnemyPanel extends BasePanel {
     // Add enemy action text at the very bottom
     actionText = TextComponent(
       text: 'Next Action: None',
-      position: Vector2(size.x / 2, size.y - 20),
+      position: Vector2(size.x * 0.4, size.y * 0.7),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
         ),
       ),
-      anchor: Anchor.center,
+      anchor: Anchor.centerLeft,
     );
     add(actionText);
   }

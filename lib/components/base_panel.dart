@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../utils/game_logger.dart';
 
 class BasePanel extends PositionComponent {
   late RectangleComponent background;
@@ -28,6 +29,11 @@ class BasePanel extends PositionComponent {
     position = Vector2(0, isTop ? 0 : gameSize.y * 0.7);
     size = Vector2(gameSize.x, gameSize.y * 0.3);
 
+    GameLogger.info(LogCategory.ui, '${isTop ? "Enemy" : "Player"} Panel:');
+    GameLogger.info(LogCategory.ui, '  Position: (${position.x}, ${position.y})');
+    GameLogger.info(LogCategory.ui, '  Size: ${size.x} x ${size.y}');
+    GameLogger.info(LogCategory.ui, '  Game Size: ${gameSize.x} x ${gameSize.y}');
+
     // Create background
     background = RectangleComponent(
       size: size,
@@ -50,14 +56,19 @@ class BasePanel extends PositionComponent {
     // Create character
     character = TextComponent(
       text: characterEmoji,
-      position: Vector2(size.x * 0.2, size.y * 0.5),
+      position: Vector2(size.x * 0.15, size.y * 0.4),
       textRenderer: TextPaint(
         style: const TextStyle(
-          fontSize: 80,
+          fontSize: 100,
           color: Colors.white,
           shadows: [
             Shadow(
               offset: Offset(2, 2),
+              blurRadius: 3,
+              color: Colors.black,
+            ),
+            Shadow(
+              offset: Offset(-2, -2),
               blurRadius: 3,
               color: Colors.black,
             ),
@@ -71,7 +82,7 @@ class BasePanel extends PositionComponent {
     // Create HP text
     hpText = TextComponent(
       text: 'HP: 0/0',
-      position: Vector2(size.x * 0.2 + 100, size.y * 0.5),
+      position: Vector2(size.x * 0.4, size.y * 0.3),
       textRenderer: TextPaint(
         style: TextStyle(
           color: hpColor,
@@ -93,7 +104,7 @@ class BasePanel extends PositionComponent {
     // Create status text
     statusText = TextComponent(
       text: 'No Status Effects',
-      position: Vector2(size.x * 0.2 + 100, size.y * 0.5 + 30),
+      position: Vector2(size.x * 0.4, size.y * 0.5),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,

@@ -15,7 +15,7 @@ import '../scenes/scene_controller.dart';
 import '../utils/game_logger.dart';
 import '../scenes/base_scene.dart';
 import '../scenes/combat_scene.dart';
-import '../models/player.dart';
+import '../models/player/player.dart';
 import '../models/enemies/goblin.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {

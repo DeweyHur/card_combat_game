@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../game/card_combat_game.dart';
 import '../models/game_cards_data.dart';
 import '../models/game_card.dart';
-import '../models/player.dart';
+import '../models/player/player.dart';
 import '../models/enemies/goblin.dart';
 import '../models/character.dart';
 import '../components/card_visual_component.dart';

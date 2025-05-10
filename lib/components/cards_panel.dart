@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../utils/game_logger.dart';
 
 class CardsPanel extends PositionComponent {
   late RectangleComponent background;
@@ -22,20 +23,24 @@ class CardsPanel extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
-    // Create background
+    GameLogger.info(LogCategory.ui, 'Cards Panel:');
+    GameLogger.info(LogCategory.ui, '  Position: (${position.x}, ${position.y})');
+    GameLogger.info(LogCategory.ui, '  Size: ${size.x} x ${size.y}');
+
+    // Create background (make it more visible)
     background = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.black.withOpacity(0.5),
+      paint: Paint()..color = Colors.blue.withOpacity(0.3),
     );
     add(background);
 
-    // Create border
+    // Create border (make it more visible)
     border = RectangleComponent(
       size: size,
       paint: Paint()
-        ..color = Colors.white
+        ..color = Colors.blueAccent
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0,
+        ..strokeWidth = 4.0,
     );
     add(border);
 

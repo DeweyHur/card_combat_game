@@ -4,7 +4,7 @@ import 'base_scene.dart';
 import 'player_selection_scene.dart';
 import 'combat_scene.dart';
 import '../game/card_combat_game.dart';
-import '../models/characters/player_base.dart';
+import '../models/player/player_base.dart';
 
 class SceneController {
   final FlameGame game;
