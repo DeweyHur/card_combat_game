@@ -16,23 +16,25 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     required Vector2 size,
     required this.onCardPlayed,
     required this.enabled,
-  }) : super(position: position, size: size);
+  }) : super(position: position, size: size) {
+    opacity = 1.0; // Set initial opacity
+  }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Card background
+    // Card background with pixel art style
     final backgroundPaint = Paint()
       ..color = enabled ? BasicPalette.white.color : BasicPalette.gray.color
       ..style = PaintingStyle.fill;
     final cardBackground = RectangleComponent(
       size: size,
       paint: backgroundPaint,
-    );
+    )..opacity = 1.0;
     add(cardBackground);
 
-    // Card border
+    // Card border with pixel art style
     final borderPaint = Paint()
       ..color = _getCardColor()
       ..style = PaintingStyle.stroke
@@ -40,10 +42,48 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     final cardBorder = RectangleComponent(
       size: size,
       paint: borderPaint,
-    );
+    )..opacity = 1.0;
     add(cardBorder);
 
-    // Card Name
+    // Add pixel art corner decorations
+    final cornerSize = 10.0;
+    final cornerPaint = Paint()
+      ..color = _getCardColor()
+      ..style = PaintingStyle.fill;
+
+    // Top-left corner
+    final topLeftCorner = RectangleComponent(
+      size: Vector2(cornerSize, cornerSize),
+      position: Vector2(0, 0),
+      paint: cornerPaint,
+    )..opacity = 1.0;
+    add(topLeftCorner);
+
+    // Top-right corner
+    final topRightCorner = RectangleComponent(
+      size: Vector2(cornerSize, cornerSize),
+      position: Vector2(size.x - cornerSize, 0),
+      paint: cornerPaint,
+    )..opacity = 1.0;
+    add(topRightCorner);
+
+    // Bottom-left corner
+    final bottomLeftCorner = RectangleComponent(
+      size: Vector2(cornerSize, cornerSize),
+      position: Vector2(0, size.y - cornerSize),
+      paint: cornerPaint,
+    )..opacity = 1.0;
+    add(bottomLeftCorner);
+
+    // Bottom-right corner
+    final bottomRightCorner = RectangleComponent(
+      size: Vector2(cornerSize, cornerSize),
+      position: Vector2(size.x - cornerSize, size.y - cornerSize),
+      paint: cornerPaint,
+    )..opacity = 1.0;
+    add(bottomRightCorner);
+
+    // Card Name with pixel art style
     final nameText = TextComponent(
       text: cardData.name,
       textRenderer: CardCombatGame.cardTextStyle,
@@ -52,7 +92,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     );
     add(nameText);
 
-    // Card Type
+    // Card Type with pixel art style
     final typeText = TextComponent(
       text: cardData.type.toString().split('.').last.toUpperCase(),
       textRenderer: CardCombatGame.cardDescriptionStyle,
@@ -61,7 +101,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     );
     add(typeText);
 
-    // Card Description
+    // Card Description with pixel art style
     final descText = TextComponent(
       text: cardData.description,
       textRenderer: CardCombatGame.cardDescriptionStyle,

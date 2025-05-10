@@ -45,8 +45,8 @@ class CardCombatGame extends FlameGame with TapDetector {
   static final cardTextStyle = TextPaint(
     style: const TextStyle(
       color: Colors.black,
-      fontSize: 14,
-      fontWeight: FontWeight.bold,
+      fontSize: 16,
+      fontFamily: 'monospace', // Changed from PressStart2P to monospace
     ),
   );
 
@@ -54,6 +54,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     style: const TextStyle(
       color: Colors.black,
       fontSize: 12,
+      fontFamily: 'monospace', // Changed from PressStart2P to monospace
     ),
   );
 
@@ -79,30 +80,66 @@ class CardCombatGame extends FlameGame with TapDetector {
         print('Error initializing audio player: $e');
       }
 
-      // Create game areas
+      // Create game areas with pixel art style
       _playerArea = RectangleComponent(
         size: Vector2(size.x, size.y * 0.3),
         position: Vector2(0, size.y * 0.7),
-        paint: Paint()..color = Colors.black.withValues(alpha: 0.3),
+        paint: Paint()
+          ..color = Colors.black.withOpacity(0.3)
+          ..style = PaintingStyle.fill,
       );
       add(_playerArea);
-      print('Player area created');
+
+      // Add pixel art border to player area
+      final playerBorder = RectangleComponent(
+        size: Vector2(size.x, size.y * 0.3),
+        position: Vector2(0, size.y * 0.7),
+        paint: Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+      add(playerBorder);
 
       _enemyArea = RectangleComponent(
         size: Vector2(size.x, size.y * 0.3),
         position: Vector2(0, 0),
-        paint: Paint()..color = Colors.black.withValues(alpha: 0.3),
+        paint: Paint()
+          ..color = Colors.black.withOpacity(0.3)
+          ..style = PaintingStyle.fill,
       );
       add(_enemyArea);
-      print('Enemy area created');
+
+      // Add pixel art border to enemy area
+      final enemyBorder = RectangleComponent(
+        size: Vector2(size.x, size.y * 0.3),
+        position: Vector2(0, 0),
+        paint: Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+      add(enemyBorder);
 
       _cardArea = RectangleComponent(
         size: Vector2(size.x, size.y * 0.4),
         position: Vector2(0, size.y * 0.3),
-        paint: Paint()..color = Colors.black.withValues(alpha: 0.3),
+        paint: Paint()
+          ..color = Colors.black.withOpacity(0.3)
+          ..style = PaintingStyle.fill,
       );
       add(_cardArea);
-      print('Card area created');
+
+      // Add pixel art border to card area
+      final cardBorder = RectangleComponent(
+        size: Vector2(size.x, size.y * 0.4),
+        position: Vector2(0, size.y * 0.3),
+        paint: Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+      add(cardBorder);
 
       // Add player character
       final playerCharacter = RectangleComponent(
@@ -142,11 +179,19 @@ class CardCombatGame extends FlameGame with TapDetector {
         position: Vector2(size.x * 0.2, 80),
         textRenderer: TextPaint(
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
+            color: Colors.red,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: Offset(1, 1),
+                blurRadius: 2,
+                color: Colors.black,
+              ),
+            ],
           ),
         ),
+        priority: 1,
       );
       add(_enemyHpText);
       print('Enemy health text added');
@@ -272,10 +317,10 @@ class CardCombatGame extends FlameGame with TapDetector {
       size: Vector2(100, 100),
       position: Vector2(size.x / 2, size.y / 2),
       paint: Paint()..color = effectColor.withOpacity(0.5),
-    );
+    )..opacity = 1.0; // Set initial opacity
     add(effect);
 
-    // Fade out effect
+    // Fade out effect with proper opacity handling
     effect.add(
       SequenceEffect(
         [
@@ -283,7 +328,8 @@ class CardCombatGame extends FlameGame with TapDetector {
             Vector2.all(2.0),
             EffectController(duration: 0.3),
           ),
-          OpacityEffect.fadeOut(
+          OpacityEffect.to(
+            0.0,
             EffectController(duration: 0.2),
           ),
         ],
@@ -307,9 +353,9 @@ class CardCombatGame extends FlameGame with TapDetector {
       print('Error setting up damage sound: $e');
     }
 
-    // Create damage number effect
+    // Create damage number effect with Unicode symbol
     final damageText = TextComponent(
-      text: isPlayer ? '-${_currentEnemyAction['damage']}' : '-${_currentHand.first.value}',
+      text: isPlayer ? '💥 ${_currentEnemyAction['damage']}' : '💥 ${_currentHand.first.value}',
       position: position,
       textRenderer: TextPaint(
         style: TextStyle(
@@ -321,18 +367,11 @@ class CardCombatGame extends FlameGame with TapDetector {
       anchor: Anchor.center,
     );
 
-    // Add floating animation
+    // Add simple floating animation
     damageText.add(
-      SequenceEffect(
-        [
-          MoveEffect.by(
-            Vector2(0, -50),
-            EffectController(duration: 0.5, curve: Curves.easeOut),
-          ),
-          OpacityEffect.fadeOut(
-            EffectController(duration: 0.3),
-          ),
-        ],
+      MoveEffect.by(
+        Vector2(0, -50),
+        EffectController(duration: 0.5, curve: Curves.easeOut),
         onComplete: () {
           remove(damageText);
         },

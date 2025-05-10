@@ -57,7 +57,8 @@ class CardCombatGame extends FlameGame with TapDetector {
     ),
   );
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer? _audioPlayer;
+  bool _audioEnabled = false;
 
   @override
   Future<void> onLoad() async {
@@ -65,7 +66,17 @@ class CardCombatGame extends FlameGame with TapDetector {
       print('Game initialization started');
       print('Screen size: ${size.x}x${size.y}');
       
-      await _initializeAudio();
+      _audioPlayer = AudioPlayer();
+      try {
+        await _audioPlayer?.setSource(AssetSource('sounds/card_play.mp3'));
+        _audioEnabled = true;
+        print('Audio player initialized successfully');
+      } catch (e) {
+        print('Warning: Could not initialize audio player: $e');
+        print('Game will continue without sound effects');
+        _audioEnabled = false;
+      }
+
       await _createGameAreas();
       await _createCharacters();
       await _createUI();
@@ -83,11 +94,6 @@ class CardCombatGame extends FlameGame with TapDetector {
       print('Stack trace: $stackTrace');
       rethrow;
     }
-  }
-
-  Future<void> _initializeAudio() async {
-    await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
-    print('Audio player initialized');
   }
 
   Future<void> _createGameAreas() async {
@@ -396,7 +402,7 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   @override
   void onRemove() {
-    _audioPlayer.dispose();
+    _audioPlayer?.dispose();
     super.onRemove();
   }
 
@@ -423,5 +429,47 @@ class CardCombatGame extends FlameGame with TapDetector {
       print('Stack trace: $stackTrace');
       rethrow;
     }
+  }
+
+  void _playDamageEffect(Vector2 position, bool isPlayer) {
+    if (_audioEnabled) {
+      try {
+        _audioPlayer?.play(AssetSource('sounds/damage.mp3'));
+      } catch (e) {
+        print('Warning: Could not play damage sound: $e');
+      }
+    }
+
+    final damageText = TextComponent(
+      text: isPlayer ? '-${_currentEnemyAction['damage']}' : '-${_currentHand.first.value}',
+      position: position,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.red,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      anchor: Anchor.center,
+    );
+
+    damageText.add(
+      SequenceEffect(
+        [
+          MoveEffect.by(
+            Vector2(0, -50),
+            EffectController(duration: 0.5, curve: Curves.easeOut),
+          ),
+          OpacityEffect.fadeOut(
+            EffectController(duration: 0.3, curve: Curves.easeOut),
+          ),
+        ],
+        onComplete: () {
+          remove(damageText);
+        },
+      ),
+    );
+
+    add(damageText);
   }
 } 
