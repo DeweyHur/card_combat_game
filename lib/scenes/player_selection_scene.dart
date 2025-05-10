@@ -77,21 +77,18 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
     characterDescriptions = [];
     characterEmojis = [];
 
-    final boxWidth = game.size.x * 0.4;
-    final boxHeight = game.size.y * 0.6;
-    final spacing = game.size.x * 0.05;
-    final startX = (game.size.x - (boxWidth * 2 + spacing)) / 2;
-    final startY = game.size.y * 0.2;
+    final boxWidth = game.size.x * 0.8;  // Wider boxes for better readability
+    final boxHeight = game.size.y * 0.15;  // Reduced height to fit better on screen
+    final spacing = game.size.y * 0.015;  // Reduced spacing between boxes
+    final startX = (game.size.x - boxWidth) / 2;  // Center horizontally
+    final startY = game.size.y * 0.15;  // Start higher on screen
 
     for (var i = 0; i < characters.length; i++) {
-      final row = i ~/ 2;
-      final col = i % 2;
-      final x = startX + (col * (boxWidth + spacing));
-      final y = startY + (row * (boxHeight + spacing));
+      final y = startY + (i * (boxHeight + spacing));
 
       // Create character box
       final box = RectangleComponent(
-        position: Vector2(x, y),
+        position: Vector2(startX, y),
         size: Vector2(boxWidth, boxHeight),
         paint: Paint()..color = characters[i]['color'] as Color,
       );
@@ -101,10 +98,10 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
       // Add character emoji
       final emoji = TextComponent(
         text: characters[i]['emoji'] as String,
-        position: Vector2(x + boxWidth / 2, y + 60),
+        position: Vector2(startX + 50, y + boxHeight * 0.35),  // Adjusted position
         textRenderer: TextPaint(
           style: const TextStyle(
-            fontSize: 48,
+            fontSize: 32,  // Slightly smaller emoji
             color: Colors.white,
           ),
         ),
@@ -116,15 +113,15 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
       // Add character name
       final name = TextComponent(
         text: characters[i]['name'] as String,
-        position: Vector2(x + boxWidth / 2, y + 120),
+        position: Vector2(startX + 120, y + boxHeight * 0.35),  // Aligned with emoji
         textRenderer: TextPaint(
           style: const TextStyle(
-            fontSize: 24,
+            fontSize: 22,  // Slightly smaller text
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        anchor: Anchor.center,
+        anchor: Anchor.centerLeft,
       );
       add(name);
       characterNames.add(name);
@@ -132,14 +129,14 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
       // Add character description
       final description = TextComponent(
         text: characters[i]['description'] as String,
-        position: Vector2(x + boxWidth / 2, y + 180),
+        position: Vector2(startX + 50, y + boxHeight * 0.75),  // Adjusted position
         textRenderer: TextPaint(
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,  // Slightly smaller text
             color: Colors.white,
           ),
         ),
-        anchor: Anchor.center,
+        anchor: Anchor.topLeft,
       );
       add(description);
       characterDescriptions.add(description);
