@@ -56,13 +56,34 @@ flutter run
 - `CombatScene`: Handles combat mechanics and UI
 - `PlayerSelectionScene`: Character selection screen
 
-### Character Classes
+### Project Structure
 
+```
+lib/
+├── components/         # Game components (cards, effects)
+├── game/              # Core game logic
+├── models/            # Game models
+│   ├── enemies/       # Enemy character classes
+│   ├── player/        # Player character classes
+│   └── game_card.dart # Card system
+├── scenes/            # Game scenes
+└── utils/             # Utility functions and logging
+```
+
+### Character System
+
+#### Player Characters
+Located in `models/player/`:
 - `PlayerBase`: Base class for all player characters
 - `Fighter`: Melee-focused character
 - `Paladin`: Defensive character with healing abilities
 - `Sorcerer`: Status effect specialist
 - `Warlock`: High-risk, high-reward character
+
+#### Enemy Characters
+Located in `models/enemies/`:
+- `EnemyBase`: Base class for all enemy characters
+- `Goblin`: Basic enemy with simple AI
 
 ### Card System
 
@@ -75,17 +96,6 @@ flutter run
 
 ## Development
 
-### Project Structure
-
-```
-lib/
-├── components/         # Game components (cards, effects)
-├── game/              # Core game logic
-├── models/            # Game models (cards, characters)
-├── scenes/            # Game scenes
-└── utils/             # Utility functions and logging
-```
-
 ### Adding New Features
 
 1. Cards:
@@ -93,8 +103,12 @@ lib/
    - Implement card effects in `GameCard` class
 
 2. Characters:
-   - Create new character class extending `PlayerBase`
-   - Add character to selection screen in `PlayerSelectionScene`
+   - Player Characters:
+     - Create new character class in `models/player/` extending `PlayerBase`
+     - Add character to selection screen in `PlayerSelectionScene`
+   - Enemy Characters:
+     - Create new enemy class in `models/enemies/` extending `EnemyBase`
+     - Implement enemy AI in `getNextAction()` method
 
 3. Scenes:
    - Create new scene extending `BaseScene`
