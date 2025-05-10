@@ -79,6 +79,8 @@ class CardsPanel extends PositionComponent {
       position: Vector2(size.x - 100, 20),
     );
     add(turnText);
+
+    GameLogger.info(LogCategory.ui, 'CardsPanel loaded with size: ${size.x}x${size.y}');
   }
 
   void updateGameInfo(String info) {

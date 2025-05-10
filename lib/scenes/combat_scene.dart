@@ -50,6 +50,7 @@ class CombatScene extends BaseScene {
 
     // Initialize player's deck
     playerDeck = List.from(gameCards);
+    playerDeck.shuffle();
     playerHand = [];
     discardPile = [];
 
@@ -63,13 +64,42 @@ class CombatScene extends BaseScene {
   }
 
   void _createGameAreas() {
-    // Remove the old game areas since we're using GameUI now
-    // The GameUI component will handle the layout
+    // Initialize GameUI
+    final gameUI = GameUI(game.size);
+    gameUI.position = Vector2.zero();  // Ensure it starts at the top-left
+    add(gameUI);
+    GameLogger.info(LogCategory.game, 'GameUI added to CombatScene at position ${gameUI.position}');
   }
 
   void _createUI() {
-    // Remove the old UI components since we're using GameUI now
-    // The GameUI component will handle the UI elements
+    // Initialize turn text
+    turnText = TextComponent(
+      text: "Player's Turn",
+      position: Vector2(game.size.x / 2, 100),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      anchor: Anchor.topCenter,
+    );
+    add(turnText);
+
+    // Initialize enemy next action text
+    enemyNextActionText = TextComponent(
+      text: 'Next: ${enemy.getNextAction()}',
+      position: Vector2(game.size.x / 2, 140),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      ),
+      anchor: Anchor.topCenter,
+    );
+    add(enemyNextActionText);
   }
 
   void _drawInitialHand() {
@@ -87,8 +117,11 @@ class CombatScene extends BaseScene {
     final cardWidth = CardsPanel.cardWidth;
     final cardHeight = CardsPanel.cardHeight;
     
+    // Get the GameUI instance
+    final gameUI = (game as CardCombatGame).gameUI;
+    
     // Calculate position using the CardsPanel's helper method
-    final position = (game as CardCombatGame).gameUI.cardsPanel.calculateCardPosition(index);
+    final position = gameUI.cardsPanel.calculateCardPosition(index);
     
     final cardComponent = CardVisualComponent(
       card,
@@ -99,7 +132,8 @@ class CombatScene extends BaseScene {
     );
     
     // Add card to the game's cards panel
-    (game as CardCombatGame).gameUI.cardsPanel.add(cardComponent);
+    gameUI.cardsPanel.add(cardComponent);
+    GameLogger.info(LogCategory.game, 'Card added to hand: ${card.name} at position $position');
   }
 
   void executeCard(GameCard card) {
