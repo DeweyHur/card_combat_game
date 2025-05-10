@@ -6,22 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'scene_controller.dart';
 
-class BaseScene extends Component with TapCallbacks {
-  final FlameGame game;
-  late SceneController sceneController;
+class BaseScene extends Component with TapCallbacks, HasGameRef {
   final Color backgroundColor;
 
   BaseScene({
-    required this.game,
-    this.backgroundColor = const Color(0xFF1A1A2E),
-  }) {
-    sceneController = SceneController(game);
-  }
+    required this.backgroundColor,
+  });
+
+  late SceneController sceneController;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Scene loaded: ${runtimeType}');
+    sceneController = (game as CardCombatGame).sceneController;
   }
 
   @override
@@ -43,7 +41,7 @@ class BaseScene extends Component with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    super.render(canvas);
+    canvas.drawColor(backgroundColor, BlendMode.src);
   }
 
   @override
@@ -62,4 +60,6 @@ class BaseScene extends Component with TapCallbacks {
   void go(String sceneName, {Map<String, dynamic>? params}) {
     sceneController.go(sceneName, params: params);
   }
+
+  CardCombatGame get game => super.game as CardCombatGame;
 } 

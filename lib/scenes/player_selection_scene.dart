@@ -10,24 +10,22 @@ import 'package:card_combat_app/models/player/warlock.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/enemies/goblin.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/layout/character_selection_box.dart';
 import 'base_scene.dart';
 import 'combat_scene.dart';
 
-class PlayerSelectionScene extends BaseScene with TapCallbacks {
+class PlayerSelectionScene extends BaseScene {
   late TextComponent titleText;
-  late List<RectangleComponent> characterBoxes;
-  late List<TextComponent> characterNames;
-  late List<TextComponent> characterDescriptions;
-  late List<TextComponent> characterEmojis;
+  late List<CharacterSelectionBox> characterBoxes;
 
-  PlayerSelectionScene(CardCombatGame game) : super(
-    game: game,
+  PlayerSelectionScene() : super(
     backgroundColor: const Color(0xFF2C3E50),
   );
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    GameLogger.debug(LogCategory.game, 'PlayerSelectionScene loading...');
 
     // Add title
     titleText = TextComponent(
@@ -73,9 +71,6 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
     ];
 
     characterBoxes = [];
-    characterNames = [];
-    characterDescriptions = [];
-    characterEmojis = [];
 
     final boxWidth = game.size.x * 0.8;  // Wider boxes for better readability
     final boxHeight = game.size.y * 0.15;  // Reduced height to fit better on screen
@@ -85,92 +80,48 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
 
     for (var i = 0; i < characters.length; i++) {
       final y = startY + (i * (boxHeight + spacing));
-
-      // Create character box
-      final box = RectangleComponent(
-        position: Vector2(startX, y),
+      
+      final box = CharacterSelectionBox(
+        name: characters[i]['name'] as String,
+        emoji: characters[i]['emoji'] as String,
+        description: characters[i]['description'] as String,
+        color: characters[i]['color'] as Color,
         size: Vector2(boxWidth, boxHeight),
-        paint: Paint()..color = characters[i]['color'] as Color,
+        position: Vector2(startX, y),
+        onSelected: () => _onCharacterSelected(i),
       );
+      
       add(box);
       characterBoxes.add(box);
-
-      // Add character emoji
-      final emoji = TextComponent(
-        text: characters[i]['emoji'] as String,
-        position: Vector2(startX + 50, y + boxHeight * 0.35),  // Adjusted position
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            fontSize: 32,  // Slightly smaller emoji
-            color: Colors.white,
-          ),
-        ),
-        anchor: Anchor.center,
-      );
-      add(emoji);
-      characterEmojis.add(emoji);
-
-      // Add character name
-      final name = TextComponent(
-        text: characters[i]['name'] as String,
-        position: Vector2(startX + 120, y + boxHeight * 0.35),  // Aligned with emoji
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            fontSize: 22,  // Slightly smaller text
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        anchor: Anchor.centerLeft,
-      );
-      add(name);
-      characterNames.add(name);
-
-      // Add character description
-      final description = TextComponent(
-        text: characters[i]['description'] as String,
-        position: Vector2(startX + 50, y + boxHeight * 0.75),  // Adjusted position
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            fontSize: 14,  // Slightly smaller text
-            color: Colors.white,
-          ),
-        ),
-        anchor: Anchor.topLeft,
-      );
-      add(description);
-      characterDescriptions.add(description);
     }
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
-    final tapPosition = event.canvasPosition;
-
-    for (var i = 0; i < characterBoxes.length; i++) {
-      if (characterBoxes[i].containsPoint(tapPosition)) {
-        _onCharacterSelected(i);
-        break;
-      }
-    }
+    
+    GameLogger.debug(LogCategory.game, 'PlayerSelectionScene loaded successfully');
   }
 
   void _onCharacterSelected(int index) {
     GameLogger.info(LogCategory.game, 'Character selected: $index');
-    final player = _createPlayer(index);
-    if (player != null) {
+    try {
+      final player = _createPlayer(index);
+      GameLogger.info(LogCategory.game, 'Player created: ${player.runtimeType}');
+      
       // Create and register combat scene with selected player
       final combatScene = CombatScene(
-        game: game as CardCombatGame,
         player: player,
         enemy: Goblin(),
       );
+      GameLogger.info(LogCategory.game, 'Combat scene created');
+      
       sceneController.registerScene('combat', combatScene);
+      GameLogger.info(LogCategory.game, 'Combat scene registered');
       
       // Initialize card pool and go to combat
       (game as CardCombatGame).initializeCardPool();
+      GameLogger.info(LogCategory.game, 'Card pool initialized');
+      
       sceneController.go('combat');
+      GameLogger.info(LogCategory.game, 'Transitioning to combat scene');
+    } catch (e, stackTrace) {
+      GameLogger.error(LogCategory.game, 'Error during character selection: $e\n$stackTrace');
     }
   }
 

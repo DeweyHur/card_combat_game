@@ -80,7 +80,8 @@ class CardCombatGame extends FlameGame with TapDetector {
       GameLogger.info(LogCategory.system, 'Audio initialized: $_audioEnabled');
 
       // Create and register player selection scene
-      final playerSelectionScene = PlayerSelectionScene(this);
+      final playerSelectionScene = PlayerSelectionScene();
+      add(playerSelectionScene);  // Add the scene to the game tree first
       sceneController.registerScene('player_selection', playerSelectionScene);
 
       // Start with player selection scene
@@ -354,5 +355,12 @@ class CardCombatGame extends FlameGame with TapDetector {
   void onCardTap(CardVisualComponent cardVisual) {
     if (!isPlayerTurn) return;
     _executeCard(cardVisual.cardData);
+  }
+
+  @override
+  void onTapDown(TapDownInfo info) {
+    super.onTapDown(info);
+    final position = info.eventPosition.global;
+    GameLogger.debug(LogCategory.game, 'Game received tap at: ${position}');
   }
 } 
