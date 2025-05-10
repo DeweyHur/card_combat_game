@@ -1,11 +1,12 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flame/events.dart';
 import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'scene_controller.dart';
 
-class BaseScene extends Component {
+class BaseScene extends Component with TapCallbacks {
   final FlameGame game;
   late SceneController sceneController;
   final Color backgroundColor;
@@ -43,6 +44,11 @@ class BaseScene extends Component {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
   }
 
   void onBack() {

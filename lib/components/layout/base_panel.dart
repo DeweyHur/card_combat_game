@@ -19,7 +19,26 @@ class BasePanel extends PositionComponent {
     required this.characterEmoji,
     required this.hpColor,
     required this.isTop,
-  });
+  }) {
+    // Initialize hpText with default values
+    hpText = TextComponent(
+      text: 'HP: 0/0',
+      textRenderer: TextPaint(
+        style: TextStyle(
+          color: hpColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            const Shadow(
+              offset: Offset(1, 1),
+              blurRadius: 2,
+              color: Colors.black,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Future<void> onLoad() async {
@@ -79,26 +98,9 @@ class BasePanel extends PositionComponent {
     );
     add(character);
 
-    // Create HP text
-    hpText = TextComponent(
-      text: 'HP: 0/0',
-      position: Vector2(size.x * 0.4, size.y * 0.3),
-      textRenderer: TextPaint(
-        style: TextStyle(
-          color: hpColor,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          shadows: [
-            const Shadow(
-              offset: Offset(1, 1),
-              blurRadius: 2,
-              color: Colors.black,
-            ),
-          ],
-        ),
-      ),
-      anchor: Anchor.centerLeft,
-    );
+    // Set HP text position and add it
+    hpText.position = Vector2(size.x * 0.4, size.y * 0.3);
+    hpText.anchor = Anchor.centerLeft;
     add(hpText);
 
     // Create status text

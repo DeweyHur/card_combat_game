@@ -17,6 +17,7 @@ import 'package:card_combat_app/scenes/base_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'package:card_combat_app/models/player/player.dart';
 import 'package:card_combat_app/models/enemies/goblin.dart';
+import 'package:card_combat_app/models/character.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {
   late List<GameCard> _cardPool;
@@ -83,25 +84,13 @@ class CardCombatGame extends FlameGame with TapDetector {
       add(gameUI);
       GameLogger.info(LogCategory.system, 'GameUI added to game');
 
-      // Create a test player
-      final player = Player(
-        name: 'Hero',
-        maxHealth: 50,
-      );
-
       // Create and register combat scene
       final combatScene = CombatScene(
         game: this,
-        player: player,
+        player: Character(name: 'Player', maxHealth: 30),
         enemy: Goblin(),
       );
       sceneController.registerScene('combat', combatScene);
-
-      // Sync HP values with character objects
-      playerHp = player.currentHealth;
-      maxPlayerHp = player.maxHealth;
-      enemyHp = combatScene.enemy.currentHealth;
-      maxEnemyHp = combatScene.enemy.maxHealth;
 
       // Start with combat scene
       sceneController.go('combat');
@@ -286,12 +275,19 @@ class CardCombatGame extends FlameGame with TapDetector {
 
   void _executeEnemyTurn() {
     GameLogger.info(LogCategory.system, '\n=== Enemy Turn ===');
+    
+    // Set next enemy action if not already set
+    if (_currentEnemyAction.isEmpty) {
+      _setNextEnemyAction();
+    }
+    
     final damage = _currentEnemyAction['damage'] as int;
     GameLogger.info(LogCategory.system, 'Enemy action: ${_currentEnemyAction['name']} for $damage damage');
     
     // Apply enemy action
     playerHp -= damage;
     if (playerHp < 0) playerHp = 0;
+    gameUI.updatePlayerHp(playerHp, maxPlayerHp);
     GameLogger.info(LogCategory.system, 'Player HP reduced to: $playerHp');
     
     // Play damage effect on player
@@ -303,7 +299,7 @@ class CardCombatGame extends FlameGame with TapDetector {
     add(damageEffect);
     
     // Update UI
-    gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+    gameUI.updatePlayerStatus('Ready');
     
     // Check for game over
     if (playerHp <= 0) {

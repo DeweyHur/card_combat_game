@@ -13,26 +13,27 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 
 class CombatScene extends BaseScene {
-  final Character player;
-  final Character enemy;
+  late Character player;
+  late Character enemy;
   late List<GameCard> playerDeck;
   late List<GameCard> playerHand;
   late List<GameCard> discardPile;
   bool isPlayerTurn = true;
-
-  // UI Components
-  late TextComponent playerHealthText;
-  late TextComponent enemyHealthText;
   late TextComponent turnText;
   late TextComponent enemyNextActionText;
 
   CombatScene({
-    required FlameGame game,
+    required CardCombatGame game,
     required this.player,
     required this.enemy,
-    super.backgroundColor = Colors.black,
   }) : super(game: game) {
     playerDeck = List.from(gameCards);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    // Handle tap events here
   }
 
   @override
@@ -83,32 +84,6 @@ class CombatScene extends BaseScene {
   }
 
   void _createUI() {
-    // Player health display
-    playerHealthText = TextComponent(
-      text: '${player.name}: ${player.currentHealth}/${player.maxHealth} HP',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-        ),
-      ),
-      position: Vector2(20, game.size.y * 0.6 + 20),
-    );
-    add(playerHealthText);
-
-    // Enemy health display
-    enemyHealthText = TextComponent(
-      text: '${enemy.name}: ${enemy.currentHealth}/${enemy.maxHealth} HP',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-        ),
-      ),
-      position: Vector2(20, 20),
-    );
-    add(enemyHealthText);
-
     // Turn indicator
     turnText = TextComponent(
       text: "Player's Turn",
@@ -284,8 +259,8 @@ class CombatScene extends BaseScene {
   }
 
   void _updateUI() {
-    playerHealthText.text = '${player.name}: ${player.currentHealth}/${player.maxHealth} HP';
-    enemyHealthText.text = '${enemy.name}: ${enemy.currentHealth}/${enemy.maxHealth} HP';
+    // Update enemy's next action
+    enemyNextActionText.text = 'Next: ${enemy.getNextAction()}';
   }
 
   void _endCombat(bool playerWon) {
