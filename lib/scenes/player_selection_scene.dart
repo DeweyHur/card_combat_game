@@ -8,6 +8,7 @@ import 'package:card_combat_app/models/player/paladin.dart';
 import 'package:card_combat_app/models/player/sorcerer.dart';
 import 'package:card_combat_app/models/player/warlock.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/enemies/goblin.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 import 'combat_scene.dart';
@@ -162,8 +163,17 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
     GameLogger.info(LogCategory.game, 'Character selected: $index');
     final player = _createPlayer(index);
     if (player != null) {
+      // Create and register combat scene with selected player
+      final combatScene = CombatScene(
+        game: game as CardCombatGame,
+        player: player,
+        enemy: Goblin(),
+      );
+      sceneController.registerScene('combat', combatScene);
+      
+      // Initialize card pool and go to combat
       (game as CardCombatGame).initializeCardPool();
-      sceneController.go('combat', params: {'player': player});
+      sceneController.go('combat');
     }
   }
 

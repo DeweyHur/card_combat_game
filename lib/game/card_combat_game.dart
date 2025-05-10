@@ -79,25 +79,12 @@ class CardCombatGame extends FlameGame with TapDetector {
       _audioEnabled = await _initializeAudio();
       GameLogger.info(LogCategory.system, 'Audio initialized: $_audioEnabled');
 
-      // Create and add GameUI
-      gameUI = GameUI(size);
-      add(gameUI);
-      GameLogger.info(LogCategory.system, 'GameUI added to game');
+      // Create and register player selection scene
+      final playerSelectionScene = PlayerSelectionScene(this);
+      sceneController.registerScene('player_selection', playerSelectionScene);
 
-      // Create and register combat scene
-      final combatScene = CombatScene(
-        game: this,
-        player: Character(name: 'Player', maxHealth: 30),
-        enemy: Goblin(),
-      );
-      sceneController.registerScene('combat', combatScene);
-
-      // Start with combat scene
-      sceneController.go('combat');
-
-      // Update UI with initial HP values
-      gameUI.updatePlayerHp(playerHp, maxPlayerHp);
-      gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
+      // Start with player selection scene
+      sceneController.go('player_selection');
 
       // Initialize card pool
       initializeCardPool();

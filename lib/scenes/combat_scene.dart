@@ -9,6 +9,7 @@ import 'package:card_combat_app/models/player/player.dart';
 import 'package:card_combat_app/models/enemies/goblin.dart';
 import 'package:card_combat_app/models/character.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
+import 'package:card_combat_app/components/layout/game_ui.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'base_scene.dart';
 
@@ -21,6 +22,7 @@ class CombatScene extends BaseScene {
   bool isPlayerTurn = true;
   late TextComponent turnText;
   late TextComponent enemyNextActionText;
+  late GameUI gameUI;
 
   CombatScene({
     required CardCombatGame game,
@@ -39,6 +41,11 @@ class CombatScene extends BaseScene {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // Initialize game UI
+    gameUI = GameUI(game.size);
+    add(gameUI);
+    GameLogger.info(LogCategory.system, 'GameUI added to combat scene');
 
     // Initialize game areas
     _createGameAreas();
