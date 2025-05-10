@@ -9,22 +9,20 @@ import 'package:flutter/material.dart' hide Card; // For TextStyle and Colors, h
 import 'package:card_combat_app/card.dart'; // Import our Card class
 import 'package:card_combat_app/cards_data.dart'; // Import our card data
 import 'package:audioplayers/audioplayers.dart'; // For sound effects
+import 'package:card_combat_app/components/game_ui.dart';
 
 class CardCombatGame extends FlameGame with TapDetector {
-  late TextComponent _playerHpText;
-  late TextComponent _enemyHpText;
-  late TextComponent _enemyActionText;
-  late TextComponent _cardAreaText;
-  late TextComponent _gameInfoText;
-  late TextComponent _turnText;
-  late RectangleComponent _playerArea;
-  late RectangleComponent _enemyArea;
-  late RectangleComponent _cardArea;
-
+  late GameUI _gameUI;
   late List<Card> _cardPool;
   final List<Card> _currentHand = [];
   final List<Component> _cardVisuals = []; // To keep track of card visual components
   final Random _random = Random();
+
+  // Card layout constants
+  static const double cardWidth = 100.0;
+  static const double cardHeight = 140.0;
+  static const double cardSpacing = 0.0;
+  static const int maxCards = 3;
 
   int playerHp = 30;
   int maxPlayerHp = 30;
@@ -42,21 +40,8 @@ class CardCombatGame extends FlameGame with TapDetector {
   ];
   Map<String, dynamic> _currentEnemyAction = {};
 
-  static final cardTextStyle = TextPaint(
-    style: const TextStyle(
-      color: Colors.black,
-      fontSize: 16,
-      fontFamily: 'monospace', // Changed from PressStart2P to monospace
-    ),
-  );
-
-  static final cardDescriptionStyle = TextPaint(
-    style: const TextStyle(
-      color: Colors.black,
-      fontSize: 12,
-      fontFamily: 'monospace', // Changed from PressStart2P to monospace
-    ),
-  );
+  // Add status effect tracking
+  Map<StatusEffect, int> _playerStatusEffects = {}; // Map of status effect to remaining duration
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
@@ -64,195 +49,19 @@ class CardCombatGame extends FlameGame with TapDetector {
   Future<void> onLoad() async {
     try {
       print('Game initialization started');
-      print('Screen size: ${size.x}x${size.y}');
       
-      // Initialize audio player with error handling
+      // Initialize audio player
       try {
-        print('Initializing audio player...');
         await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
         print('Audio player initialized successfully');
-        
-        // Test sound playback
-        print('Testing sound playback...');
-        await _audioPlayer.play(AssetSource('sounds/card_play.mp3'));
-        print('Test sound played successfully');
       } catch (e) {
         print('Error initializing audio player: $e');
       }
 
-      // Create game areas with pixel art style
-      _playerArea = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.3),
-        position: Vector2(0, size.y * 0.7),
-        paint: Paint()
-          ..color = Colors.black.withOpacity(0.3)
-          ..style = PaintingStyle.fill,
-      );
-      add(_playerArea);
-
-      // Add pixel art border to player area
-      final playerBorder = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.3),
-        position: Vector2(0, size.y * 0.7),
-        paint: Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-      add(playerBorder);
-
-      _enemyArea = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.3),
-        position: Vector2(0, 0),
-        paint: Paint()
-          ..color = Colors.black.withOpacity(0.3)
-          ..style = PaintingStyle.fill,
-      );
-      add(_enemyArea);
-
-      // Add pixel art border to enemy area
-      final enemyBorder = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.3),
-        position: Vector2(0, 0),
-        paint: Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-      add(enemyBorder);
-
-      _cardArea = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.4),
-        position: Vector2(0, size.y * 0.3),
-        paint: Paint()
-          ..color = Colors.black.withOpacity(0.3)
-          ..style = PaintingStyle.fill,
-      );
-      add(_cardArea);
-
-      // Add pixel art border to card area
-      final cardBorder = RectangleComponent(
-        size: Vector2(size.x, size.y * 0.4),
-        position: Vector2(0, size.y * 0.3),
-        paint: Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-      add(cardBorder);
-
-      // Add player character
-      final playerCharacter = RectangleComponent(
-        size: Vector2(50, 50),
-        position: Vector2(size.x * 0.2, size.y * 0.7 + 25),
-        paint: Paint()..color = const Color(0xFF3498DB),
-      );
-      add(playerCharacter);
-      print('Player character added');
-
-      // Add enemy character
-      final enemyCharacter = RectangleComponent(
-        size: Vector2(50, 50),
-        position: Vector2(size.x * 0.2, 25),
-        paint: Paint()..color = const Color(0xFFE74C3C),
-      );
-      add(enemyCharacter);
-      print('Enemy character added');
-
-      // Display health text
-      _playerHpText = TextComponent(
-        text: 'HP: $playerHp/$maxPlayerHp',
-        position: Vector2(size.x * 0.2, size.y * 0.7 + 80),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      add(_playerHpText);
-      print('Player health text added');
-
-      _enemyHpText = TextComponent(
-        text: 'HP: $enemyHp/$maxEnemyHp',
-        position: Vector2(size.x * 0.2, 80),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.red,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                offset: Offset(1, 1),
-                blurRadius: 2,
-                color: Colors.black,
-              ),
-            ],
-          ),
-        ),
-        priority: 1,
-      );
-      add(_enemyHpText);
-      print('Enemy health text added');
-
-      // Display enemy action text
-      _enemyActionText = TextComponent(
-        text: 'Next Action: $enemyNextAction',
-        position: Vector2(size.x * 0.2, 120),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-      );
-      add(_enemyActionText);
-      print('Enemy action text added');
-
-      // Display card area text
-      _cardAreaText = TextComponent(
-        text: 'Cards',
-        position: Vector2(size.x * 0.5, size.y * 0.3 + 20),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      add(_cardAreaText);
-      print('Card area text added');
-
-      // Display game info text
-      _gameInfoText = TextComponent(
-        text: 'Turn: $turnCount',
-        position: Vector2(size.x * 0.8, 20),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-      );
-      add(_gameInfoText);
-      print('Game info text added');
-
-      // Display turn text
-      _turnText = TextComponent(
-        text: isPlayerTurn ? 'Your Turn' : 'Enemy Turn',
-        position: Vector2(size.x * 0.8, 50),
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-      add(_turnText);
-      print('Turn text added');
+      // Initialize game UI and wait for it to complete
+      _gameUI = GameUI(size);
+      await add(_gameUI);  // Wait for GameUI to fully initialize
+      print('Game UI initialized');
 
       // Initialize card pool
       _cardPool = initializeCardPool();
@@ -274,10 +83,10 @@ class CardCombatGame extends FlameGame with TapDetector {
     }
   }
 
-  void _pickNewEnemyAction() {
+  void _setNextEnemyAction() {
     _currentEnemyAction = _goblinActions[_random.nextInt(_goblinActions.length)];
     enemyNextAction = _currentEnemyAction['description'];
-    print('New enemy action selected: ${_currentEnemyAction['name']}');
+    _gameUI.updateEnemyAction(enemyNextAction);
   }
 
   void _drawNewHand() {
@@ -358,7 +167,7 @@ class CardCombatGame extends FlameGame with TapDetector {
       text: isPlayer ? '💥 ${_currentEnemyAction['damage']}' : '💥 ${_currentHand.first.value}',
       position: position,
       textRenderer: TextPaint(
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.red,
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -423,11 +232,10 @@ class CardCombatGame extends FlameGame with TapDetector {
         print('Processing attack card: ${card.value} damage');
         enemyHp -= card.value;
         if (enemyHp < 0) enemyHp = 0;
-        _enemyHpText.text = 'Goblin HP: $enemyHp/$maxEnemyHp';
-        print('Enemy HP reduced to: $enemyHp');
+        _gameUI.updateEnemyHp(enemyHp, maxEnemyHp);
         // Play damage effect on enemy
         _playDamageEffect(
-          Vector2(_enemyArea.position.x + _enemyArea.size.x / 2, _enemyArea.position.y + 40),
+          Vector2(_gameUI.enemyAreaPosition.x + _gameUI.enemyAreaSize.x / 2, _gameUI.enemyAreaPosition.y + 40),
           false,
         );
         break;
@@ -435,33 +243,37 @@ class CardCombatGame extends FlameGame with TapDetector {
         print('Processing heal card: ${card.value} HP');
         playerHp += card.value;
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
-        _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
-        print('Player HP increased to: $playerHp');
+        _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
         break;
       case CardType.statusEffect:
         print('Processing status effect card: ${card.statusEffectToApply}');
-        // TODO: Implement status effects
+        if (card.statusEffectToApply != StatusEffect.none && card.statusDuration != null) {
+          _playerStatusEffects[card.statusEffectToApply] = card.statusDuration!;
+          _gameUI.updatePlayerStatus(_getStatusText());
+        }
         break;
       case CardType.cure:
         print('Processing cure card: ${card.value} HP');
         playerHp += card.value;
         if (playerHp > maxPlayerHp) playerHp = maxPlayerHp;
-        _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
-        print('Player HP increased to: $playerHp');
+        _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+        // Clear all status effects
+        _playerStatusEffects.clear();
+        _gameUI.updatePlayerStatus(_getStatusText());
         break;
     }
 
     // Check for victory
     if (enemyHp <= 0) {
       print('Victory: Enemy defeated!');
-      _gameInfoText.text = 'Victory! You defeated the Goblin!';
+      _gameUI.updateGameInfo('Victory! You defeated the Goblin!');
       return;
     }
 
     // End player turn, start enemy turn
     print('Ending player turn');
     isPlayerTurn = false;
-    _cardAreaText.text = 'Enemy Turn';
+    _gameUI.updateCardAreaText('Enemy Turn');
     
     // Remove cards from hand
     print('Removing cards from hand...');
@@ -481,16 +293,14 @@ class CardCombatGame extends FlameGame with TapDetector {
   }
 
   Component _createCardVisual(Card cardData, int index) {
-    final cardWidth = 140.0;
-    final cardHeight = 180.0;
-    final spacing = 20.0;
-    final totalWidth = (_currentHand.length * cardWidth) + ((_currentHand.length -1) * spacing);
-    final startX = _cardArea.position.x + (_cardArea.size.x - totalWidth) / 2;
+    final totalWidth = (maxCards * cardWidth) + ((maxCards - 1) * cardSpacing);
+    final startX = (_gameUI.cardAreaSize.x - totalWidth) / 2;
 
     final position = Vector2(
-      startX + (index * (cardWidth + spacing)),
-      _cardArea.position.y + 60, // Position cards below the area text
+      _gameUI.cardAreaPosition.x + startX + (index * (cardWidth + cardSpacing)),
+      _gameUI.cardAreaPosition.y + (_gameUI.cardAreaSize.y - cardHeight) / 2,
     );
+
     return CardVisualComponent(
       cardData,
       position: position,
@@ -512,17 +322,20 @@ class CardCombatGame extends FlameGame with TapDetector {
     
     // Play damage effect on player
     _playDamageEffect(
-      Vector2(_playerArea.position.x + _playerArea.size.x / 2, _playerArea.position.y + 40),
+      Vector2(_gameUI.playerAreaPosition.x + _gameUI.playerAreaSize.x / 2, _gameUI.playerAreaPosition.y + 40),
       true,
     );
     
     // Update UI
-    _playerHpText.text = 'HP: $playerHp/$maxPlayerHp';
+    _gameUI.updatePlayerHp(playerHp, maxPlayerHp);
+    
+    // Update status effects
+    _updateStatusEffects();
     
     // Check for game over
     if (playerHp <= 0) {
       print('Game Over: Player defeated!');
-      _gameInfoText.text = 'Game Over! You were defeated by the Goblin!';
+      _gameUI.updateGameInfo('Game Over! You were defeated by the Goblin!');
       return;
     }
     
@@ -530,10 +343,9 @@ class CardCombatGame extends FlameGame with TapDetector {
     print('Starting new player turn...');
     isPlayerTurn = true;
     turnCount++;
-    _turnText.text = 'Turn $turnCount';
-    _pickNewEnemyAction();
-    _enemyActionText.text = 'Next: $enemyNextAction';
-    _cardAreaText.text = 'Your Turn - Choose a Card';
+    _gameUI.updateTurnText('Turn $turnCount');
+    _setNextEnemyAction();
+    _gameUI.updateCardAreaText('Your Turn - Choose a Card');
     print('Starting turn $turnCount');
     print('Next enemy action: $enemyNextAction');
     _drawNewHand();
@@ -552,10 +364,36 @@ class CardCombatGame extends FlameGame with TapDetector {
     }
   }
 
-  void _setNextEnemyAction() {
-    _currentEnemyAction = _goblinActions[_random.nextInt(_goblinActions.length)];
-    enemyNextAction = _currentEnemyAction['description'] as String;
-    _enemyActionText.text = 'Next Action: $enemyNextAction';
+  String _getStatusText() {
+    if (_playerStatusEffects.isEmpty) {
+      return 'No Status Effects';
+    }
+    
+    final statusStrings = _playerStatusEffects.entries.map((entry) {
+      final effect = entry.key;
+      final duration = entry.value;
+      String effectText = effect.toString().split('.').last;
+      return '$effectText ($duration)';
+    }).join(', ');
+    
+    return 'Status: $statusStrings';
+  }
+
+  void _updateStatusEffects() {
+    // Update status effect durations
+    _playerStatusEffects = Map.fromEntries(
+      _playerStatusEffects.entries.where((entry) {
+        final newDuration = entry.value - 1;
+        if (newDuration <= 0) {
+          return false;
+        }
+        _playerStatusEffects[entry.key] = newDuration;
+        return true;
+      })
+    );
+    
+    // Update status text
+    _gameUI.updatePlayerStatus(_getStatusText());
   }
 
   @override
@@ -599,6 +437,22 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
   final Function(Card) onCardPlayed;
   final bool enabled;
 
+  static final cardTextStyle = TextPaint(
+    style: const TextStyle(
+      color: Colors.black,
+      fontSize: 16,
+      fontFamily: 'monospace',
+    ),
+  );
+
+  static final cardDescriptionStyle = TextPaint(
+    style: const TextStyle(
+      color: Colors.black,
+      fontSize: 12,
+      fontFamily: 'monospace',
+    ),
+  );
+
   CardVisualComponent(
     this.cardData, {
     required Vector2 position,
@@ -611,7 +465,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Card background
     final backgroundPaint = Paint()
       ..color = enabled ? BasicPalette.white.color : BasicPalette.gray.color
       ..style = PaintingStyle.fill;
@@ -621,7 +474,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     );
     add(cardBackground);
 
-    // Card border
     final borderPaint = Paint()
       ..color = _getCardColor()
       ..style = PaintingStyle.stroke
@@ -632,34 +484,30 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     );
     add(cardBorder);
 
-    // Card Name
     final nameText = TextComponent(
       text: cardData.name,
-      textRenderer: CardCombatGame.cardTextStyle,
+      textRenderer: cardTextStyle,
       position: Vector2(size.x / 2, 20),
       anchor: Anchor.topCenter,
     );
     add(nameText);
 
-    // Card Type
     final typeText = TextComponent(
       text: cardData.type.toString().split('.').last.toUpperCase(),
-      textRenderer: CardCombatGame.cardDescriptionStyle,
+      textRenderer: cardDescriptionStyle,
       position: Vector2(size.x / 2, 45),
       anchor: Anchor.topCenter,
     );
     add(typeText);
 
-    // Card Description
     final descText = TextComponent(
       text: cardData.description,
-      textRenderer: CardCombatGame.cardDescriptionStyle,
+      textRenderer: cardDescriptionStyle,
       position: Vector2(size.x / 2, size.y - 30),
       anchor: Anchor.bottomCenter,
     );
     add(descText);
 
-    // Card Value
     if (cardData.type == CardType.attack || cardData.type == CardType.heal) {
       final valueText = TextComponent(
         text: cardData.value.toString(),
