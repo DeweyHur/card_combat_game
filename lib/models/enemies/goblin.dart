@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../game_card.dart';
-import '../character.dart';
+import 'enemy_base.dart';
 import '../../utils/game_logger.dart';
 
-class Goblin extends Character {
+class Goblin extends EnemyBase {
   Goblin() : super(
     name: 'Goblin',
-    maxHealth: 30,
+    emoji: '👺',
+    maxHp: 30,
+    color: Colors.green,
   );
 
   @override
