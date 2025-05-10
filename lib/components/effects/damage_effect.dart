@@ -8,7 +8,7 @@ import 'package:card_combat_app/components/effects/fading_text_component.dart';
 class DamageEffect extends PositionComponent {
   final int value;
   final bool isPlayer;
-  double _opacity = 1.0;
+  late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
   DamageEffect({
@@ -22,13 +22,23 @@ class DamageEffect extends PositionComponent {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Damage effect created: $value damage');
+    
+    _textComponent = FadingTextComponent(
+      '-$value',
+      Vector2(size.x / 2, size.y / 2),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    add(_textComponent);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    _opacity -= dt * _fadeSpeed;
-    if (_opacity <= 0) {
+    if (_textComponent.isFinished) {
       removeFromParent();
       GameLogger.debug(LogCategory.game, 'Damage effect faded out and removed.');
     }
@@ -38,36 +48,5 @@ class DamageEffect extends PositionComponent {
   void onRemove() {
     GameLogger.debug(LogCategory.game, 'Damage effect faded out and removed.');
     super.onRemove();
-  }
-
-  @override
-  void render(Canvas canvas) {
-    final paint = Paint()
-      ..color = Colors.red.withOpacity(_opacity)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      paint,
-    );
-
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '-$value',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.x - textPainter.width) / 2,
-        (size.y - textPainter.height) / 2,
-      ),
-    );
   }
 } 

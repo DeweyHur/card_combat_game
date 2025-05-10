@@ -7,7 +7,7 @@ import 'package:card_combat_app/components/effects/fading_text_component.dart';
 
 class HealEffect extends PositionComponent {
   final int value;
-  double _opacity = 1.0;
+  late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
   HealEffect({
@@ -20,47 +20,26 @@ class HealEffect extends PositionComponent {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Heal effect created: $value HP');
+    
+    _textComponent = FadingTextComponent(
+      '+$value',
+      Vector2(size.x / 2, size.y / 2),
+      style: const TextStyle(
+        color: Colors.green,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    add(_textComponent);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    _opacity -= dt * _fadeSpeed;
-    if (_opacity <= 0) {
+    if (_textComponent.isFinished) {
       removeFromParent();
       GameLogger.debug(LogCategory.game, 'Heal effect faded out and removed.');
     }
-  }
-
-  @override
-  void render(Canvas canvas) {
-    final paint = Paint()
-      ..color = Colors.green.withOpacity(_opacity)
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      paint,
-    );
-
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '+$value',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.x - textPainter.width) / 2,
-        (size.y - textPainter.height) / 2,
-      ),
-    );
   }
 
   @override
