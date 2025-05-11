@@ -10,12 +10,12 @@ import 'package:card_combat_app/utils/game_logger.dart';
 
 class CombatSceneLayout extends Component {
   final Vector2 size;
-  late CardsPanel cardsPanel;
-  late TextComponent turnText;
-  late TextComponent enemyNextActionText;
-  late TextComponent playerHealthText;
-  late TextComponent enemyHealthText;
-  late TextComponent gameMessageText;
+  final CardsPanel cardsPanel;
+  final TextComponent turnText;
+  final TextComponent enemyNextActionText;
+  final TextComponent playerHealthText;
+  final TextComponent enemyHealthText;
+  final TextComponent gameMessageText;
   final List<CardVisualComponent> cardComponents = [];
 
   late CombatManager combatManager;
@@ -25,14 +25,11 @@ class CombatSceneLayout extends Component {
     required PlayerBase player,
     required EnemyBase enemy,
     required Function(GameCard) onCardPlayed,
-  }) {
-    // Initialize cards panel
+  }) : 
     cardsPanel = CardsPanel(
       position: Vector2(size.x / 2, size.y - 100),
       size: Vector2(size.x, 200),
-    );
-
-    // Initialize turn text
+    ),
     turnText = TextComponent(
       text: "Player's Turn",
       position: Vector2(size.x / 2, 100),
@@ -44,9 +41,7 @@ class CombatSceneLayout extends Component {
         ),
       ),
       anchor: Anchor.topCenter,
-    );
-
-    // Initialize enemy next action text
+    ),
     enemyNextActionText = TextComponent(
       text: 'Next: ',
       position: Vector2(size.x / 2, 140),
@@ -57,9 +52,7 @@ class CombatSceneLayout extends Component {
         ),
       ),
       anchor: Anchor.topCenter,
-    );
-
-    // Initialize health displays
+    ),
     playerHealthText = TextComponent(
       text: '',
       position: Vector2(50, 50),
@@ -69,8 +62,7 @@ class CombatSceneLayout extends Component {
           fontSize: 18,
         ),
       ),
-    );
-
+    ),
     enemyHealthText = TextComponent(
       text: '',
       position: Vector2(size.x - 50, 50),
@@ -81,9 +73,7 @@ class CombatSceneLayout extends Component {
         ),
       ),
       anchor: Anchor.topRight,
-    );
-
-    // Initialize game message text (hidden by default)
+    ),
     gameMessageText = TextComponent(
       text: '',
       position: Vector2(size.x / 2, size.y / 2),
@@ -96,7 +86,6 @@ class CombatSceneLayout extends Component {
       ),
       anchor: Anchor.center,
     );
-  }
 
   void initialize(PlayerBase player, EnemyBase enemy, CombatManager combatManager) {
     this.combatManager = combatManager;
