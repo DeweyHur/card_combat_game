@@ -2,67 +2,81 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'game_card.dart';
 
-class Character {
+abstract class Character {
   final String name;
-  int maxHealth;
+  final int maxHealth;
   int currentHealth;
-  final List<StatusEffect> activeStatusEffects = [];
-  final Map<StatusEffect, int> statusDurations = {};
+  final int attack;
+  final int defense;
+  final String emoji;
+  final Color color;
+  StatusEffect? statusEffect;
+  int? statusDuration;
 
   Character({
     required this.name,
     required this.maxHealth,
+    required this.attack,
+    required this.defense,
+    required this.emoji,
+    required this.color,
   }) : currentHealth = maxHealth;
 
-  void takeDamage(int amount) {
-    currentHealth = (currentHealth - amount).clamp(0, maxHealth);
-    GameLogger.info(LogCategory.game, '$name took $amount damage. Health: $currentHealth/$maxHealth');
+  void takeDamage(int damage) {
+    currentHealth = (currentHealth - damage).clamp(0, maxHealth);
+    GameLogger.info(LogCategory.combat, '$name takes $damage damage. Health: $currentHealth/$maxHealth');
   }
 
   void heal(int amount) {
     currentHealth = (currentHealth + amount).clamp(0, maxHealth);
-    GameLogger.info(LogCategory.game, '$name healed for $amount. Health: $currentHealth/$maxHealth');
+    GameLogger.info(LogCategory.combat, '$name heals for $amount. Health: $currentHealth/$maxHealth');
   }
 
   void addStatusEffect(StatusEffect effect, int duration) {
-    if (!activeStatusEffects.contains(effect)) {
-      activeStatusEffects.add(effect);
-      statusDurations[effect] = duration;
-      GameLogger.info(LogCategory.game, '$name received $effect for $duration turns');
-    } else {
-      statusDurations[effect] = duration;
-      GameLogger.info(LogCategory.game, '$name\'s $effect duration refreshed to $duration turns');
-    }
+    statusEffect = effect;
+    statusDuration = duration;
+    GameLogger.info(LogCategory.combat, '$name is affected by $effect for $duration turns');
   }
 
-  void removeStatusEffect(StatusEffect effect) {
-    activeStatusEffects.remove(effect);
-    statusDurations.remove(effect);
-    GameLogger.info(LogCategory.game, '$effect removed from $name');
-  }
-
-  void removeAllStatusEffects() {
-    activeStatusEffects.clear();
-    statusDurations.clear();
-    GameLogger.info(LogCategory.game, 'All status effects removed from $name');
-  }
-
-  bool hasStatusEffect(StatusEffect effect) {
-    return activeStatusEffects.contains(effect);
+  void removeStatusEffect() {
+    statusEffect = null;
+    statusDuration = null;
+    GameLogger.info(LogCategory.combat, '$name status effects removed');
   }
 
   void updateStatusEffects() {
-    final effectsToRemove = <StatusEffect>[];
-    for (final effect in activeStatusEffects) {
-      statusDurations[effect] = (statusDurations[effect] ?? 0) - 1;
-      if (statusDurations[effect]! <= 0) {
-        effectsToRemove.add(effect);
+    if (statusEffect != null && statusDuration != null) {
+      statusDuration = statusDuration! - 1;
+      if (statusDuration! <= 0) {
+        removeStatusEffect();
       }
     }
-    for (final effect in effectsToRemove) {
-      removeStatusEffect(effect);
+  }
+
+  void onTurnStart() {
+    updateStatusEffects();
+    // Apply status effect damage if applicable
+    if (statusEffect != null) {
+      switch (statusEffect!) {
+        case StatusEffect.poison:
+          takeDamage(2);
+          GameLogger.info(LogCategory.combat, '$name takes 2 poison damage');
+          break;
+        case StatusEffect.burn:
+          takeDamage(3);
+          GameLogger.info(LogCategory.combat, '$name takes 3 burn damage');
+          break;
+        case StatusEffect.freeze:
+          // Freeze effect is handled in the combat logic
+          GameLogger.info(LogCategory.combat, '$name is frozen');
+          break;
+        case StatusEffect.none:
+          break;
+      }
     }
   }
+
+  bool isAlive() => currentHealth > 0;
 
   GameCard getNextAction() {
     // This is a placeholder. Enemy classes will override this method
