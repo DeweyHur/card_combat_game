@@ -1,19 +1,38 @@
+import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'player_base.dart';
+import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:flutter/material.dart';
 
 class Fighter extends PlayerBase {
   Fighter() : super(
     name: 'Fighter',
     maxHealth: 100,
-    deck: [],
+    attack: 15,
+    defense: 8,
+    emoji: '⚔️',
+    color: Colors.orange,
+    deck: [
+      slash,
+      poison,
+      heal,
+      greaterHeal,
+      cleanse,
+    ],
+    description: 'Medium HP, gets +1 energy per turn, attack cards deal +1 damage',
   );
 
   @override
-  void startTurn() {
-    super.startTurn();
-    // Fighter gets +1 energy at the start of their turn
-    energy = maxEnergy + 1;
+  int get maxEnergy => 4;
+
+  @override
+  void onTurnStart() {
+    super.onTurnStart();
+    energy += 1; // Get +1 energy per turn
+  }
+
+  @override
+  int calculateDamage(int baseDamage) {
+    return baseDamage + 1; // Attack cards deal +1 damage
   }
 
   @override

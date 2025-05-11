@@ -20,7 +20,8 @@ class GameCard {
   final CardType type;
   final int value;
   final StatusEffect? statusEffectToApply;
-  final int statusDuration;
+  final int? statusDuration;
+  final Color color;
 
   const GameCard({
     required this.name,
@@ -28,34 +29,10 @@ class GameCard {
     required this.type,
     required this.value,
     this.statusEffectToApply,
-    this.statusDuration = 0,
+    this.statusDuration,
+    this.color = Colors.blue,
   });
 
   @override
-  String toString() {
-    final buffer = StringBuffer();
-    buffer.write('$name: ');
-    
-    switch (type) {
-      case CardType.attack:
-        buffer.write('Deal $value damage');
-        break;
-      case CardType.heal:
-        buffer.write('Heal $value HP');
-        break;
-      case CardType.statusEffect:
-        if (statusEffectToApply != null) {
-          buffer.write('Apply ${statusEffectToApply.toString().split('.').last} for $statusDuration turns');
-          if (value > 0) {
-            buffer.write(' and deal $value damage');
-          }
-        }
-        break;
-      case CardType.cure:
-        buffer.write('Remove all status effects');
-        break;
-    }
-    
-    return buffer.toString();
-  }
+  String toString() => name;
 } 

@@ -1,44 +1,52 @@
+import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/character.dart';
-import 'package:card_combat_app/components/effects/status_effect.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart';
 
 abstract class EnemyBase extends Character {
-  final String emoji;
-  final Color color;
-
   EnemyBase({
-    required String name,
-    required this.emoji,
-    required int maxHp,
-    required this.color,
-  }) : super(name: name, maxHealth: maxHp);
+    required super.name,
+    required super.maxHealth,
+    required super.attack,
+    required super.defense,
+    required super.emoji,
+    required super.color,
+  });
 
-  GameCard getNextAction();
+  void takeAction(PlayerBase target) {
+    final action = selectAction();
+    GameLogger.info(LogCategory.combat, '$name uses ${action.name}');
 
-  @override
-  void executeAction(Character target) {
-    final action = getNextAction();
     switch (action.type) {
       case CardType.attack:
-        target.takeDamage(action.value);
-        break;
-      case CardType.heal:
-        heal(action.value);
+        final damage = calculateDamage(action.value);
+        target.takeDamage(damage);
+        GameLogger.info(LogCategory.combat, '$name deals $damage damage to ${target.name}');
         break;
       case CardType.statusEffect:
-        if (action.statusEffectToApply != null) {
-          target.addStatusEffect(action.statusEffectToApply!, action.statusDuration);
+        final effect = action.statusEffectToApply;
+        final duration = action.statusDuration;
+        if (effect != null && duration != null) {
+          target.addStatusEffect(effect, duration);
+          GameLogger.info(LogCategory.combat, '$name applies $effect to ${target.name} for $duration turns');
         }
         break;
+      case CardType.heal:
+        final healAmount = action.value;
+        heal(healAmount);
+        GameLogger.info(LogCategory.combat, '$name heals for $healAmount');
+        break;
       case CardType.cure:
-        removeAllStatusEffects();
+        removeStatusEffect();
+        GameLogger.info(LogCategory.combat, '$name removes status effects');
         break;
     }
   }
 
-  @override
-  void updateStatusEffects() {
-    super.updateStatusEffects();
+  int calculateDamage(int baseDamage) {
+    return baseDamage;
   }
+
+  GameCard selectAction();
 } 

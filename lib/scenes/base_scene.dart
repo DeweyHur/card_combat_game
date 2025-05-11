@@ -4,7 +4,7 @@ import 'package:flame/events.dart';
 import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'scene_controller.dart';
+import 'scene_manager.dart';
 
 class BaseScene extends Component with TapCallbacks, HasGameRef {
   final Color backgroundColor;
@@ -13,13 +13,10 @@ class BaseScene extends Component with TapCallbacks, HasGameRef {
     required this.backgroundColor,
   });
 
-  late SceneController sceneController;
-
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Scene loaded: ${runtimeType}');
-    sceneController = (game as CardCombatGame).sceneController;
   }
 
   @override
@@ -30,6 +27,10 @@ class BaseScene extends Component with TapCallbacks, HasGameRef {
 
   @override
   void onRemove() {
+    // Remove all components from the scene
+    for (final component in children.toList()) {
+      component.removeFromParent();
+    }
     GameLogger.debug(LogCategory.game, 'Scene removed: ${runtimeType}');
     super.onRemove();
   }
@@ -55,10 +56,6 @@ class BaseScene extends Component with TapCallbacks, HasGameRef {
 
   void initialize(Map<String, dynamic> params) {
     GameLogger.debug(LogCategory.game, 'Scene initialized with params: $params');
-  }
-
-  void go(String sceneName, {Map<String, dynamic>? params}) {
-    sceneController.go(sceneName, params: params);
   }
 
   CardCombatGame get game => super.game as CardCombatGame;

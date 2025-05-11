@@ -12,7 +12,7 @@ class CardsPanel extends PositionComponent {
   // Card layout constants
   static const double cardWidth = 140.0;
   static const double cardHeight = 180.0;
-  static const double cardSpacing = 0.0;
+  static const double cardSpacing = 0.0; // Remove spacing
   static const double cardTopMargin = 60.0;
   static const int maxCards = 3;
 
@@ -80,7 +80,7 @@ class CardsPanel extends PositionComponent {
     );
     add(turnText);
 
-    GameLogger.info(LogCategory.ui, 'CardsPanel loaded with size: ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, 'CardsPanel loaded with size: ${size.x}x${size.y} at position ${position.x},${position.y}');
   }
 
   void updateGameInfo(String info) {
@@ -95,15 +95,24 @@ class CardsPanel extends PositionComponent {
     final totalWidth = (maxCards * cardWidth) + ((maxCards - 1) * cardSpacing);
     final startX = (size.x - totalWidth) / 2;
 
-    return Vector2(
+    final pos = Vector2(
       startX + (index * (cardWidth + cardSpacing)),
       cardTopMargin,
     );
+
+    return pos;
   }
 
   @override
   void render(Canvas canvas) {
+    // Draw background first
+    background.render(canvas);
+    
+    // Let Flame handle child rendering
     super.render(canvas);
+    
+    // Draw border last
+    border.render(canvas);
     
     // Debug rendering
     final debugPaint = Paint()
@@ -128,8 +137,30 @@ class CardsPanel extends PositionComponent {
   }
 
   @override
-  void update(double dt) {
-    super.update(dt);
-    // Remove the frequent logging
+  void onMount() {
+    super.onMount();
+    GameLogger.info(LogCategory.ui, 'CardsPanel mounted at position ${position.x},${position.y} with size ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, '  - Children count: ${children.length}');
+    GameLogger.info(LogCategory.ui, '  - Children types: ${children.map((c) => c.runtimeType).join(', ')}');
+  }
+
+  @override
+  void onRemove() {
+    super.onRemove();
+    GameLogger.info(LogCategory.ui, 'CardsPanel removed');
+  }
+
+  @override
+  void add(Component component) {
+    GameLogger.info(LogCategory.ui, 'Adding component to CardsPanel: ${component.runtimeType}');
+    GameLogger.info(LogCategory.ui, '  - Current children count: ${children.length}');
+    if (component is PositionComponent) {
+      GameLogger.info(LogCategory.ui, '  - Component position: ${component.position.x},${component.position.y}');
+    }
+    
+    super.add(component);
+    
+    GameLogger.info(LogCategory.ui, '  - New children count: ${children.length}');
+    GameLogger.info(LogCategory.ui, '  - Children types: ${children.map((c) => c.runtimeType).join(', ')}');
   }
 } 

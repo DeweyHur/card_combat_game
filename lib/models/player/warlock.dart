@@ -1,20 +1,44 @@
+import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'player_base.dart';
+import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:flutter/material.dart';
 
 class Warlock extends PlayerBase {
   Warlock() : super(
     name: 'Warlock',
     maxHealth: 90,
-    deck: [],
+    attack: 20,
+    defense: 5,
+    emoji: '👹',
+    color: Colors.red,
+    deck: [
+      slash,
+      poison,
+      heal,
+      greaterHeal,
+      cleanse,
+    ],
+    description: 'Medium HP, takes 2 damage per turn but gets +1 energy, attack cards deal +2 damage but cost +1 energy',
   );
 
   @override
-  void startTurn() {
-    super.startTurn();
-    // Warlock takes 2 damage at the start of their turn but gets +1 energy
-    takeDamage(2);
-    energy = maxEnergy + 1;
+  int get maxEnergy => 4;
+
+  @override
+  void onTurnStart() {
+    super.onTurnStart();
+    takeDamage(2); // Take 2 damage at the start of each turn
+    energy += 1; // Get +1 energy
+  }
+
+  @override
+  int calculateDamage(int baseDamage) {
+    return baseDamage + 2; // Attack cards deal +2 damage
+  }
+
+  @override
+  int calculateEnergyCost(int baseCost) {
+    return baseCost + 1; // Attack cards cost +1 energy
   }
 
   @override

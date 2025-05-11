@@ -7,6 +7,7 @@ enum LogCategory {
   audio,
   effect,
   model,
+  combat,
   debug
 }
 
