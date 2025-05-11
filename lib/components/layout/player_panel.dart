@@ -43,6 +43,8 @@ class PlayerPanel extends Component {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    GameLogger.info(LogCategory.ui, 'PlayerPanel mounted at position ${position.x},${position.y} with size ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, 'CardsPanel mounted at position ${cardsPanel.position.x},${cardsPanel.position.y} with size ${cardsPanel.size.x}x${cardsPanel.size.y}');
     add(cardsPanel);
     add(playerHealthText);
   }
