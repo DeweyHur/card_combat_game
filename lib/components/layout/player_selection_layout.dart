@@ -106,7 +106,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
           fontWeight: FontWeight.bold,
         ),
       ),
-      size: Vector2(200, 50),
+      size: Vector2(200, 20),
       position: Vector2(size.x / 2, 0),
       anchor: Anchor.topCenter,
     );
@@ -127,7 +127,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     detailPanel.removeFromParent();
     detailPanel = PlayerDetailPanel(player: player);
     detailPanel.position = Vector2(size.x / 2, 0);
-    detailPanel.size = Vector2(size.x, 200);
+    detailPanel.size = Vector2(size.x, 20);
     detailPanel.anchor = Anchor.topCenter;
     addToVerticalStack(detailPanel);
   }

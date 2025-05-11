@@ -39,7 +39,7 @@ class PlayerDetailPanel extends BasePanel {
 
     statsText = TextComponent(
       text: 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}',
-      position: Vector2(size.x * 0.5, 80),
+      position: Vector2(size.x * 0.5, 0),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,

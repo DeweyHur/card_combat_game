@@ -24,6 +24,7 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
   ];
   final List<PlayerSelectionBox> characterBoxes = [];
   Function(PlayerBase)? onPlayerSelected;
+  bool _isVisible = true;
 
   PlayerSelectionPanel();
 
@@ -40,10 +41,10 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
     GameLogger.info(LogCategory.ui, '  - Panel absolute position: ${absolutePosition.x},${absolutePosition.y}');
 
     // Create character selection boxes with relative sizing
-    final boxWidth = size.x * 0.25;  // 25% of panel width
-    final boxHeight = size.y * 0.25; // 25% of panel height
+    final boxWidth = size.x * 0.2;  // 25% of panel width
+    final boxHeight = size.y * 0.2; // 25% of panel height
     final spacing = size.x * 0.04;   // 4% of panel width
-    final startX = -size.x * 0.35;   // Start from left side
+    final startX = -size.x * 0.25;   // Center horizontally
     final startY = -size.y * 0.3;    // Start from top
 
     // Log box dimensions and layout
@@ -57,7 +58,7 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
       final col = i % 3;
       final box = PlayerSelectionBox(
         position: Vector2(
-          startX + (col * (boxWidth + spacing)),
+          startX + (col * (boxWidth + spacing) + 500),
           startY + (row * (boxHeight + spacing)),
         ),
         size: Vector2(boxWidth, boxHeight),
@@ -76,6 +77,8 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
+    if (!_isVisible) return;
+    
     final position = event.canvasPosition;
     
     // Check for character selection
@@ -83,6 +86,7 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
     if (player != null) {
       selectPlayer(player);
       onPlayerSelected?.call(player);
+      _isVisible = false; // Hide the panel after selection
     }
   }
 
@@ -118,6 +122,8 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
 
   @override
   void render(Canvas canvas) {
+    if (!_isVisible) return; // Don't render if not visible
+    
     super.render(canvas);
 
     // Draw panel background
@@ -151,8 +157,8 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
     );
     titlePaint.render(
       canvas,
-      'Select Your Character',
+      'Select Your Character one',
       Vector2(0, -size.y * 0.4),
     );
   }
-} 
+}
