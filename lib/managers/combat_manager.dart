@@ -62,6 +62,8 @@ class CombatManager {
     }
 
     player.playCard(card);
+    GameLogger.info(LogCategory.game, 'Card effect applied. Ending player turn.');
+    endPlayerTurn();
   }
 
   void endPlayerTurn() {
