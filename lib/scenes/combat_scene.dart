@@ -34,7 +34,6 @@ class CombatScene extends BaseScene {
 
     _layout = CombatSceneLayout(
       size: game.size,
-      player: player,
       combatManager: _combatManager,
       onCardPlayed: _handleCardPlayed,
     );
@@ -42,7 +41,7 @@ class CombatScene extends BaseScene {
     _combatManager.startCombat();
 
     // Initialize layout
-    _layout.initialize(player, enemy, _combatManager);
+    _layout.initialize(enemy, _combatManager);
 
     GameLogger.info(LogCategory.game, 'Combat started: ${player.name} vs ${enemy.name}');
   }

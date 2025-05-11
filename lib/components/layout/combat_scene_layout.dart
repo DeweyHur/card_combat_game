@@ -19,7 +19,6 @@ class CombatSceneLayout extends Component {
 
   CombatSceneLayout({
     required this.size,
-    required PlayerBase player,
     required CombatManager combatManager,
     required Function(GameCard) onCardPlayed,
   }) : 
@@ -65,16 +64,16 @@ class CombatSceneLayout extends Component {
     ),
     playerPanel = PlayerPanel(
       size: size,
-      player: player,
+      player: combatManager.player,
       onCardPlayed: onCardPlayed,
       position: Vector2(0, size.y * 0.75),
     ) {
     this.combatManager = combatManager;
   }
 
-  void initialize(PlayerBase player, EnemyBase enemy, CombatManager combatManager) {
+  void initialize(EnemyBase enemy, CombatManager combatManager) {
     this.combatManager = combatManager;
-    playerPanel.initialize(player, combatManager);
+    playerPanel.initialize(combatManager.player, combatManager);
     updateUI(combatManager);
   }
 
