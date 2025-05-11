@@ -20,36 +20,28 @@ class CombatSceneLayout extends Component {
   CombatSceneLayout({
     required this.size,
     required PlayerBase player,
-    required EnemyBase enemy,
+    required CombatManager combatManager,
     required Function(GameCard) onCardPlayed,
   }) : 
-    playerPanel = PlayerPanel(
-      size: size,
-      player: player,
-      onCardPlayed: onCardPlayed,
-    ),
     turnText = TextComponent(
-      text: "Player's Turn",
+      text: '',
       position: Vector2(size.x * 0.5, size.y * 0.1),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 24,
-          fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.topCenter,
     ),
     enemyNextActionText = TextComponent(
-      text: 'Next: ',
+      text: '',
       position: Vector2(size.x * 0.5, size.y * 0.15),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 20,
+          fontSize: 18,
         ),
       ),
-      anchor: Anchor.topCenter,
     ),
     enemyHealthText = TextComponent(
       text: '',
@@ -60,7 +52,6 @@ class CombatSceneLayout extends Component {
           fontSize: 18,
         ),
       ),
-      anchor: Anchor.topRight,
     ),
     gameMessageText = TextComponent(
       text: '',
@@ -68,12 +59,18 @@ class CombatSceneLayout extends Component {
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
+          fontSize: 24,
         ),
       ),
-      anchor: Anchor.center,
-    );
+    ),
+    playerPanel = PlayerPanel(
+      size: size,
+      player: player,
+      onCardPlayed: onCardPlayed,
+      position: Vector2(0, size.y * 0.75),
+    ) {
+    this.combatManager = combatManager;
+  }
 
   void initialize(PlayerBase player, EnemyBase enemy, CombatManager combatManager) {
     this.combatManager = combatManager;

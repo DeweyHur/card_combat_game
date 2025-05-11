@@ -19,6 +19,7 @@ class PlayerPanel extends Component {
     required this.size,
     required PlayerBase player,
     required Function(GameCard) onCardPlayed,
+    Vector2? position,
   }) : 
     cardsPanel = CardsPanel(
       position: Vector2(0, size.y * 0.75),
@@ -33,7 +34,9 @@ class PlayerPanel extends Component {
           fontSize: 18,
         ),
       ),
-    );
+    ) {
+    this.position = position ?? Vector2.zero();
+  }
 
   void initialize(PlayerBase player, CombatManager combatManager) {
     this.combatManager = combatManager;
