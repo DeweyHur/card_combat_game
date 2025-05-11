@@ -4,6 +4,7 @@ import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:flame/game.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef {
   EnemyBase enemy;
@@ -58,14 +59,19 @@ class EnemyPanel extends BasePanel with HasGameRef {
     add(statsText);
 
     // Add enemy sprite
-    final sprite = await gameRef.loadSprite(enemy.imagePath);
-    enemySprite = SpriteComponent(
-      sprite: sprite,
-      position: Vector2(size.x / 2, size.y / 2),
-      size: Vector2(200, 200),
-      anchor: Anchor.center,
-    );
-    add(enemySprite!);
+    try {
+      final image = await gameRef.images.load(enemy.imagePath);
+      final sprite = Sprite(image);
+      enemySprite = SpriteComponent(
+        sprite: sprite,
+        position: Vector2(size.x / 2, size.y / 2),
+        size: Vector2(200, 200),
+        anchor: Anchor.center,
+      );
+      add(enemySprite!);
+    } catch (e) {
+      GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
+    }
 
     // Load enemy sound
     try {

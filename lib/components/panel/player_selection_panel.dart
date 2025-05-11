@@ -11,8 +11,9 @@ import 'package:card_combat_app/models/player/paladin.dart';
 import 'package:card_combat_app/models/player/warlock.dart';
 import 'package:card_combat_app/models/player/fighter.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
+import 'package:flame/game.dart';
 
-class PlayerSelectionPanel extends BasePanel with TapCallbacks {
+class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
   final List<PlayerBase> availablePlayers = [
     Knight(),
     Mage(),
@@ -31,15 +32,28 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerSelectionPanel loading...');
 
-    // Set size and position
-    size = Vector2(800, 600);
+    // Set size relative to game size
+    size = Vector2(gameRef.size.x * 0.6, gameRef.size.y * 0.6);
+    
+    // Log panel dimensions and position
+    GameLogger.info(LogCategory.ui, 'Panel dimensions:');
+    GameLogger.info(LogCategory.ui, '  - Game size: ${gameRef.size.x}x${gameRef.size.y}');
+    GameLogger.info(LogCategory.ui, '  - Panel size: ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, '  - Panel position: ${position.x},${position.y}');
+    GameLogger.info(LogCategory.ui, '  - Panel absolute position: ${absolutePosition.x},${absolutePosition.y}');
 
-    // Create character selection boxes
-    final boxWidth = size.x * 0.15;
-    final boxHeight = size.y * 0.15;
-    final spacing = size.x * 0.03;
+    // Create character selection boxes with relative sizing
+    final boxWidth = size.x * 0.25;  // 25% of panel width
+    final boxHeight = size.y * 0.25; // 25% of panel height
+    final spacing = size.x * 0.04;   // 4% of panel width
     final startX = (size.x - (boxWidth * 3 + spacing * 2)) / 2;
-    final startY = size.y * 0.3;
+    final startY = size.y * 0.2;     // Start a bit higher
+
+    // Log box dimensions and layout
+    GameLogger.info(LogCategory.ui, 'Box layout:');
+    GameLogger.info(LogCategory.ui, '  - Box size: ${boxWidth}x${boxHeight}');
+    GameLogger.info(LogCategory.ui, '  - Spacing: $spacing');
+    GameLogger.info(LogCategory.ui, '  - Start position: $startX,$startY');
 
     for (int i = 0; i < 6; i++) {
       final row = i ~/ 3;
@@ -54,6 +68,9 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks {
       );
       characterBoxes.add(box);
       add(box);
+      
+      // Log each box's position
+      GameLogger.info(LogCategory.ui, 'Box $i position: ${box.position.x},${box.position.y}');
     }
 
     GameLogger.debug(LogCategory.ui, 'PlayerSelectionPanel loaded successfully');
