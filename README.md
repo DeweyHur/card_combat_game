@@ -21,6 +21,7 @@ A turn-based card combat game built with Flutter and Flame engine.
   - Card drawing and hand management
   - Status effects system
   - Enemy AI with predictable actions
+  - Auto-end player turn after card effect is applied
 
 ## Getting Started
 
