@@ -8,7 +8,7 @@ mixin VerticalStackMixin on PositionComponent {
   void addToVerticalStack(PositionComponent component, double height) {
     component.size = Vector2(size.x, height);
     component.position = Vector2(component.size.x / 2, _currentTopPos);
-    component.anchor = Anchor.center;
+    component.anchor = Anchor.topCenter;
     add(component);
     
     // Update the current top position with fixed spacing
