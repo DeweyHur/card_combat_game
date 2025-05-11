@@ -26,13 +26,14 @@ class EnemyPanel extends BasePanel with HasGameRef {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'EnemyPanel loading...');
 
-    // Set size and position
-    size = Vector2(300, 400);
+    GameLogger.info(LogCategory.ui, 'EnemyPanel dimensions:');
+    GameLogger.info(LogCategory.ui, '  - Size: ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, '  - Position: ${position.x},${position.y}');
+    GameLogger.info(LogCategory.ui, '  - Absolute Position: ${absolutePosition.x},${absolutePosition.y}');
 
     // Add enemy name
     nameText = TextComponent(
       text: enemy.name,
-      position: Vector2(size.x / 2, 20),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -40,23 +41,20 @@ class EnemyPanel extends BasePanel with HasGameRef {
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.topCenter,
     );
-    add(nameText);
+    addToVerticalStack(nameText);
 
     // Add enemy stats
     statsText = TextComponent(
       text: 'HP: ${enemy.maxHealth}\nATK: ${enemy.attack}\nDEF: ${enemy.defense}',
-      position: Vector2(size.x / 2, 60),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
         ),
       ),
-      anchor: Anchor.topCenter,
     );
-    add(statsText);
+    addToVerticalStack(statsText);
 
     // Add enemy sprite
     try {
@@ -64,11 +62,12 @@ class EnemyPanel extends BasePanel with HasGameRef {
       final sprite = Sprite(image);
       enemySprite = SpriteComponent(
         sprite: sprite,
-        position: Vector2(size.x / 2, size.y / 2),
         size: Vector2(200, 200),
-        anchor: Anchor.center,
       );
-      add(enemySprite!);
+      addToVerticalStack(enemySprite!);
+      GameLogger.info(LogCategory.ui, 'Enemy sprite:');
+      GameLogger.info(LogCategory.ui, '  - Size: ${enemySprite!.size.x}x${enemySprite!.size.y}');
+      GameLogger.info(LogCategory.ui, '  - Absolute Position: ${enemySprite!.absolutePosition.x},${enemySprite!.absolutePosition.y}');
     } catch (e) {
       GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
     }
@@ -92,9 +91,8 @@ class EnemyPanel extends BasePanel with HasGameRef {
           fontSize: 16,
         ),
       ),
-      position: Vector2(100, 20),
     );
-    add(actionText!);
+    addToVerticalStack(actionText!);
 
     healthText = TextComponent(
       text: 'Health: ${enemy.currentHealth}/${enemy.maxHealth}',
@@ -104,17 +102,15 @@ class EnemyPanel extends BasePanel with HasGameRef {
           fontSize: 16,
         ),
       ),
-      position: Vector2(100, 50),
     );
-    add(healthText!);
+    addToVerticalStack(healthText!);
 
     // Add separator line
     separatorLine = RectangleComponent(
       size: Vector2(280, 2),
-      position: Vector2(10, 90),
       paint: Paint()..color = Colors.white.withOpacity(0.5),
     );
-    add(separatorLine!);
+    addToVerticalStack(separatorLine!);
 
     _isLoaded = true;
     GameLogger.debug(LogCategory.ui, 'EnemyPanel loaded successfully');
@@ -161,7 +157,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
       ..style = PaintingStyle.fill;
     
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
+      Rect.fromLTWH(position.x, position.y, size.x, size.y),
       paint,
     );
 
@@ -172,7 +168,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
       ..strokeWidth = 2.0;
     
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
+      Rect.fromLTWH(position.x, position.y, size.x, size.y),
       borderPaint,
     );
   }

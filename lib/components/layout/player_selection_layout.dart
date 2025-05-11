@@ -62,9 +62,20 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     size = gameRef.size;
 
     // Add title
+    var topPos = 0.0;
+    GameLogger.info(LogCategory.ui, 'Initial topPos: $topPos');
+
+    // Add enemy panel
+    enemyPanel.position = Vector2(0, topPos);
+    enemyPanel.size = Vector2(size.x, size.y * 0.3);
+    enemyPanel.anchor = Anchor.topLeft;
+    add(enemyPanel);
+    topPos += enemyPanel.size.y;
+    GameLogger.info(LogCategory.ui, 'After enemy panel: topPos = $topPos');
+    
     titleText = TextComponent(
       text: 'Choose Your Character',
-      position: Vector2(size.x / 2, 50),
+      position: Vector2(size.x / 2, topPos),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -75,21 +86,24 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       anchor: Anchor.topCenter,
     );
     add(titleText);
+    topPos += titleText.size.y;
+    GameLogger.info(LogCategory.ui, 'After title: topPos = $topPos');
 
     // Add detail panel
-    detailPanel.position = Vector2(size.x * 0.7, size.y * 0.3);
+    detailPanel.position = Vector2(0, topPos);
+    detailPanel.size = Vector2(size.x, size.y * 0.3);
+    detailPanel.anchor = Anchor.topLeft;
     add(detailPanel);
+    topPos += detailPanel.size.y;
+    GameLogger.info(LogCategory.ui, 'After detail panel: topPos = $topPos');
 
     // Add selection panel
-    selectionPanel.position = Vector2(
-      size.x * 0.5 - selectionPanel.size.x / 2,
-      size.y * 0.5 - selectionPanel.size.y / 2,
-    );
+    selectionPanel.position = Vector2(0, topPos);
+    selectionPanel.size = Vector2(size.x, size.y * 0.2);
+    selectionPanel.anchor = Anchor.topLeft;
     add(selectionPanel);
-
-    // Add enemy panel
-    enemyPanel.position = Vector2(size.x * 0.7, size.y * 0.7);
-    add(enemyPanel);
+    topPos += selectionPanel.size.y;
+    GameLogger.info(LogCategory.ui, 'After selection panel: topPos = $topPos');
 
     // Add battle button
     battleButton = TextComponent(

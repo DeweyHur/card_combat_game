@@ -34,9 +34,10 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
 
     // Set size relative to game size
     size = Vector2(gameRef.size.x * 0.6, gameRef.size.y * 0.6);
+    anchor = Anchor.center;
     
     // Log panel dimensions and position
-    GameLogger.info(LogCategory.ui, 'Panel dimensions:');
+    GameLogger.info(LogCategory.ui, 'PlayerSelectionPanel dimensions:');
     GameLogger.info(LogCategory.ui, '  - Game size: ${gameRef.size.x}x${gameRef.size.y}');
     GameLogger.info(LogCategory.ui, '  - Panel size: ${size.x}x${size.y}');
     GameLogger.info(LogCategory.ui, '  - Panel position: ${position.x},${position.y}');
@@ -46,8 +47,8 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
     final boxWidth = size.x * 0.25;  // 25% of panel width
     final boxHeight = size.y * 0.25; // 25% of panel height
     final spacing = size.x * 0.04;   // 4% of panel width
-    final startX = (size.x - (boxWidth * 3 + spacing * 2)) / 2;
-    final startY = size.y * 0.2;     // Start a bit higher
+    final startX = -size.x * 0.35;   // Start from left side
+    final startY = -size.y * 0.3;    // Start from top
 
     // Log box dimensions and layout
     GameLogger.info(LogCategory.ui, 'Box layout:');
@@ -117,5 +118,45 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
       }
     }
     return null;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Draw panel background
+    final paint = Paint()
+      ..color = Colors.black.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(-size.x / 2, -size.y / 2, size.x, size.y),
+      paint,
+    );
+
+    // Draw border
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(-size.x / 2, -size.y / 2, size.x, size.y),
+      borderPaint,
+    );
+
+    // Draw title
+    final titlePaint = TextPaint(
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    titlePaint.render(
+      canvas,
+      'Select Your Character',
+      Vector2(0, -size.y * 0.4),
+    );
   }
 } 

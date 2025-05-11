@@ -21,8 +21,6 @@ class PlayerDetailPanel extends BasePanel {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
 
-    // Set size and position
-    size = Vector2(300, 400);
 
     // Create text components
     nameText = TextComponent(
