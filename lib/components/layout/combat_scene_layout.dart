@@ -71,7 +71,7 @@ class CombatSceneLayout extends Component {
     this.combatManager = combatManager;
   }
 
-  void initialize(EnemyBase enemy, CombatManager combatManager) {
+  void initialize(CombatManager combatManager) {
     this.combatManager = combatManager;
     playerPanel.initialize(combatManager.player, combatManager);
     updateUI(combatManager);

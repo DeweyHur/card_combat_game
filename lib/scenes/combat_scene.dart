@@ -41,7 +41,7 @@ class CombatScene extends BaseScene {
     _combatManager.startCombat();
 
     // Initialize layout
-    _layout.initialize(enemy, _combatManager);
+    _layout.initialize(_combatManager);
 
     GameLogger.info(LogCategory.game, 'Combat started: ${player.name} vs ${enemy.name}');
   }
