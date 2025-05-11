@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef {
-  final EnemyBase enemy;
+  EnemyBase enemy;
   TextComponent? actionText;
   TextComponent? healthText;
   RectangleComponent? separatorLine;
   SpriteComponent? enemySprite;
   AudioPlayer? audioPlayer;
   bool _isLoaded = false;
+  late final TextComponent nameText;
+  late final TextComponent statsText;
 
   EnemyPanel({
     required this.enemy,
@@ -21,13 +23,47 @@ class EnemyPanel extends BasePanel with HasGameRef {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    GameLogger.debug(LogCategory.ui, 'EnemyPanel loading...');
 
-    // Load enemy sprite
+    // Set size and position
+    size = Vector2(300, 400);
+
+    // Add enemy name
+    nameText = TextComponent(
+      text: enemy.name,
+      position: Vector2(size.x / 2, 20),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      anchor: Anchor.topCenter,
+    );
+    add(nameText);
+
+    // Add enemy stats
+    statsText = TextComponent(
+      text: 'HP: ${enemy.maxHealth}\nATK: ${enemy.attack}\nDEF: ${enemy.defense}',
+      position: Vector2(size.x / 2, 60),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+        ),
+      ),
+      anchor: Anchor.topCenter,
+    );
+    add(statsText);
+
+    // Add enemy sprite
     final sprite = await gameRef.loadSprite(enemy.imagePath);
     enemySprite = SpriteComponent(
       sprite: sprite,
-      size: Vector2(80, 80),
-      position: Vector2(10, 10),
+      position: Vector2(size.x / 2, size.y / 2),
+      size: Vector2(200, 200),
+      anchor: Anchor.center,
     );
     add(enemySprite!);
 
@@ -75,6 +111,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
     add(separatorLine!);
 
     _isLoaded = true;
+    GameLogger.debug(LogCategory.ui, 'EnemyPanel loaded successfully');
   }
 
   void updateAction(String action) {
@@ -94,10 +131,43 @@ class EnemyPanel extends BasePanel with HasGameRef {
     updateHealth();
   }
 
+  void updateEnemy(EnemyBase newEnemy) {
+    enemy = newEnemy;
+    nameText.text = enemy.name;
+    statsText.text = 'HP: ${enemy.maxHealth}\nATK: ${enemy.attack}\nDEF: ${enemy.defense}';
+    // TODO: Update sprite when enemy changes
+  }
+
   @override
   void onRemove() {
     audioPlayer?.stop();
     audioPlayer?.dispose();
     super.onRemove();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Draw panel background
+    final paint = Paint()
+      ..color = enemy.color.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      paint,
+    );
+
+    // Draw border
+    final borderPaint = Paint()
+      ..color = enemy.color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      borderPaint,
+    );
   }
 } 

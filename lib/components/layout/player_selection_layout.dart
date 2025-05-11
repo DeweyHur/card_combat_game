@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/player/knight.dart';
@@ -7,10 +8,18 @@ import 'package:card_combat_app/models/player/sorcerer.dart';
 import 'package:card_combat_app/models/player/paladin.dart';
 import 'package:card_combat_app/models/player/warlock.dart';
 import 'package:card_combat_app/models/player/fighter.dart';
+import 'package:card_combat_app/models/enemies/enemy_base.dart';
+import 'package:card_combat_app/models/enemies/tung_tung_tung_sahur.dart';
+import 'package:card_combat_app/models/enemies/trippi_troppi.dart';
+import 'package:card_combat_app/models/enemies/trullimero_trullicina.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
+import 'package:card_combat_app/components/panel/player_detail_panel.dart';
+import 'package:card_combat_app/components/panel/player_selection_panel.dart';
+import 'package:card_combat_app/components/panel/enemy_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
 
-class PlayerSelectionLayout extends PositionComponent with HasGameRef {
+class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks {
   final List<PlayerBase> availablePlayers = [
     Knight(),
     Mage(),
@@ -21,7 +30,28 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef {
   ];
 
   late final TextComponent titleText;
-  final List<PlayerSelectionBox> characterBoxes = [];
+  late final PlayerDetailPanel detailPanel;
+  late final PlayerSelectionPanel selectionPanel;
+  late final EnemyPanel enemyPanel;
+  late final TextComponent battleButton;
+  PlayerBase selectedPlayer;
+  late EnemyBase selectedEnemy;
+
+  PlayerSelectionLayout() : selectedPlayer = Knight() {
+    detailPanel = PlayerDetailPanel(player: selectedPlayer);
+    selectionPanel = PlayerSelectionPanel()
+      ..onPlayerSelected = _handlePlayerSelected;
+    
+    // Randomly select an enemy
+    final availableEnemies = [
+      TungTungTungSahur(),
+      TrippiTroppi(),
+      TrullimeroTrullicina(),
+    ];
+    final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
+    selectedEnemy = availableEnemies[random];
+    enemyPanel = EnemyPanel(enemy: selectedEnemy);
+  }
 
   @override
   Future<void> onLoad() async {
@@ -46,37 +76,98 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef {
     );
     add(titleText);
 
-    // Create character selection boxes
-    final boxWidth = size.x * 0.2;
-    final boxHeight = size.y * 0.3;
-    final spacing = size.x * 0.05;
-    final startX = (size.x - (boxWidth * 3 + spacing * 2)) / 2;
-    final startY = size.y * 0.3;
+    // Add detail panel
+    detailPanel.position = Vector2(size.x * 0.7, size.y * 0.3);
+    add(detailPanel);
 
-    for (int i = 0; i < 6; i++) {
-      final row = i ~/ 3;
-      final col = i % 3;
-      final box = PlayerSelectionBox(
-        position: Vector2(
-          startX + (col * (boxWidth + spacing)),
-          startY + (row * (boxHeight + spacing)),
+    // Add selection panel
+    selectionPanel.position = Vector2(
+      size.x * 0.5 - selectionPanel.size.x / 2,
+      size.y * 0.5 - selectionPanel.size.y / 2,
+    );
+    add(selectionPanel);
+
+    // Add enemy panel
+    enemyPanel.position = Vector2(size.x * 0.7, size.y * 0.7);
+    add(enemyPanel);
+
+    // Add battle button
+    battleButton = TextComponent(
+      text: 'Battle!',
+      position: Vector2(size.x / 2, size.y * 0.9),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
         ),
-        size: Vector2(boxWidth, boxHeight),
-        index: i,
-      );
-      characterBoxes.add(box);
-      add(box);
-    }
+      ),
+      anchor: Anchor.center,
+    );
+    add(battleButton);
     
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
 
-  PlayerBase? getSelectedPlayer(Vector2 position) {
-    for (var box in characterBoxes) {
-      if (box.containsPoint(position)) {
-        return box.getPlayer();
-      }
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    // Draw battle button background
+    final buttonWidth = 200.0;
+    final buttonHeight = 60.0;
+    final buttonX = size.x / 2 - buttonWidth / 2;
+    final buttonY = size.y * 0.9 - buttonHeight / 2;
+
+    final buttonPaint = Paint()
+      ..color = Colors.red.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(buttonX, buttonY, buttonWidth, buttonHeight),
+      buttonPaint,
+    );
+
+    // Draw button border
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(buttonX, buttonY, buttonWidth, buttonHeight),
+      borderPaint,
+    );
+  }
+
+  void _handlePlayerSelected(PlayerBase player) {
+    selectedPlayer = player;
+    
+    // Update detail panel
+    detailPanel.removeFromParent();
+    detailPanel = PlayerDetailPanel(player: player);
+    detailPanel.position = Vector2(size.x * 0.7, size.y * 0.3);
+    add(detailPanel);
+  }
+
+  bool isBattleButtonTappedAt(Vector2 position) {
+    final buttonWidth = 200.0;
+    final buttonHeight = 60.0;
+    final buttonX = size.x / 2 - buttonWidth / 2;
+    final buttonY = size.y * 0.9 - buttonHeight / 2;
+
+    return position.x >= buttonX &&
+           position.x <= buttonX + buttonWidth &&
+           position.y >= buttonY &&
+           position.y <= buttonY + buttonHeight;
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    if (isBattleButtonTappedAt(event.canvasPosition)) {
+      GameLogger.info(LogCategory.game, 'Starting battle with ${selectedPlayer.name} vs ${selectedEnemy.name}');
+      // TODO: Add callback to scene to start battle with selectedPlayer and selectedEnemy
     }
-    return null;
   }
 } 

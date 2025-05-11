@@ -3,22 +3,26 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/player/knight.dart';
+import 'package:card_combat_app/models/player/mage.dart';
+import 'package:card_combat_app/models/player/sorcerer.dart';
+import 'package:card_combat_app/models/player/paladin.dart';
+import 'package:card_combat_app/models/player/warlock.dart';
+import 'package:card_combat_app/models/player/fighter.dart';
 
 class PlayerSelectionBox extends PositionComponent with TapCallbacks {
-  final PlayerBase character;
-  final Function()? onSelected;
+  final int index;
   bool isSelected = false;
   bool isHovered = false;
 
-  late RectangleComponent box;
+  late RectangleComponent background;
   late TextComponent nameText;
-  late TextComponent statsText;
+  late TextComponent emojiText;
 
   PlayerSelectionBox({
-    required this.character,
     required Vector2 position,
     required Vector2 size,
-    this.onSelected,
+    required this.index,
   }) : super(
     position: position,
     size: size,
@@ -28,46 +32,73 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.game, 'Loading PlayerSelectionBox for ${character.name}');
+    GameLogger.debug(LogCategory.game, 'Loading PlayerSelectionBox for index $index');
 
-    // Create box
-    box = RectangleComponent(
+    // Create background
+    background = RectangleComponent(
       size: size,
-      paint: Paint()..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
-      anchor: Anchor.topLeft,
+      paint: Paint()..color = Colors.black.withOpacity(0.3),
     );
-    add(box);
+    add(background);
 
-    // Add name
+    // Create border
+    final border = RectangleComponent(
+      size: size,
+      paint: Paint()
+        ..color = Colors.white.withOpacity(0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
+    add(border);
+
+    // Create text components
+    final player = getPlayer();
     nameText = TextComponent(
-      text: character.name,
-      position: Vector2(20, size.y / 2 - 20),
+      text: player.name,
+      position: Vector2(size.x * 0.5, size.y * 0.3),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.centerLeft,
+      anchor: Anchor.center,
     );
     add(nameText);
 
-    // Add stats
-    statsText = TextComponent(
-      text: 'HP: ${character.maxHealth} | ATK: ${character.attack} | DEF: ${character.defense}',
-      position: Vector2(20, size.y / 2 + 20),
+    emojiText = TextComponent(
+      text: player.emoji,
+      position: Vector2(size.x * 0.5, size.y * 0.7),
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 16,
+          fontSize: 24,
         ),
       ),
-      anchor: Anchor.centerLeft,
+      anchor: Anchor.center,
     );
-    add(statsText);
+    add(emojiText);
 
-    GameLogger.debug(LogCategory.game, 'PlayerSelectionBox loaded for ${character.name}');
+    GameLogger.debug(LogCategory.game, 'PlayerSelectionBox loaded for index $index');
+  }
+
+  PlayerBase getPlayer() {
+    switch (index) {
+      case 0:
+        return Knight();
+      case 1:
+        return Mage();
+      case 2:
+        return Sorcerer();
+      case 3:
+        return Paladin();
+      case 4:
+        return Warlock();
+      case 5:
+        return Fighter();
+      default:
+        throw Exception('Invalid player index: $index');
+    }
   }
 
   @override
@@ -75,42 +106,47 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     super.onTapDown(event);
     final tapPosition = event.canvasPosition;
     if (containsPoint(tapPosition)) {
-      GameLogger.info(LogCategory.game, 'Player box tapped: ${character.name}');
+      GameLogger.info(LogCategory.game, 'Player box tapped: index $index');
       isSelected = !isSelected;
-      box.paint = Paint()..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.grey.withOpacity(0.3);
-      if (isSelected && onSelected != null) {
-        onSelected!();
-      }
+      updateAppearance();
+    }
+  }
+
+  void updateAppearance() {
+    if (background != null) {
+      background.paint = Paint()
+        ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3);
     }
   }
 
   @override
   void onHoverEnter() {
     isHovered = true;
-    box.paint.color = Colors.grey.withOpacity(0.5);
+    if (!isSelected) {
+      background.paint.color = Colors.grey.withOpacity(0.5);
+    }
   }
 
   @override
   void onHoverExit() {
     isHovered = false;
-    box.paint.color = Colors.grey.withOpacity(0.3);
+    if (!isSelected) {
+      background.paint.color = Colors.black.withOpacity(0.3);
+    }
   }
 
   bool containsPoint(Vector2 point) {
-    final boxPosition = position;
-    final boxSize = size;
-    
-    return point.x >= boxPosition.x &&
-           point.x <= boxPosition.x + boxSize.x &&
-           point.y >= boxPosition.y &&
-           point.y <= boxPosition.y + boxSize.y;
+    return point.x >= position.x &&
+           point.x <= position.x + size.x &&
+           point.y >= position.y &&
+           point.y <= position.y + size.y;
   }
 
   @override
   void render(Canvas canvas) {
     // Draw box background
     final paint = Paint()
-      ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.grey.withOpacity(0.3)
+      ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3)
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
@@ -131,38 +167,29 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     final nameText = TextPaint(
       style: const TextStyle(
         color: Colors.white,
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: FontWeight.bold,
       ),
     );
     nameText.render(
       canvas,
-      character.name,
-      Vector2(20, size.y / 2 - 20),
-      anchor: Anchor.centerLeft,
+      getPlayer().name,
+      Vector2(size.x * 0.5, size.y * 0.3),
+      anchor: Anchor.center,
     );
 
-    // Draw stats
-    final statsText = TextPaint(
+    // Draw emoji
+    final emojiText = TextPaint(
       style: const TextStyle(
-        color: Colors.white70,
-        fontSize: 16,
+        fontSize: 24,
       ),
     );
-
-    final stats = [
-      'HP: ${character.maxHealth}',
-      'Attack: ${character.attack}',
-      'Defense: ${character.defense}',
-    ];
-
-    for (var i = 0; i < stats.length; i++) {
-      statsText.render(
-        canvas,
-        stats[i],
-        Vector2(20, size.y / 2 + 20 + i * 30),
-      );
-    }
+    emojiText.render(
+      canvas,
+      getPlayer().emoji,
+      Vector2(size.x * 0.5, size.y * 0.7),
+      anchor: Anchor.center,
+    );
   }
 
   @override
