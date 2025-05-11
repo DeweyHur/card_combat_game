@@ -8,9 +8,6 @@ import 'package:card_combat_app/utils/game_logger.dart';
 class CombatManager {
   final PlayerBase player;
   final EnemyBase enemy;
-  final List<GameCard> playerHand = [];
-  final List<GameCard> playerDeck = [];
-  final List<GameCard> discardPile = [];
   bool isPlayerTurn = true;
 
   CombatManager({
@@ -21,35 +18,13 @@ class CombatManager {
   void startCombat() {
     GameLogger.info(LogCategory.game, 'Starting combat: ${player.name} vs ${enemy.name}');
     _initializePlayerDeck();
-    _drawInitialHand();
+    player.drawInitialHand();
   }
 
   void _initializePlayerDeck() {
-    playerDeck.addAll(gameCards);
-    playerDeck.shuffle();
-  }
-
-  void _drawInitialHand() {
-    for (int i = 0; i < 3; i++) {
-      _drawCard();
-    }
-  }
-
-  void _drawCard() {
-    if (playerDeck.isEmpty) {
-      if (discardPile.isEmpty) {
-        GameLogger.warning(LogCategory.game, 'No cards left to draw');
-        return;
-      }
-      _shuffleDiscardIntoDeck();
-    }
-    playerHand.add(playerDeck.removeLast());
-  }
-
-  void _shuffleDiscardIntoDeck() {
-    playerDeck.addAll(discardPile);
-    discardPile.clear();
-    playerDeck.shuffle();
+    player.deck.clear();
+    player.deck.addAll(gameCards);
+    player.shuffleDeck();
   }
 
   void playCard(GameCard card) {
@@ -58,7 +33,7 @@ class CombatManager {
       return;
     }
 
-    if (!playerHand.contains(card)) {
+    if (!player.hand.contains(card)) {
       GameLogger.warning(LogCategory.game, 'Card not in hand');
       return;
     }
@@ -86,13 +61,12 @@ class CombatManager {
         break;
     }
 
-    // Move card to discard pile
-    playerHand.remove(card);
-    discardPile.add(card);
+    player.playCard(card);
   }
 
   void endPlayerTurn() {
     isPlayerTurn = false;
+    player.endTurn();
     GameLogger.info(LogCategory.game, 'Player turn ended');
   }
 
@@ -134,14 +108,7 @@ class CombatManager {
 
   void _startNewPlayerTurn() {
     GameLogger.info(LogCategory.game, 'Starting new player turn');
-    player.onTurnStart();
-    _drawCards(1);
-  }
-
-  void _drawCards(int count) {
-    for (int i = 0; i < count; i++) {
-      _drawCard();
-    }
+    player.startTurn();
   }
 
   bool isCombatOver() {
