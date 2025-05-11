@@ -34,9 +34,8 @@ class PlayerPanel extends Component {
           fontSize: 18,
         ),
       ),
-    ) {
-    this.position = position ?? Vector2.zero();
-  }
+    ),
+    super(position: position ?? Vector2.zero());
 
   void initialize(PlayerBase player, CombatManager combatManager) {
     this.combatManager = combatManager;
