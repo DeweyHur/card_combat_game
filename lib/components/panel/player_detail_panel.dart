@@ -5,7 +5,7 @@ import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 
 class PlayerDetailPanel extends BasePanel {
-  final PlayerBase player;
+  late PlayerBase player;
   late TextComponent nameText;
   late TextComponent statsText;
   late TextComponent descriptionText;
@@ -13,8 +13,10 @@ class PlayerDetailPanel extends BasePanel {
   late TextComponent deckText;
 
   PlayerDetailPanel({
-    required this.player,
-  });
+    required PlayerBase initialPlayer,
+  }) {
+    player = initialPlayer;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -90,6 +92,15 @@ class PlayerDetailPanel extends BasePanel {
     add(deckText);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
+  }
+
+  void updatePlayer(PlayerBase newPlayer) {
+    player = newPlayer;
+    nameText.text = '${player.name} ${player.emoji}';
+    statsText.text = 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}';
+    descriptionText.text = player.description;
+    energyText.text = 'Max Energy: ${player.maxEnergy}';
+    deckText.text = 'Starting Deck: ${player.deck.length} cards';
   }
 
   @override

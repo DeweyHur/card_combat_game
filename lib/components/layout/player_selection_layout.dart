@@ -52,7 +52,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
 
     // Initialize selected player and enemy
     selectedPlayer = Knight();
-    detailPanel = PlayerDetailPanel(player: selectedPlayer);
+    detailPanel = PlayerDetailPanel(initialPlayer: selectedPlayer);
     selectionPanel = PlayerSelectionPanel()
       ..onPlayerSelected = _handlePlayerSelected;
     final availableEnemies = [
@@ -65,10 +65,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     enemyPanel = EnemyPanel(enemy: selectedEnemy);
 
     // Add enemy panel
-    enemyPanel.position = Vector2(size.x / 2, 0);
-    enemyPanel.size = Vector2(size.x, 400);
-    enemyPanel.anchor = Anchor.topCenter;
-    addToVerticalStack(enemyPanel);
+    addToVerticalStack(enemyPanel, size.y * 0.2);
 
     // Add title text
     titleText = TextComponent(
@@ -82,35 +79,30 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       ),
       size: Vector2(size.x, 50),
     );
-    addToVerticalStack(titleText);
+    addToVerticalStack(titleText, 50);
 
     // Add detail panel
-    detailPanel.position = Vector2(size.x / 2, 0);
-    detailPanel.size = Vector2(size.x, 200);
-    detailPanel.anchor = Anchor.topCenter;
-    addToVerticalStack(detailPanel);
+    addToVerticalStack(detailPanel, size.y * 0.3);
 
     // Add selection panel
-    selectionPanel.position = Vector2(size.x / 2, 0);
-    selectionPanel.size = Vector2(size.x, 300);
-    selectionPanel.anchor = Anchor.topCenter;
-    addToVerticalStack(selectionPanel);
+    addToVerticalStack(selectionPanel, size.y * 0.4);
 
-    // Add battle button as a TextComponent for now
+    // Add battle button
     battleButton = TextComponent(
-      text: 'Battle!',
+      text: 'Start Battle',
       textRenderer: TextPaint(
         style: const TextStyle(
+          fontSize: 24,
           color: Colors.white,
-          fontSize: 32,
           fontWeight: FontWeight.bold,
         ),
       ),
+
       size: Vector2(200, 20),
       position: Vector2(size.x / 2, 0),
       anchor: Anchor.topCenter,
     );
-    addToVerticalStack(battleButton);
+    addToVerticalStack(battleButton, 60);
 
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
@@ -127,7 +119,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     detailPanel.removeFromParent();
     detailPanel = PlayerDetailPanel(player: player);
     detailPanel.position = Vector2(size.x / 2, 0);
-    detailPanel.size = Vector2(size.x, 20);
+    detailPanel.size = Vector2(size.x, 200);
     detailPanel.anchor = Anchor.topCenter;
     addToVerticalStack(detailPanel);
   }

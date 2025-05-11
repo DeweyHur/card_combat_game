@@ -42,7 +42,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
         ),
       ),
     );
-    addToVerticalStack(nameText);
+    addToVerticalStack(nameText, 30);
 
     // Add enemy stats
     statsText = TextComponent(
@@ -54,7 +54,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
         ),
       ),
     );
-    addToVerticalStack(statsText);
+    addToVerticalStack(statsText, 60);
 
     // Add enemy sprite
     try {
@@ -64,7 +64,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
         sprite: sprite,
         size: Vector2(200, 200),
       );
-      addToVerticalStack(enemySprite!);
+      addToVerticalStack(enemySprite!, 200);
       GameLogger.info(LogCategory.ui, 'Enemy sprite:');
       GameLogger.info(LogCategory.ui, '  - Size: ${enemySprite!.size.x}x${enemySprite!.size.y}');
       GameLogger.info(LogCategory.ui, '  - Absolute Position: ${enemySprite!.absolutePosition.x},${enemySprite!.absolutePosition.y}');
@@ -92,7 +92,7 @@ class EnemyPanel extends BasePanel with HasGameRef {
         ),
       ),
     );
-    addToVerticalStack(actionText!);
+    addToVerticalStack(actionText!, 20);
 
     healthText = TextComponent(
       text: 'Health: ${enemy.currentHealth}/${enemy.maxHealth}',
@@ -103,14 +103,14 @@ class EnemyPanel extends BasePanel with HasGameRef {
         ),
       ),
     );
-    addToVerticalStack(healthText!);
+    addToVerticalStack(healthText!, 20);
 
     // Add separator line
     separatorLine = RectangleComponent(
       size: Vector2(280, 2),
       paint: Paint()..color = Colors.white.withOpacity(0.5),
     );
-    addToVerticalStack(separatorLine!);
+    addToVerticalStack(separatorLine!, 2);
 
     _isLoaded = true;
     GameLogger.debug(LogCategory.ui, 'EnemyPanel loaded successfully');
