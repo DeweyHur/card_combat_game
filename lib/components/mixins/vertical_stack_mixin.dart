@@ -5,8 +5,8 @@ mixin VerticalStackMixin on PositionComponent {
   double _currentTopPos = 0.0;
 
   // Add a component to the vertical stack
-  void addToVerticalStack(PositionComponent component) {
-    component.size.x = size.x;
+  void addToVerticalStack(PositionComponent component, double height) {
+    component.size = Vector2(size.x, height);
     component.position = Vector2(component.size.x / 2, _currentTopPos);
     component.anchor = Anchor.center;
     add(component);
