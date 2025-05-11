@@ -20,7 +20,6 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/panel/player_panel.dart';
-import 'package:card_combat_app/components/ui/battle_button.dart';
 
 class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
   final List<PlayerBase> availablePlayers = [
@@ -32,31 +31,15 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     Fighter(),
   ];
 
-  late final TextComponent titleText;
-  late final PlayerDetailPanel detailPanel;
-  late final PlayerSelectionPanel selectionPanel;
-  late final EnemyPanel enemyPanel;
-  late final TextComponent battleButton;
-  PlayerBase selectedPlayer;
+  late TextComponent titleText;
+  late PlayerDetailPanel detailPanel;
+  late PlayerSelectionPanel selectionPanel;
+  late EnemyPanel enemyPanel;
+  late TextComponent battleButton;
+  late PlayerBase selectedPlayer;
   late EnemyBase selectedEnemy;
 
-  PlayerSelectionLayout() : super(
-    anchor: Anchor.topLeft,
-  ) : selectedPlayer = Knight() {
-    detailPanel = PlayerDetailPanel(player: selectedPlayer);
-    selectionPanel = PlayerSelectionPanel()
-      ..onPlayerSelected = _handlePlayerSelected;
-    
-    // Randomly select an enemy
-    final availableEnemies = [
-      TungTungTungSahur(),
-      TrippiTroppi(),
-      TrullimeroTrullicina(),
-    ];
-    final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
-    selectedEnemy = availableEnemies[random];
-    enemyPanel = EnemyPanel(enemy: selectedEnemy);
-  }
+  PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
 
   @override
   Future<void> onLoad() async {
@@ -67,6 +50,20 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Set size from gameRef
     size = gameRef.size;
 
+    // Initialize selected player and enemy
+    selectedPlayer = Knight();
+    detailPanel = PlayerDetailPanel(player: selectedPlayer);
+    selectionPanel = PlayerSelectionPanel()
+      ..onPlayerSelected = _handlePlayerSelected;
+    final availableEnemies = [
+      TungTungTungSahur(),
+      TrippiTroppi(),
+      TrullimeroTrullicina(),
+    ];
+    final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
+    selectedEnemy = availableEnemies[random];
+    enemyPanel = EnemyPanel(enemy: selectedEnemy);
+
     // Add enemy panel
     enemyPanel.position = Vector2(size.x / 2, 0);
     enemyPanel.size = Vector2(size.x, 400);
@@ -74,7 +71,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     addToVerticalStack(enemyPanel);
 
     // Add title text
-    final titleText = TextComponent(
+    titleText = TextComponent(
       text: 'Select Your Character',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -88,70 +85,50 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     addToVerticalStack(titleText);
 
     // Add detail panel
-    final detailPanel = PlayerPanel(
-      size: Vector2(size.x, 200),
-      position: Vector2(size.x / 2, 0),
-      anchor: Anchor.topCenter,
-    );
+    detailPanel.position = Vector2(size.x / 2, 0);
+    detailPanel.size = Vector2(size.x, 200);
+    detailPanel.anchor = Anchor.topCenter;
     addToVerticalStack(detailPanel);
 
     // Add selection panel
-    final selectionPanel = PlayerSelectionPanel(
-      size: Vector2(size.x, 300),
-      position: Vector2(size.x / 2, 0),
-      anchor: Anchor.topCenter,
-    );
+    selectionPanel.position = Vector2(size.x / 2, 0);
+    selectionPanel.size = Vector2(size.x, 300);
+    selectionPanel.anchor = Anchor.topCenter;
     addToVerticalStack(selectionPanel);
 
-    // Add battle button
-    final battleButton = BattleButton(
+    // Add battle button as a TextComponent for now
+    battleButton = TextComponent(
+      text: 'Battle!',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       size: Vector2(200, 50),
       position: Vector2(size.x / 2, 0),
       anchor: Anchor.topCenter,
     );
     addToVerticalStack(battleButton);
-    
+
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-
-    // Draw battle button background
-    final buttonWidth = 200.0;
-    final buttonHeight = 60.0;
-    final buttonX = size.x / 2 - buttonWidth / 2;
-    final buttonY = size.y * 0.9 - buttonHeight / 2;
-
-    final buttonPaint = Paint()
-      ..color = Colors.red.withOpacity(0.6)
-      ..style = PaintingStyle.fill;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(buttonX, buttonY, buttonWidth, buttonHeight),
-      buttonPaint,
-    );
-
-    // Draw button border
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(buttonX, buttonY, buttonWidth, buttonHeight),
-      borderPaint,
-    );
+    // Optionally, draw a custom background or border for the battle button here
   }
 
   void _handlePlayerSelected(PlayerBase player) {
     selectedPlayer = player;
-    
     // Update detail panel
     detailPanel.removeFromParent();
     detailPanel = PlayerDetailPanel(player: player);
-    detailPanel.position = Vector2(size.x * 0.7, size.y * 0.3);
+    detailPanel.position = Vector2(size.x / 2, 0);
+    detailPanel.size = Vector2(size.x, 200);
+    detailPanel.anchor = Anchor.topCenter;
     addToVerticalStack(detailPanel);
   }
 
@@ -159,8 +136,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     final buttonWidth = 200.0;
     final buttonHeight = 60.0;
     final buttonX = size.x / 2 - buttonWidth / 2;
-    final buttonY = size.y * 0.9 - buttonHeight / 2;
-
+    final buttonY = battleButton.position.y - buttonHeight / 2;
     return position.x >= buttonX &&
            position.x <= buttonX + buttonWidth &&
            position.y >= buttonY &&
@@ -171,7 +147,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
     if (isBattleButtonTappedAt(event.canvasPosition)) {
-      GameLogger.info(LogCategory.game, 'Starting battle with ${selectedPlayer.name} vs ${selectedEnemy.name}');
+      GameLogger.info(LogCategory.game, 'Starting battle with \\${selectedPlayer.name} vs \\${selectedEnemy.name}');
       // TODO: Add callback to scene to start battle with selectedPlayer and selectedEnemy
     }
   }
