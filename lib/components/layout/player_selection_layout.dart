@@ -10,8 +10,7 @@ import 'package:card_combat_app/models/player/fighter.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 
-class PlayerSelectionLayout extends PositionComponent {
-  final Vector2 gameSize;
+class PlayerSelectionLayout extends PositionComponent with HasGameRef {
   final List<PlayerBase> availablePlayers = [
     Knight(),
     Mage(),
@@ -22,23 +21,20 @@ class PlayerSelectionLayout extends PositionComponent {
   ];
 
   late final TextComponent titleText;
-  late final List<PlayerSelectionBox> characterBoxes;
-
-  PlayerSelectionLayout({
-    required this.gameSize,
-  }) : super(
-    size: gameSize,
-    anchor: Anchor.topLeft,
-  );
+  final List<PlayerSelectionBox> characterBoxes = [];
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    GameLogger.debug(LogCategory.ui, 'PlayerSelectionLayout loading...');
+
+    // Set size from gameRef
+    size = gameRef.size;
 
     // Add title
     titleText = TextComponent(
       text: 'Choose Your Character',
-      position: Vector2(gameSize.x / 2, 50),
+      position: Vector2(size.x / 2, 50),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -51,34 +47,34 @@ class PlayerSelectionLayout extends PositionComponent {
     add(titleText);
 
     // Create character selection boxes
-    characterBoxes = [];
+    final boxWidth = size.x * 0.2;
+    final boxHeight = size.y * 0.3;
+    final spacing = size.x * 0.05;
+    final startX = (size.x - (boxWidth * 3 + spacing * 2)) / 2;
+    final startY = size.y * 0.3;
 
-    final boxWidth = gameSize.x * 0.8;
-    final boxHeight = gameSize.y * 0.15;
-    final spacing = gameSize.y * 0.015;
-    final startX = (gameSize.x - boxWidth) / 2;
-    final startY = gameSize.y * 0.2;
-
-    for (var i = 0; i < availablePlayers.length; i++) {
-      final y = startY + (i * (boxHeight + spacing));
-      
+    for (int i = 0; i < 6; i++) {
+      final row = i ~/ 3;
+      final col = i % 3;
       final box = PlayerSelectionBox(
-        character: availablePlayers[i],
-        position: Vector2(startX, y),
+        position: Vector2(
+          startX + (col * (boxWidth + spacing)),
+          startY + (row * (boxHeight + spacing)),
+        ),
         size: Vector2(boxWidth, boxHeight),
+        index: i,
       );
-      
-      add(box);
       characterBoxes.add(box);
+      add(box);
     }
     
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
 
   PlayerBase? getSelectedPlayer(Vector2 position) {
-    for (final box in characterBoxes) {
+    for (var box in characterBoxes) {
       if (box.containsPoint(position)) {
-        return box.character;
+        return box.getPlayer();
       }
     }
     return null;
