@@ -18,8 +18,11 @@ import 'package:card_combat_app/components/panel/player_selection_panel.dart';
 import 'package:card_combat_app/components/panel/enemy_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
+import 'package:card_combat_app/components/panel/player_panel.dart';
+import 'package:card_combat_app/components/ui/battle_button.dart';
 
-class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks {
+class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
   final List<PlayerBase> availablePlayers = [
     Knight(),
     Mage(),
@@ -37,7 +40,9 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   PlayerBase selectedPlayer;
   late EnemyBase selectedEnemy;
 
-  PlayerSelectionLayout() : selectedPlayer = Knight() {
+  PlayerSelectionLayout() : super(
+    anchor: Anchor.topLeft,
+  ) : selectedPlayer = Knight() {
     detailPanel = PlayerDetailPanel(player: selectedPlayer);
     selectionPanel = PlayerSelectionPanel()
       ..onPlayerSelected = _handlePlayerSelected;
@@ -56,69 +61,55 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    resetVerticalStack();
     GameLogger.debug(LogCategory.ui, 'PlayerSelectionLayout loading...');
 
     // Set size from gameRef
     size = gameRef.size;
 
-    // Add title
-    var topPos = 0.0;
-    GameLogger.info(LogCategory.ui, 'Initial topPos: $topPos');
-
     // Add enemy panel
-    enemyPanel.position = Vector2(0, topPos);
-    enemyPanel.size = Vector2(size.x, size.y * 0.3);
-    enemyPanel.anchor = Anchor.topLeft;
-    add(enemyPanel);
-    topPos += enemyPanel.size.y;
-    GameLogger.info(LogCategory.ui, 'After enemy panel: topPos = $topPos');
-    
-    titleText = TextComponent(
-      text: 'Choose Your Character',
-      position: Vector2(size.x / 2, topPos),
+    enemyPanel.position = Vector2(size.x / 2, 0);
+    enemyPanel.size = Vector2(size.x, 400);
+    enemyPanel.anchor = Anchor.topCenter;
+    addToVerticalStack(enemyPanel);
+
+    // Add title text
+    final titleText = TextComponent(
+      text: 'Select Your Character',
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.white,
           fontSize: 32,
+          color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.topCenter,
+      size: Vector2(size.x, 50),
     );
-    add(titleText);
-    topPos += titleText.size.y;
-    GameLogger.info(LogCategory.ui, 'After title: topPos = $topPos');
+    addToVerticalStack(titleText);
 
     // Add detail panel
-    detailPanel.position = Vector2(0, topPos);
-    detailPanel.size = Vector2(size.x, size.y * 0.3);
-    detailPanel.anchor = Anchor.topLeft;
-    add(detailPanel);
-    topPos += detailPanel.size.y;
-    GameLogger.info(LogCategory.ui, 'After detail panel: topPos = $topPos');
+    final detailPanel = PlayerPanel(
+      size: Vector2(size.x, 200),
+      position: Vector2(size.x / 2, 0),
+      anchor: Anchor.topCenter,
+    );
+    addToVerticalStack(detailPanel);
 
     // Add selection panel
-    selectionPanel.position = Vector2(0, topPos);
-    selectionPanel.size = Vector2(size.x, size.y * 0.2);
-    selectionPanel.anchor = Anchor.topLeft;
-    add(selectionPanel);
-    topPos += selectionPanel.size.y;
-    GameLogger.info(LogCategory.ui, 'After selection panel: topPos = $topPos');
+    final selectionPanel = PlayerSelectionPanel(
+      size: Vector2(size.x, 300),
+      position: Vector2(size.x / 2, 0),
+      anchor: Anchor.topCenter,
+    );
+    addToVerticalStack(selectionPanel);
 
     // Add battle button
-    battleButton = TextComponent(
-      text: 'Battle!',
-      position: Vector2(size.x / 2, size.y * 0.9),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
+    final battleButton = BattleButton(
+      size: Vector2(200, 50),
+      position: Vector2(size.x / 2, 0),
+      anchor: Anchor.topCenter,
     );
-    add(battleButton);
+    addToVerticalStack(battleButton);
     
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
@@ -161,7 +152,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     detailPanel.removeFromParent();
     detailPanel = PlayerDetailPanel(player: player);
     detailPanel.position = Vector2(size.x * 0.7, size.y * 0.3);
-    add(detailPanel);
+    addToVerticalStack(detailPanel);
   }
 
   bool isBattleButtonTappedAt(Vector2 position) {

@@ -32,10 +32,6 @@ class PlayerSelectionPanel extends BasePanel with TapCallbacks, HasGameRef {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerSelectionPanel loading...');
 
-    // Set size relative to game size
-    size = Vector2(gameRef.size.x * 0.6, gameRef.size.y * 0.6);
-    anchor = Anchor.center;
-    
     // Log panel dimensions and position
     GameLogger.info(LogCategory.ui, 'PlayerSelectionPanel dimensions:');
     GameLogger.info(LogCategory.ui, '  - Game size: ${gameRef.size.x}x${gameRef.size.y}');
