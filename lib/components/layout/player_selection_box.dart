@@ -8,6 +8,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   final PlayerBase character;
   final Function()? onSelected;
   bool isSelected = false;
+  bool isHovered = false;
 
   late RectangleComponent box;
   late TextComponent nameText;
@@ -18,7 +19,11 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     required Vector2 position,
     required Vector2 size,
     this.onSelected,
-  }) : super(position: position, size: size);
+  }) : super(
+    position: position,
+    size: size,
+    anchor: Anchor.topLeft,
+  );
 
   @override
   Future<void> onLoad() async {
@@ -29,35 +34,36 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     box = RectangleComponent(
       size: size,
       paint: Paint()..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
+      anchor: Anchor.topLeft,
     );
     add(box);
 
     // Add name
     nameText = TextComponent(
       text: character.name,
-      position: Vector2(size.x / 2, 20),
+      position: Vector2(20, size.y / 2 - 20),
       textRenderer: TextPaint(
         style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
           color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.topCenter,
+      anchor: Anchor.centerLeft,
     );
     add(nameText);
 
     // Add stats
     statsText = TextComponent(
-      text: 'HP: ${character.maxHealth}\nAttack: ${character.attack}\nDefense: ${character.defense}',
-      position: Vector2(20, 60),
+      text: 'HP: ${character.maxHealth} | ATK: ${character.attack} | DEF: ${character.defense}',
+      position: Vector2(20, size.y / 2 + 20),
       textRenderer: TextPaint(
         style: const TextStyle(
+          color: Colors.white70,
           fontSize: 16,
-          color: Colors.white,
         ),
       ),
-      anchor: Anchor.topLeft,
+      anchor: Anchor.centerLeft,
     );
     add(statsText);
 
@@ -76,6 +82,18 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
         onSelected!();
       }
     }
+  }
+
+  @override
+  void onHoverEnter() {
+    isHovered = true;
+    box.paint.color = Colors.grey.withOpacity(0.5);
+  }
+
+  @override
+  void onHoverExit() {
+    isHovered = false;
+    box.paint.color = Colors.grey.withOpacity(0.3);
   }
 
   bool containsPoint(Vector2 point) {
@@ -113,21 +131,21 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     final nameText = TextPaint(
       style: const TextStyle(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
     );
     nameText.render(
       canvas,
       character.name,
-      Vector2(size.x / 2, 20),
-      anchor: Anchor.topCenter,
+      Vector2(20, size.y / 2 - 20),
+      anchor: Anchor.centerLeft,
     );
 
     // Draw stats
     final statsText = TextPaint(
       style: const TextStyle(
-        color: Colors.white,
+        color: Colors.white70,
         fontSize: 16,
       ),
     );
@@ -142,7 +160,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
       statsText.render(
         canvas,
         stats[i],
-        Vector2(20, 60 + i * 30),
+        Vector2(20, size.y / 2 + 20 + i * 30),
       );
     }
   }

@@ -10,7 +10,7 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'base_scene.dart';
 
-class CombatScene extends BaseScene {
+class CombatScene extends BaseScene with HasGameRef {
   final PlayerBase player;
   final EnemyBase enemy;
   final CombatManager _combatManager;
@@ -24,7 +24,7 @@ class CombatScene extends BaseScene {
          enemy: enemy,
        ),
        super(
-         backgroundColor: const Color(0xFF1A1A2E),
+         sceneBackgroundColor: const Color(0xFF1A1A2E),
        );
 
   @override
@@ -33,15 +33,12 @@ class CombatScene extends BaseScene {
     GameLogger.debug(LogCategory.game, 'CombatScene loading...');
 
     _layout = CombatSceneLayout(
-      size: game.size,
-      combatManager: _combatManager,
-      onCardPlayed: _handleCardPlayed,
+      gameSize: gameRef.size,
+      player: player,
+      enemy: enemy,
     );
     add(_layout);
     _combatManager.startCombat();
-
-    // Initialize layout
-    _layout.initialize(_combatManager);
 
     GameLogger.info(LogCategory.game, 'Combat started: ${player.name} vs ${enemy.name}');
   }
@@ -50,11 +47,16 @@ class CombatScene extends BaseScene {
     if (!_combatManager.isPlayerTurn) return;
 
     _combatManager.playCard(card);
-    _layout.updateUI(_combatManager);
+    _layout.updateUI();
 
     if (_combatManager.isCombatOver()) {
       handleCombatEnd();
+      return;
     }
+
+    // Log before ending turn automatically
+    GameLogger.info(LogCategory.game, 'Auto-ending player turn after card play.');
+    endTurn();
   }
 
   void handleCombatEnd() {
@@ -69,12 +71,12 @@ class CombatScene extends BaseScene {
     if (!_combatManager.isPlayerTurn) return;
 
     _combatManager.endPlayerTurn();
-    _layout.updateUI(_combatManager);
+    _layout.updateUI();
 
     // Execute enemy turn after a short delay
     Future.delayed(const Duration(seconds: 1), () {
       _combatManager.executeEnemyTurn();
-      _layout.updateUI(_combatManager);
+      _layout.updateUI();
 
       if (_combatManager.isCombatOver()) {
         handleCombatEnd();

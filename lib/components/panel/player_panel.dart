@@ -4,8 +4,9 @@ import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/panel/base_panel.dart';
 
-class PlayerPanel extends PositionComponent {
+class PlayerPanel extends BasePanel {
   final TextComponent playerNameText;
   final TextComponent playerHealthText;
   final TextComponent playerStatsText;
@@ -14,19 +15,15 @@ class PlayerPanel extends PositionComponent {
   final TextComponent playerHandText;
   final TextComponent playerDiscardText;
   final TextComponent playerStatusText;
-  late RectangleComponent background;
-
+  final PlayerBase player;
   late CombatManager combatManager;
 
   PlayerPanel({
-    required Vector2 position,
-    required Vector2 size,
-    required PlayerBase player,
-    required Function(GameCard) onCardPlayed,
+    required this.player,
   }) : 
     playerNameText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.05),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -37,7 +34,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerHealthText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.15),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -47,7 +44,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerStatsText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.25),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -57,7 +54,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerEnergyText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.35),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -67,7 +64,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerDeckText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.45),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -77,7 +74,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerHandText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.55),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -87,7 +84,7 @@ class PlayerPanel extends PositionComponent {
     ),
     playerDiscardText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.65),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -97,26 +94,28 @@ class PlayerPanel extends PositionComponent {
     ),
     playerStatusText = TextComponent(
       text: '',
-      position: Vector2(size.x * 0.05, size.y * 0.75),
+      position: Vector2(0, 0), // Will be set in onLoad
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
         ),
       ),
-    ),
-    super(position: position, size: size);
+    );
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     
-    // Create background
-    background = RectangleComponent(
-      size: size,
-      paint: Paint()..color = Colors.blue.withOpacity(0.3),
-    );
-    add(background);
+    // Set text positions based on panel size
+    playerNameText.position = Vector2(size.x * 0.05, size.y * 0.05);
+    playerHealthText.position = Vector2(size.x * 0.05, size.y * 0.15);
+    playerStatsText.position = Vector2(size.x * 0.05, size.y * 0.25);
+    playerEnergyText.position = Vector2(size.x * 0.05, size.y * 0.35);
+    playerDeckText.position = Vector2(size.x * 0.05, size.y * 0.45);
+    playerHandText.position = Vector2(size.x * 0.05, size.y * 0.55);
+    playerDiscardText.position = Vector2(size.x * 0.05, size.y * 0.65);
+    playerStatusText.position = Vector2(size.x * 0.05, size.y * 0.75);
     
     // Add UI components
     add(playerNameText);
@@ -127,16 +126,17 @@ class PlayerPanel extends PositionComponent {
     add(playerHandText);
     add(playerDiscardText);
     add(playerStatusText);
-    
-    GameLogger.info(LogCategory.ui, 'PlayerPanel mounted at position ${position.x},${position.y} with size ${size.x}x${size.y}');
   }
 
   void initialize(PlayerBase player, CombatManager combatManager) {
     this.combatManager = combatManager;
-    updateUI(combatManager);
+    updateUI();
   }
 
-  void updateUI(CombatManager combatManager) {
+  @override
+  void updateUI() {
+    if (combatManager == null) return;
+    
     final player = combatManager.player;
     
     // Update player info

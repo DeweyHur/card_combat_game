@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
+import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/player/knight.dart';
@@ -12,13 +13,15 @@ import 'package:card_combat_app/models/player/fighter.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
-import 'package:card_combat_app/models/enemies/goblin.dart';
-import 'package:card_combat_app/models/enemies/orc.dart';
+import 'package:card_combat_app/models/enemies/tung_tung_tung_sahur.dart';
+import 'package:card_combat_app/models/enemies/trippi_troppi.dart';
+import 'package:card_combat_app/models/enemies/trullimero_trullicina.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/components/layout/player_selection_layout.dart';
 import 'base_scene.dart';
 
-class PlayerSelectionScene extends BaseScene with TapCallbacks {
+class PlayerSelectionScene extends BaseScene with TapCallbacks, HasGameRef {
   final List<PlayerBase> availablePlayers = [
     Knight(),
     Mage(),
@@ -29,19 +32,17 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
   ];
 
   final List<EnemyBase> availableEnemies = [
-    Goblin(),
-    Orc(),
+    TungTungTungSahur(),
+    TrippiTroppi(),
+    TrullimeroTrullicina(),
   ];
 
+  late final PlayerSelectionLayout _layout;
   PlayerBase? selectedPlayer;
   late EnemyBase selectedEnemy;
 
-  late TextComponent titleText;
-  late List<PlayerSelectionBox> characterBoxes;
-  late TextComponent enemyInfoText;
-
   PlayerSelectionScene() : super(
-    backgroundColor: const Color(0xFF2C3E50),
+    sceneBackgroundColor: const Color(0xFF2C3E50),
   ) {
     // Randomly select an enemy
     final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
@@ -56,60 +57,25 @@ class PlayerSelectionScene extends BaseScene with TapCallbacks {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'PlayerSelectionScene loading...');
 
-    // Add title
-    titleText = TextComponent(
-      text: 'Choose Your Character',
-      position: Vector2(game.size.x / 2, 50),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.topCenter,
+    _layout = PlayerSelectionLayout(
+      gameSize: game.size,
     );
-    add(titleText);
+    add(_layout);
 
-    // Add enemy info
-    enemyInfoText = TextComponent(
-      text: 'Your opponent: ${selectedEnemy.name} ${selectedEnemy.emoji}',
-      position: Vector2(game.size.x / 2, 100),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-        ),
-      ),
-      anchor: Anchor.topCenter,
-    );
-    add(enemyInfoText);
-
-    // Create character selection boxes
-    characterBoxes = [];
-
-    final boxWidth = game.size.x * 0.8;
-    final boxHeight = game.size.y * 0.15;
-    final spacing = game.size.y * 0.015;
-    final startX = (game.size.x - boxWidth) / 2;
-    final startY = game.size.y * 0.2;  // Start lower to make room for enemy info
-
-    for (var i = 0; i < availablePlayers.length; i++) {
-      final y = startY + (i * (boxHeight + spacing));
-      
-      final box = PlayerSelectionBox(
-        character: availablePlayers[i],
-        position: Vector2(startX, y),
-        size: Vector2(boxWidth, boxHeight),
-        onSelected: () => _onCharacterSelected(i),
-      );
-      
-      add(box);
-      characterBoxes.add(box);
-    }
-    
-    GameLogger.debug(LogCategory.game, 'PlayerSelectionScene loaded successfully');
+    GameLogger.info(LogCategory.game, 'Player selection started');
   }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    final selectedPlayer = _layout.getSelectedPlayer(event.canvasPosition);
+    if (selectedPlayer != null) {
+      this.selectedPlayer = selectedPlayer;
+      GameLogger.info(LogCategory.game, 'Player selected: ${selectedPlayer.name}');
+    }
+  }
+
+  PlayerBase? getSelectedPlayer() => selectedPlayer;
 
   void _onCharacterSelected(int index) {
     GameLogger.info(LogCategory.game, 'Character selected: $index');

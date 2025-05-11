@@ -1,17 +1,17 @@
-import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:flame/events.dart';
-import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'scene_manager.dart';
 
-class BaseScene extends Component with TapCallbacks, HasGameRef {
-  final Color backgroundColor;
+class BaseScene extends FlameGame {
+  final Color sceneBackgroundColor;
 
   BaseScene({
-    required this.backgroundColor,
+    required this.sceneBackgroundColor,
   });
+
+  @override
+  Color backgroundColor() => sceneBackgroundColor;
 
   @override
   Future<void> onLoad() async {
@@ -42,12 +42,7 @@ class BaseScene extends Component with TapCallbacks, HasGameRef {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawColor(backgroundColor, BlendMode.src);
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
+    canvas.drawColor(sceneBackgroundColor, BlendMode.src);
   }
 
   void onBack() {
@@ -57,6 +52,4 @@ class BaseScene extends Component with TapCallbacks, HasGameRef {
   void initialize(Map<String, dynamic> params) {
     GameLogger.debug(LogCategory.game, 'Scene initialized with params: $params');
   }
-
-  CardCombatGame get game => super.game as CardCombatGame;
 } 

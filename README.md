@@ -84,7 +84,9 @@ Located in `models/player/`:
 #### Enemy Characters
 Located in `models/enemies/`:
 - `EnemyBase`: Base class for all enemy characters
-- `Goblin`: Basic enemy with simple AI
+- `TungTungTungSahur`: Drum-wielding enemy with rhythm-based attacks
+- `TrippiTroppi`: Acrobatic enemy with high damage potential
+- `TrullimeroTrullicina`: Comedic enemy with unpredictable attacks
 
 ### Card System
 

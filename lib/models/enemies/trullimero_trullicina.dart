@@ -1,17 +1,17 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 
-class Goblin extends EnemyBase {
-  Goblin() : super(
-    name: 'Goblin',
-    maxHealth: 50,
-    attack: 10,
-    defense: 5,
-    emoji: '👺',
-    color: Colors.green,
+class TrullimeroTrullicina extends EnemyBase {
+  TrullimeroTrullicina() : super(
+    name: 'Trullimero Trullicina',
+    maxHealth: 90,
+    attack: 15,
+    defense: 6,
+    emoji: '🎭',
+    color: Colors.purple,
+    imagePath: 'assets/characters/trullimero trullicina/trullimero trullicina.jpg',
+    soundPath: 'assets/characters/trullimero trullicina/trullimero trullicina.mp3',
   );
 
   @override
@@ -20,28 +20,25 @@ class Goblin extends EnemyBase {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     
     if (random < 70) {
-      // Attack
       return GameCard(
-        name: 'Goblin Strike',
-        description: 'A quick attack',
+        name: 'Comedy Strike',
+        description: 'A joke that hurts',
         type: CardType.attack,
-        value: 8,
+        value: 12,
       );
     } else if (random < 90) {
-      // Heal
       return GameCard(
-        name: 'Goblin Healing',
-        description: 'Heals the goblin',
+        name: 'Laughing Heal',
+        description: 'Heals through laughter',
         type: CardType.heal,
-        value: 5,
+        value: 6,
       );
     } else {
-      // Status effect
       return GameCard(
-        name: 'Goblin Poison',
-        description: 'Poisons the target',
+        name: 'Confusing Joke',
+        description: 'Confuses the target with a complex joke',
         type: CardType.statusEffect,
-        value: 3,
+        value: 4,
         statusEffectToApply: StatusEffect.poison,
         statusDuration: 3,
       );
@@ -50,6 +47,6 @@ class Goblin extends EnemyBase {
 
   @override
   int calculateDamage(int baseDamage) {
-    return (baseDamage * 0.8).round(); // Goblin deals 20% less damage
+    return (baseDamage * 1.3).round(); // 30% more damage due to comedic timing
   }
 } 

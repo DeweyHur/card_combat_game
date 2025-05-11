@@ -5,6 +5,9 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart';
 
 abstract class EnemyBase extends Character {
+  final String imagePath;
+  final String soundPath;
+
   EnemyBase({
     required super.name,
     required super.maxHealth,
@@ -12,6 +15,8 @@ abstract class EnemyBase extends Character {
     required super.defense,
     required super.emoji,
     required super.color,
+    required this.imagePath,
+    required this.soundPath,
   });
 
   void takeAction(PlayerBase target) {
