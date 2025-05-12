@@ -31,11 +31,7 @@ class CombatScene extends BaseScene with HasGameRef {
       return;
     }
     _combatManager = CombatManager(player: player, enemy: enemy);
-    _layout = CombatSceneLayout(
-      gameSize: gameRef.size,
-      player: player,
-      enemy: enemy,
-    );
+    _layout = CombatSceneLayout();
     add(_layout);
     _combatManager.startCombat();
     GameLogger.info(LogCategory.game, 'Combat started: [32m${player.name}[0m vs [31m${enemy.name}[0m');
