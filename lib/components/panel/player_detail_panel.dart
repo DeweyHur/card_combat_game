@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:card_combat_app/models/player/knight.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
@@ -12,10 +13,8 @@ class PlayerDetailPanel extends BasePanel {
   late TextComponent energyText;
   late TextComponent deckText;
 
-  PlayerDetailPanel({
-    required PlayerBase initialPlayer,
-  }) {
-    player = initialPlayer;
+  PlayerDetailPanel() {
+    player = Knight();
   }
 
   @override
