@@ -179,8 +179,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
       );
       add(valueText);
     }
-
-    GameLogger.info(LogCategory.ui, 'CardVisualComponent loaded: ${cardData.name} at position ${position.x},${position.y}');
   }
 
   @override

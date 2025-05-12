@@ -13,6 +13,7 @@ class CombatScene extends BaseScene with HasGameRef {
   late final CombatSceneLayout _layout;
   late final dynamic player;
   late final dynamic enemy;
+  bool _combatEnded = false;
 
   CombatScene() : super(
     sceneBackgroundColor: const Color(0xFF1A1A2E),
@@ -48,6 +49,8 @@ class CombatScene extends BaseScene with HasGameRef {
   }
 
   void handleCombatEnd() {
+    if (_combatEnded) return;
+    _combatEnded = true;
     final result = CombatManager().getCombatResult();
     if (result != null) {
       GameLogger.info(LogCategory.game, 'Combat ended: $result');
@@ -75,7 +78,8 @@ class CombatScene extends BaseScene with HasGameRef {
   @override
   void update(double dt) {
     super.update(dt);
-    if (CombatManager().isCombatOver()) {
+    if (!_combatEnded && CombatManager().isCombatOver()) {
+      _combatEnded = true;
       final result = CombatManager().getCombatResult();
       GameLogger.info(LogCategory.combat, 'Combat ended: $result');
       // TODO: Handle combat end

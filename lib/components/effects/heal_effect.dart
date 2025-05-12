@@ -28,7 +28,7 @@ class HealEffect extends PositionComponent {
       Vector2(size.x / 2, size.y / 2),
       style: const TextStyle(
         color: Colors.green,
-        fontSize: 24,
+        fontSize: 48,
         fontWeight: FontWeight.bold,
       ),
     );

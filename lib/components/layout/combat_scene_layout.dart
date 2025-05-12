@@ -148,5 +148,6 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
   void registerWatchers(CombatManager manager) {
     manager.addWatcher(enemyPanel);
+    manager.addWatcher(panels[1] as PlayerPanel);
   }
 } 
