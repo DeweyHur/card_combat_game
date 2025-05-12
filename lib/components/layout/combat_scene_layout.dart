@@ -23,11 +23,13 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
 
   @override
   Future<void> onLoad() async {
+    GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad started');
     await super.onLoad();
     final player = DataController.instance.get('selectedPlayer');
     final enemy = DataController.instance.get('selectedEnemy');
     if (player == null || enemy == null) {
       GameLogger.error(LogCategory.game, 'CombatSceneLayout: player or enemy not set in DataController');
+      GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad aborted due to missing player/enemy');
       return;
     }
     size = gameRef.size;
@@ -63,6 +65,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
       EnemyPanel(enemy: enemy),
     ];
 
+    // Initialize PlayerPanel with combatManager
+    (panels[1] as PlayerPanel).initialize(player, combatManager);
+
     // Add panels to the scene
     for (var panel in panels) {
       add(panel);
@@ -78,11 +83,16 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
     add(gameMessageText);
 
     _isInitialized = true;
+    GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad completed, calling updateUI');
     updateUI();
   }
 
   void updateUI() {
-    if (!_isInitialized) return;
+    GameLogger.info(LogCategory.game, 'CombatSceneLayout: updateUI called');
+    if (!_isInitialized) {
+      GameLogger.info(LogCategory.game, 'CombatSceneLayout: updateUI early return, not initialized');
+      return;
+    }
 
     final enemy = DataController.instance.get('selectedEnemy');
     if (enemy != null) {
@@ -100,6 +110,8 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
   }
 
   void showGameMessage(String message) {
+    GameLogger.info(LogCategory.game, 'CombatSceneLayout: showGameMessage: '
+        '[33m$message[0m');
     gameMessageText.text = message;
     if (!children.contains(gameMessageText)) {
       add(gameMessageText);
@@ -107,6 +119,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
   }
 
   void hideGameMessage() {
+    GameLogger.info(LogCategory.game, 'CombatSceneLayout: hideGameMessage called');
     if (children.contains(gameMessageText)) {
       gameMessageText.removeFromParent();
     }
