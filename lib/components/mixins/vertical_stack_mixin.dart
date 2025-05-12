@@ -17,6 +17,7 @@ mixin VerticalStackMixin on PositionComponent {
     GameLogger.info(LogCategory.ui, 'Added component to vertical stack:');
     GameLogger.info(LogCategory.ui, '  - Component: ${component.runtimeType}');
     GameLogger.info(LogCategory.ui, '  - Position: ${component.position.x},${component.position.y}');
+    GameLogger.info(LogCategory.ui, '  - Size: ${component.size.x},${component.size.y}');
     GameLogger.info(LogCategory.ui, '  - Current top position: $_currentTopPos');
   }
 
