@@ -5,6 +5,7 @@ import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 
 class PlayerDetailPanel extends BasePanel {
   late PlayerBase player;
@@ -13,6 +14,7 @@ class PlayerDetailPanel extends BasePanel {
   late TextComponent descriptionText;
   late TextComponent energyText;
   late TextComponent deckText;
+  late NameEmojiComponent nameEmojiComponent;
 
   PlayerDetailPanel() {
     player = Knight();
@@ -23,20 +25,9 @@ class PlayerDetailPanel extends BasePanel {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
 
-    // Create text components
-    nameText = TextComponent(
-      text: '${player.name} ${player.emoji}',
-      position: Vector2(size.x * 0.5, 30),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.topCenter,
-    );
-    add(nameText);
+    // Add name + emoji at the top
+    nameEmojiComponent = NameEmojiComponent(player: player);
+    add(nameEmojiComponent);
 
     statsText = TextComponent(
       text: 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}',
@@ -112,7 +103,7 @@ class PlayerDetailPanel extends BasePanel {
 
   void updatePlayer(PlayerBase newPlayer) {
     player = newPlayer;
-    nameText.text = '${player.name} ${player.emoji}';
+    nameEmojiComponent.updatePlayer(newPlayer);
     statsText.text = 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}';
     descriptionText.text = player.description;
     energyText.text = 'Max Energy: ${player.maxEnergy}';

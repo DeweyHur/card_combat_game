@@ -5,8 +5,9 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:flame/game.dart';
+import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 
-class EnemyPanel extends BasePanel with HasGameRef {
+class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin {
   EnemyBase enemy;
   TextComponent? actionText;
   TextComponent? healthText;
@@ -144,26 +145,11 @@ class EnemyPanel extends BasePanel with HasGameRef {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-
-    // Draw panel background
-    final paint = Paint()
-      ..color = enemy.color.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(position.x, position.y, size.x, size.y),
-      paint,
-    );
-
-    // Draw border
-    final borderPaint = Paint()
-      ..color = enemy.color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(position.x, position.y, size.x, size.y),
-      borderPaint,
+    drawAreaFiller(
+      canvas,
+      enemy.color.withOpacity(0.3),
+      borderColor: enemy.color,
+      borderWidth: 2.0,
     );
   }
 } 

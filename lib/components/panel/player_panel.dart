@@ -6,8 +6,10 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/panel/player_stats_row.dart';
+import 'package:card_combat_app/components/layout/name_emoji_component.dart';
+import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 
-class PlayerPanel extends BasePanel {
+class PlayerPanel extends BasePanel with AreaFillerMixin {
   final TextComponent playerDeckText;
   final TextComponent playerHandText;
   final TextComponent playerDiscardText;
@@ -17,6 +19,7 @@ class PlayerPanel extends BasePanel {
   TextComponent? actionText;
   RectangleComponent? separatorLine;
   late PlayerStatsRow statsRow;
+  late NameEmojiComponent nameEmojiComponent;
   bool _isLoaded = false;
 
   PlayerPanel({
@@ -71,7 +74,11 @@ class PlayerPanel extends BasePanel {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add stats row as the first row in the vertical stack
+    // Add name + emoji at the top
+    nameEmojiComponent = NameEmojiComponent(player: player);
+    addToVerticalStack(nameEmojiComponent, 40);
+
+    // Add stats row as the next row in the vertical stack
     statsRow = PlayerStatsRow(player: player);
     addToVerticalStack(statsRow, 40);
 
@@ -106,28 +113,28 @@ class PlayerPanel extends BasePanel {
 
   void initialize(PlayerBase player, CombatManager combatManager) {
     this.combatManager = combatManager;
-    updateUI();
+    if (_isLoaded) {
+      updateUI();
+    }
   }
 
   @override
   void updateUI() {
-    if (combatManager == null) return;
+    if (!_isLoaded || combatManager == null) return;
     final player = combatManager.player;
-    if (_isLoaded) {
-      statsRow.updateUI();
-      // Update other info
-      playerDeckText.text = 'Deck: \u001b[36m${player.deck.length}\u001b[0m cards';
-      playerHandText.text = 'Hand: \u001b[36m${player.hand.length}\u001b[0m cards';
-      playerDiscardText.text = 'Discard: \u001b[36m${player.discardPile.length}\u001b[0m cards';
-      playerStatusText.text = combatManager.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
-      if (actionText != null) {
-        // actionText is handled below
-      }
+    statsRow.updateUI();
+    // Update other info
+    playerDeckText.text = 'Deck: \u001b[36m${player.deck.length}\u001b[0m cards';
+    playerHandText.text = 'Hand: \u001b[36m${player.hand.length}\u001b[0m cards';
+    playerDiscardText.text = 'Discard: \u001b[36m${player.discardPile.length}\u001b[0m cards';
+    playerStatusText.text = combatManager.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
+    if (actionText != null) {
+      // actionText is handled below
     }
   }
 
   void updateAction(String action) {
-    if (_isLoaded && actionText != null) {
+    if (actionText != null) {
       actionText!.text = 'Next Action: $action';
     }
   }
@@ -135,26 +142,11 @@ class PlayerPanel extends BasePanel {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-
-    // Draw panel background
-    final paint = Paint()
-      ..color = player.color.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(-size.x / 2, -size.y / 2, size.x, size.y),
-      paint,
-    );
-
-    // Draw border
-    final borderPaint = Paint()
-      ..color = player.color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-    
-    canvas.drawRect(
-      Rect.fromLTWH(-size.x / 2, -size.y / 2, size.x, size.y),
-      borderPaint,
+    drawAreaFiller(
+      canvas,
+      player.color.withOpacity(0.3),
+      borderColor: player.color,
+      borderWidth: 2.0,
     );
   }
 } 
