@@ -10,8 +10,8 @@ class TungTungTungSahur extends EnemyBase {
     defense: 8,
     emoji: '🥁',
     color: Colors.brown,
-    imagePath: 'characters/tung tung tung sahur/tung tung tung sahur.jpg',
-    soundPath: 'characters/tung tung tung sahur/tung tung tung sahur.mp3',
+    imagePath: 'characters/tung/tung.jpg',
+    soundPath: 'characters/tung/tung.mp3',
   );
 
   @override
