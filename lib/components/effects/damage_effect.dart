@@ -9,6 +9,8 @@ class DamageEffect extends PositionComponent {
   final int value;
   final bool isPlayer;
   final VoidCallback? onComplete;
+  final Color color;
+  final String emoji;
   late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
@@ -18,6 +20,8 @@ class DamageEffect extends PositionComponent {
     required this.value,
     this.isPlayer = false,
     this.onComplete,
+    this.color = Colors.red,
+    this.emoji = '💥',
   }) : super(position: position, size: size);
 
   @override
@@ -26,11 +30,11 @@ class DamageEffect extends PositionComponent {
     GameLogger.debug(LogCategory.game, 'Damage effect created: $value damage');
     
     _textComponent = FadingTextComponent(
-      '-$value',
+      '$emoji -$value',
       Vector2(size.x / 2, size.y / 2),
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 24,
+      style: TextStyle(
+        color: color,
+        fontSize: 48,
         fontWeight: FontWeight.bold,
       ),
     );

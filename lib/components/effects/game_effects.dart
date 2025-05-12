@@ -23,21 +23,23 @@ class GameEffects {
     }
   }
 
-  static Component createCardEffect(CardType type, Vector2 position, Vector2 size, {VoidCallback? onComplete}) {
+  static Component createCardEffect(CardType type, Vector2 position, Vector2 size, {VoidCallback? onComplete, Color? color, String? emoji, int value = 5}) {
     switch (type) {
       case CardType.attack:
         return DamageEffect(
           position: position,
           size: size,
-          value: 5, // Default damage value
+          value: value,
           isPlayer: false,
           onComplete: onComplete,
+          color: color ?? Colors.red,
+          emoji: emoji ?? '💥',
         );
       case CardType.heal:
         return HealEffect(
           position: position,
           size: size,
-          value: 5, // Default heal value
+          value: value,
           onComplete: onComplete,
         );
       case CardType.statusEffect:
@@ -51,19 +53,21 @@ class GameEffects {
         return HealEffect(
           position: position,
           size: size,
-          value: 5, // Default heal value
+          value: value,
           onComplete: onComplete,
         );
     }
   }
 
-  static Component createDamageEffect(Vector2 position, int value, bool isPlayer, {VoidCallback? onComplete}) {
+  static Component createDamageEffect(Vector2 position, int value, bool isPlayer, {VoidCallback? onComplete, Color? color, String? emoji}) {
     return DamageEffect(
       position: position,
       size: Vector2(100, 100),
       value: value,
       isPlayer: isPlayer,
       onComplete: onComplete,
+      color: color ?? Colors.red,
+      emoji: emoji ?? '💥',
     );
   }
 

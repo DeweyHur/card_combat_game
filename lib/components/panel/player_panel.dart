@@ -8,8 +8,9 @@ import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/panel/player_stats_row.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
+import 'package:card_combat_app/components/effects/game_effects.dart';
 
-class PlayerPanel extends BasePanel with AreaFillerMixin {
+class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatcher {
   final TextComponent playerDeckText;
   final TextComponent playerHandText;
   final TextComponent playerDiscardText;
@@ -148,5 +149,38 @@ class PlayerPanel extends BasePanel with AreaFillerMixin {
       borderColor: player.color,
       borderWidth: 2.0,
     );
+  }
+
+  @override
+  void onCombatEvent(CombatEvent event) {
+    if (event.target == player) {
+      if (event.type == CombatEventType.damage) {
+        final effect = GameEffects.createCardEffect(
+          event.card?.type ?? CardType.attack,
+          Vector2(size.x / 2 - 50, size.y / 2 - 50),
+          Vector2(100, 100),
+          onComplete: () {
+            updateUI();
+          },
+          color: Colors.red,
+          emoji: '💔',
+          value: event.value,
+        )..priority = 100;
+        add(effect);
+      } else if (event.type == CombatEventType.heal || event.type == CombatEventType.status) {
+        final effect = GameEffects.createCardEffect(
+          event.card?.type ?? CardType.heal,
+          Vector2(size.x / 2 - 50, size.y / 2 - 50),
+          Vector2(100, 100),
+          onComplete: () {
+            updateUI();
+          },
+          value: event.value,
+        )..priority = 100;
+        add(effect);
+      } else if (event.type == CombatEventType.cure) {
+        updateUI();
+      }
+    }
   }
 } 
