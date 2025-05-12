@@ -2,6 +2,10 @@
 
 A turn-based card combat game built with Flutter and Flame engine.
 
+## Repository
+
+[https://github.com/yourusername/card_combat_app](https://github.com/yourusername/card_combat_app)
+
 ## Features
 
 - Four unique character classes with different playstyles:
@@ -134,3 +138,47 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with [Flutter](https://flutter.dev/)
 - Game engine powered by [Flame](https://flame-engine.org/)
 - Inspired by popular card games and roguelikes
+
+## Project Tree Structure
+
+```
+card_combat_app/
+├── android/
+├── assets/
+│   ├── audio/
+│   ├── characters/
+│   ├── images/
+│   └── sounds/
+├── ios/
+├── lib/
+│   ├── components/
+│   ├── controllers/
+│   ├── game/
+│   ├── managers/
+│   ├── models/
+│   ├── scenes/
+│   └── utils/
+├── linux/
+├── macos/
+├── test/
+├── web/
+├── windows/
+├── pubspec.yaml
+├── README.md
+└── ...
+```
+
+## Assets & Gameplay Details
+
+- Character sprites and images are located in `assets/images/characters/` and `assets/characters/`.
+- Sound effects and music are in `assets/audio/` and `assets/sounds/`.
+- Each character has a dedicated folder for their assets.
+- The game features unique enemies and player characters, each with their own abilities and art.
+- Gameplay is turn-based, with a focus on card strategy and status effects.
+
+## Credits
+
+- Game Design & Programming: [Your Name]
+- Art & Assets: [Artist Name or Source]
+- Sound & Music: [Composer Name or Source]
+- Special Thanks: [Any additional contributors or inspirations]
