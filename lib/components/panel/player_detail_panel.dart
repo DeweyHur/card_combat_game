@@ -4,6 +4,7 @@ import 'package:card_combat_app/models/player/knight.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class PlayerDetailPanel extends BasePanel {
   late PlayerBase player;
@@ -21,7 +22,6 @@ class PlayerDetailPanel extends BasePanel {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
-
 
     // Create text components
     nameText = TextComponent(
@@ -91,6 +91,23 @@ class PlayerDetailPanel extends BasePanel {
     add(deckText);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    // Set initial player from DataController if available
+    final selectedPlayer = DataController.instance.get<PlayerBase>('selectedPlayer');
+    if (selectedPlayer != null) {
+      player = selectedPlayer;
+    }
+
+    // Watch for changes to selectedPlayer
+    DataController.instance.watch('selectedPlayer', (value) {
+      if (value is PlayerBase) {
+        updatePlayer(value);
+      }
+    });
   }
 
   void updatePlayer(PlayerBase newPlayer) {

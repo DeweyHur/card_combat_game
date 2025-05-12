@@ -11,6 +11,8 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/layout/player_selection_layout.dart';
 import 'base_scene.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/models/player/knight.dart';
 
 class PlayerSelectionScene extends BaseScene {
   final List<EnemyBase> availableEnemies = [
@@ -25,6 +27,8 @@ class PlayerSelectionScene extends BaseScene {
   PlayerSelectionScene() : super(
     sceneBackgroundColor: const Color(0xFF2C3E50),
   ) {
+    // Set default selected player to Knight
+    DataController.instance.set('selectedPlayer', Knight());
     // Randomly select an enemy
     final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
     selectedEnemy = availableEnemies[random];

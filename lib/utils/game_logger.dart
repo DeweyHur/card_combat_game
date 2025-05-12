@@ -4,6 +4,7 @@ enum LogCategory {
   system,
   game,
   ui,
+  data,
   audio,
   effect,
   model,

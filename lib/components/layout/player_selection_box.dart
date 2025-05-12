@@ -9,6 +9,7 @@ import 'package:card_combat_app/models/player/sorcerer.dart';
 import 'package:card_combat_app/models/player/paladin.dart';
 import 'package:card_combat_app/models/player/warlock.dart';
 import 'package:card_combat_app/models/player/fighter.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   final int index;
@@ -29,10 +30,30 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     anchor: Anchor.topLeft,
   );
 
+  bool get isSelectedPlayer {
+    final selectedPlayer = DataController.instance.get<PlayerBase>('selectedPlayer');
+    return selectedPlayer?.runtimeType == getPlayer().runtimeType;
+  }
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Loading PlayerSelectionBox for index $index');
+
+    // Set initial selection state from DataController
+    isSelected = isSelectedPlayer;
+    if (isSelected) {
+      DataController.instance.set<PlayerBase>('selectedPlayer', getPlayer());
+    }
+
+    // Watch for changes to selectedPlayer
+    DataController.instance.watch('selectedPlayer', (value) {
+      final wasSelected = isSelected;
+      isSelected = isSelectedPlayer;
+      if (wasSelected != isSelected) {
+        updateAppearance();
+      }
+    });
 
     // Create background
     background = RectangleComponent(
@@ -104,12 +125,8 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    final tapPosition = event.canvasPosition;
-    if (containsPoint(tapPosition)) {
-      GameLogger.info(LogCategory.game, 'Player box tapped: index $index');
-      isSelected = !isSelected;
-      updateAppearance();
-    }
+    // Set selectedPlayer in DataController
+    DataController.instance.set<PlayerBase>('selectedPlayer', getPlayer());
   }
 
   void updateAppearance() {
