@@ -47,4 +47,4 @@ app.*.map.json
 /android/app/release
 
 # Audio files that should be added manually
-/assets/sounds/
+# /assets/sounds/
