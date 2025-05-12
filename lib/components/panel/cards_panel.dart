@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/components/effects/game_effects.dart';
+import 'package:card_combat_app/components/layout/card_visual_component.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
@@ -10,12 +12,7 @@ class CardsPanel extends BasePanel {
   final TextComponent turnText;
   final PlayerBase player;
 
-  // Card layout constants
-  static const double cardWidth = 140.0;
-  static const double cardHeight = 180.0;
-  static const double cardSpacing = 20.0; // Add some spacing between cards
-  static const double cardTopMargin = 20.0;
-  static const int maxCards = 5; // Allow more cards to be displayed
+  List<CardVisualComponent> cardVisuals = [];
 
   CardsPanel({
     required this.player,
@@ -61,6 +58,38 @@ class CardsPanel extends BasePanel {
     addToVerticalStack(cardAreaText, 40);
     addToVerticalStack(gameInfoText, 32);
     addToVerticalStack(turnText, 32);
+
+    // Show the player's hand as cards
+    _showHand();
+  }
+
+  void _showHand() {
+    // Remove old card visuals
+    for (final cardVisual in cardVisuals) {
+      cardVisual.removeFromParent();
+    }
+    cardVisuals.clear();
+
+    // Add new card visuals for each card in hand
+    for (int i = 0; i < player.hand.length; i++) {
+      final card = player.hand[i];
+      final cardVisual = GameEffects.createCardVisual(
+        card,
+        i,
+        Vector2(0, 0), // CardsPanel's own position/size
+        size,
+        (playedCard) => playCard(playedCard),
+        true, // isPlayerTurn (stubbed for now)
+      ) as CardVisualComponent;
+      add(cardVisual);
+      cardVisuals.add(cardVisual);
+    }
+  }
+
+  void playCard(card) {
+    // TODO: Implement play card logic, e.g., call CombatManager.playCard(card)
+    // For now, just log
+    GameLogger.info(LogCategory.ui, 'Card played: [32m${card.name}[0m');
   }
 
   void updateGameInfo(String info) {
@@ -72,12 +101,12 @@ class CardsPanel extends BasePanel {
   }
 
   Vector2 calculateCardPosition(int index) {
-    final totalWidth = (maxCards * cardWidth) + ((maxCards - 1) * cardSpacing);
+    final totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = (size.x - totalWidth) / 2;
 
     final pos = Vector2(
-      startX + (index * (cardWidth + cardSpacing)),
-      cardTopMargin,
+      startX + (index * (CardVisualComponent.cardWidth + CardVisualComponent.cardSpacing)),
+      CardVisualComponent.cardTopMargin,
     );
 
     return pos;
@@ -87,5 +116,6 @@ class CardsPanel extends BasePanel {
   void updateUI() {
     // Update any UI elements that need to be refreshed
     // This could include updating card positions, turn information, etc.
+    _showHand();
   }
 } 

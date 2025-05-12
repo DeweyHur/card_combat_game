@@ -11,6 +11,11 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
   final GameCard cardData;
   final bool enabled;
   final Function(GameCard) onCardPlayed;
+  static const double cardWidth = 140.0;
+  static const double cardHeight = 180.0;
+  static const double cardSpacing = 20.0;
+  static const double cardTopMargin = 20.0;
+  static const int maxCards = 5;
 
   CardVisualComponent(
     this.cardData, {
