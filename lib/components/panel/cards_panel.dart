@@ -5,12 +5,14 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
   final TextComponent gameInfoText;
   final TextComponent turnText;
   final PlayerBase player;
+  void Function(GameCard card)? onCardPlayed;
 
   List<CardVisualComponent> cardVisuals = [];
 
@@ -78,18 +80,14 @@ class CardsPanel extends BasePanel {
         i,
         Vector2(0, 0), // CardsPanel's own position/size
         size,
-        (playedCard) => playCard(playedCard),
+        (playedCard) {
+          if (onCardPlayed != null) onCardPlayed!(playedCard);
+        },
         true, // isPlayerTurn (stubbed for now)
       ) as CardVisualComponent;
       add(cardVisual);
       cardVisuals.add(cardVisual);
     }
-  }
-
-  void playCard(card) {
-    // TODO: Implement play card logic, e.g., call CombatManager.playCard(card)
-    // For now, just log
-    GameLogger.info(LogCategory.ui, 'Card played: [32m${card.name}[0m');
   }
 
   void updateGameInfo(String info) {

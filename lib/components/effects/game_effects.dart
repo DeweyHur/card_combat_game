@@ -23,7 +23,7 @@ class GameEffects {
     }
   }
 
-  static Component createCardEffect(CardType type, Vector2 position, Vector2 size) {
+  static Component createCardEffect(CardType type, Vector2 position, Vector2 size, {VoidCallback? onComplete}) {
     switch (type) {
       case CardType.attack:
         return DamageEffect(
@@ -31,59 +31,67 @@ class GameEffects {
           size: size,
           value: 5, // Default damage value
           isPlayer: false,
+          onComplete: onComplete,
         );
       case CardType.heal:
         return HealEffect(
           position: position,
           size: size,
           value: 5, // Default heal value
+          onComplete: onComplete,
         );
       case CardType.statusEffect:
         return StatusEffectComponent(
           position: position,
           size: size,
           effect: StatusEffect.poison, // Default status effect
+          onComplete: onComplete,
         );
       case CardType.cure:
         return HealEffect(
           position: position,
           size: size,
           value: 5, // Default heal value
+          onComplete: onComplete,
         );
     }
   }
 
-  static Component createDamageEffect(Vector2 position, int value, bool isPlayer) {
+  static Component createDamageEffect(Vector2 position, int value, bool isPlayer, {VoidCallback? onComplete}) {
     return DamageEffect(
       position: position,
       size: Vector2(100, 100),
       value: value,
       isPlayer: isPlayer,
+      onComplete: onComplete,
     );
   }
 
-  static Component createHealEffect(Vector2 position, int value) {
+  static Component createHealEffect(Vector2 position, int value, {VoidCallback? onComplete}) {
     return HealEffect(
       position: position,
       size: Vector2(100, 100),
       value: value,
+      onComplete: onComplete,
     );
   }
 
-  static Component createDoTEffect(Vector2 position, StatusEffect effect, int value) {
+  static Component createDoTEffect(Vector2 position, StatusEffect effect, int value, {VoidCallback? onComplete}) {
     return DoTEffect(
       position: position,
       size: Vector2(100, 100),
       effect: effect,
       value: value,
+      onComplete: onComplete,
     );
   }
 
-  static Component createStatusEffect(Vector2 position, StatusEffect effectType, bool isPlayer) {
+  static Component createStatusEffect(Vector2 position, StatusEffect effectType, bool isPlayer, {VoidCallback? onComplete}) {
     return StatusEffectComponent(
       position: position,
       size: Vector2(100, 100),
       effect: effectType,
+      onComplete: onComplete,
     );
   }
 

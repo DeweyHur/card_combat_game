@@ -15,10 +15,11 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
-  late final CombatManager combatManager;
   late final TextComponent turnText;
   late final TextComponent gameMessageText;
   bool _isInitialized = false;
+  late final EnemyPanel enemyPanel;
+  late final CardsPanel cardsPanel;
 
   CombatSceneLayout() : super(anchor: Anchor.topLeft);
 
@@ -34,7 +35,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
       return;
     }
     size = gameRef.size;
-    combatManager = CombatManager(player: player, enemy: enemy);
+    CombatManager().initialize(player: player, enemy: enemy);
 
     // Initialize text components
     turnText = TextComponent(
@@ -60,14 +61,27 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     );
 
     // Initialize panels
+    cardsPanel = CardsPanel(player: player);
+    // Connect card tap to game logic
+    cardsPanel.onCardPlayed = (card) {
+      if (!CombatManager().isPlayerTurn) return;
+      CombatManager().playCard(card);
+      updateUI();
+      if (CombatManager().isCombatOver()) {
+        // Optionally, show game over message here
+        return;
+      }
+      // Optionally, handle endTurn logic here if needed
+    };
+    enemyPanel = EnemyPanel(enemy: enemy);
     panels = [
-      CardsPanel(player: player),
+      cardsPanel,
       PlayerPanel(player: player),
-      EnemyPanel(enemy: enemy),
+      enemyPanel,
     ];
 
-    // Initialize PlayerPanel with combatManager
-    (panels[1] as PlayerPanel).initialize(player, combatManager);
+    // Initialize PlayerPanel with CombatManager singleton
+    (panels[1] as PlayerPanel).initialize(player, CombatManager());
 
     // Add panels to the scene using vertical stack
     resetVerticalStack();
@@ -82,6 +96,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     _isInitialized = true;
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad completed, calling updateUI');
     updateUI();
+    registerWatchers(CombatManager());
   }
 
   void updateUI() {
@@ -93,9 +108,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
     final enemy = DataController.instance.get('selectedEnemy');
     if (enemy != null) {
-      turnText.text = combatManager.isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
+      turnText.text = CombatManager().isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
       // Update enemy's next action
-      (panels[2] as EnemyPanel).updateAction(combatManager.enemy.getNextAction().name);
+      (panels[2] as EnemyPanel).updateAction(CombatManager().enemy.getNextAction().name);
       // Update enemy health
       (panels[2] as EnemyPanel).updateHealth();
     }
@@ -120,5 +135,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     if (children.contains(gameMessageText)) {
       gameMessageText.removeFromParent();
     }
+  }
+
+  void registerWatchers(CombatManager manager) {
+    manager.addWatcher(enemyPanel);
   }
 } 

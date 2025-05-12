@@ -9,6 +9,7 @@ import 'package:card_combat_app/models/game_card.dart';
 class DoTEffect extends PositionComponent {
   final StatusEffect effect;
   final int value;
+  final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
@@ -17,6 +18,7 @@ class DoTEffect extends PositionComponent {
     required Vector2 size,
     required this.effect,
     required this.value,
+    this.onComplete,
   }) : super(position: position, size: size);
 
   @override
@@ -40,6 +42,7 @@ class DoTEffect extends PositionComponent {
   void update(double dt) {
     super.update(dt);
     if (_textComponent.isFinished) {
+      onComplete?.call();
       removeFromParent();
       GameLogger.debug(LogCategory.game, 'DoT effect faded out and removed.');
     }

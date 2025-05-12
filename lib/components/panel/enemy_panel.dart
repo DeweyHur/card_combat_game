@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:flame/game.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
+import 'package:card_combat_app/components/effects/game_effects.dart';
+import 'package:card_combat_app/managers/combat_manager.dart';
 
-class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin {
+class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements CombatWatcher {
   EnemyBase enemy;
   TextComponent? actionText;
   TextComponent? healthText;
@@ -151,5 +153,28 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin {
       borderColor: enemy.color,
       borderWidth: 2.0,
     );
+  }
+
+  void showEffectForCard(dynamic card, VoidCallback onComplete) {
+    final effect = GameEffects.createCardEffect(
+      card.type,
+      Vector2(size.x / 2 - 50, size.y / 2 - 50), // Centered in enemy panel
+      Vector2(100, 100),
+      onComplete: onComplete,
+    )..priority = 100;
+    add(effect);
+  }
+
+  @override
+  void onCombatEvent(CombatEvent event) {
+    if (event.target == enemy) {
+      if (event.type == CombatEventType.damage || event.type == CombatEventType.heal || event.type == CombatEventType.status) {
+        showEffectForCard(event.card ?? event, () {
+          updateHealth();
+        });
+      } else if (event.type == CombatEventType.cure) {
+        updateHealth();
+      }
+    }
   }
 } 

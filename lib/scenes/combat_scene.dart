@@ -10,7 +10,6 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'base_scene.dart';
 
 class CombatScene extends BaseScene with HasGameRef {
-  late final CombatManager _combatManager;
   late final CombatSceneLayout _layout;
   late final dynamic player;
   late final dynamic enemy;
@@ -30,31 +29,26 @@ class CombatScene extends BaseScene with HasGameRef {
       GameLogger.error(LogCategory.game, 'CombatScene: player or enemy not set in DataController');
       return;
     }
-    _combatManager = CombatManager(player: player, enemy: enemy);
+    CombatManager().initialize(player: player, enemy: enemy);
     _layout = CombatSceneLayout();
     add(_layout);
-    _combatManager.startCombat();
+    CombatManager().startCombat();
     GameLogger.info(LogCategory.game, 'Combat started: [32m${player.name}[0m vs [31m${enemy.name}[0m');
   }
 
   void _handleCardPlayed(GameCard card) {
-    if (!_combatManager.isPlayerTurn) return;
-
-    _combatManager.playCard(card);
+    if (!CombatManager().isPlayerTurn) return;
+    CombatManager().playCard(card);
     _layout.updateUI();
-
-    if (_combatManager.isCombatOver()) {
+    if (CombatManager().isCombatOver()) {
       handleCombatEnd();
       return;
     }
-
-    // Log before ending turn automatically
-    GameLogger.info(LogCategory.game, 'Auto-ending player turn after card play.');
     endTurn();
   }
 
   void handleCombatEnd() {
-    final result = _combatManager.getCombatResult();
+    final result = CombatManager().getCombatResult();
     if (result != null) {
       GameLogger.info(LogCategory.game, 'Combat ended: $result');
       _layout.showGameMessage(result);
@@ -62,17 +56,17 @@ class CombatScene extends BaseScene with HasGameRef {
   }
 
   void endTurn() {
-    if (!_combatManager.isPlayerTurn) return;
+    if (!CombatManager().isPlayerTurn) return;
 
-    _combatManager.endPlayerTurn();
+    CombatManager().endPlayerTurn();
     _layout.updateUI();
 
     // Execute enemy turn after a short delay
     Future.delayed(const Duration(seconds: 1), () {
-      _combatManager.executeEnemyTurn();
+      CombatManager().executeEnemyTurn();
       _layout.updateUI();
 
-      if (_combatManager.isCombatOver()) {
+      if (CombatManager().isCombatOver()) {
         handleCombatEnd();
       }
     });
@@ -81,8 +75,8 @@ class CombatScene extends BaseScene with HasGameRef {
   @override
   void update(double dt) {
     super.update(dt);
-    if (_combatManager.isCombatOver()) {
-      final result = _combatManager.getCombatResult();
+    if (CombatManager().isCombatOver()) {
+      final result = CombatManager().getCombatResult();
       GameLogger.info(LogCategory.combat, 'Combat ended: $result');
       // TODO: Handle combat end
     }

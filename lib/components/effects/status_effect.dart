@@ -8,6 +8,7 @@ import 'package:card_combat_app/models/game_card.dart';
 
 class StatusEffectComponent extends PositionComponent {
   final StatusEffect effect;
+  final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
@@ -15,6 +16,7 @@ class StatusEffectComponent extends PositionComponent {
     required Vector2 position,
     required Vector2 size,
     required this.effect,
+    this.onComplete,
   }) : super(position: position, size: size);
 
   @override
@@ -38,6 +40,7 @@ class StatusEffectComponent extends PositionComponent {
   void update(double dt) {
     super.update(dt);
     if (_textComponent.isFinished) {
+      onComplete?.call();
       removeFromParent();
       GameLogger.debug(LogCategory.game, 'Status effect faded out and removed.');
     }

@@ -8,6 +8,7 @@ import 'package:card_combat_app/components/effects/fading_text_component.dart';
 class DamageEffect extends PositionComponent {
   final int value;
   final bool isPlayer;
+  final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
   static const double _fadeSpeed = 2.0;
 
@@ -16,6 +17,7 @@ class DamageEffect extends PositionComponent {
     required Vector2 size,
     required this.value,
     this.isPlayer = false,
+    this.onComplete,
   }) : super(position: position, size: size);
 
   @override
@@ -39,6 +41,7 @@ class DamageEffect extends PositionComponent {
   void update(double dt) {
     super.update(dt);
     if (_textComponent.isFinished) {
+      onComplete?.call();
       removeFromParent();
       GameLogger.debug(LogCategory.game, 'Damage effect faded out and removed.');
     }

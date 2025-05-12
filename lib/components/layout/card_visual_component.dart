@@ -32,12 +32,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Log absolute position and size after component is loaded
-    GameLogger.info(LogCategory.ui, 'CardVisualComponent loaded: ${cardData.name}');
-    GameLogger.info(LogCategory.ui, '  - Position: ${position.x},${position.y}');
-    GameLogger.info(LogCategory.ui, '  - Size: ${size.x}x${size.y}');
-    GameLogger.info(LogCategory.ui, '  - Absolute Position: ${absolutePosition.x},${absolutePosition.y}');
-
     // Card background with pixel art style
     final backgroundPaint = Paint()
       ..color = enabled ? Colors.white : Colors.grey
@@ -152,10 +146,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     );
     add(textBg);
     add(typeText);
-    GameLogger.info(LogCategory.ui, 'Card type text positions:');
-    GameLogger.info(LogCategory.ui, '  - Relative position: ${typeText.position.x},${typeText.position.y}');
-    GameLogger.info(LogCategory.ui, '  - Absolute position: ${typeText.absolutePosition.x},${typeText.absolutePosition.y}');
-    GameLogger.info(LogCategory.ui, '  - Z-index: ${typeText.priority}');
 
     // Card Description with pixel art style
     final descText = TextComponent(
