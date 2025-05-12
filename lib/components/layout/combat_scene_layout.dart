@@ -71,7 +71,16 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
         // Optionally, show game over message here
         return;
       }
-      // Optionally, handle endTurn logic here if needed
+      // End player turn and trigger enemy turn after a delay
+      CombatManager().endPlayerTurn();
+      updateUI();
+      Future.delayed(const Duration(seconds: 1), () {
+        CombatManager().executeEnemyTurn();
+        updateUI();
+        if (CombatManager().isCombatOver()) {
+          // Optionally, show game over message here
+        }
+      });
     };
     enemyPanel = EnemyPanel(enemy: enemy);
     panels = [
