@@ -11,8 +11,9 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 
-class CombatSceneLayout extends PositionComponent with HasGameRef {
+class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
   late final CombatManager combatManager;
   late final TextComponent turnText;
@@ -68,15 +69,11 @@ class CombatSceneLayout extends PositionComponent with HasGameRef {
     // Initialize PlayerPanel with combatManager
     (panels[1] as PlayerPanel).initialize(player, combatManager);
 
-    // Add panels to the scene
-    for (var panel in panels) {
-      add(panel);
-    }
-
-    // Set panel positions
-    panels[0].position = Vector2(0, size.y * 0.3); // Cards panel
-    panels[1].position = Vector2(0, size.y * 0.7); // Player panel
-    panels[2].position = Vector2(0, 0); // Enemy panel
+    // Add panels to the scene using vertical stack
+    resetVerticalStack();
+    addToVerticalStack(panels[2], size.y * 0.3); // Enemy panel (top)
+    addToVerticalStack(panels[0], size.y * 0.4); // Cards panel (middle)
+    addToVerticalStack(panels[1], size.y * 0.3); // Player panel (bottom)
 
     // Add text components
     add(turnText);
