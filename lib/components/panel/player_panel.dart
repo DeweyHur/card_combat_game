@@ -5,7 +5,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
-import 'package:card_combat_app/components/panel/player_stats_row.dart';
+import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';

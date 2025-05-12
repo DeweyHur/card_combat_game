@@ -6,7 +6,7 @@ import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
-import 'package:card_combat_app/components/panel/player_stats_row.dart';
+import 'package:card_combat_app/components/panel/stats_row.dart';
 
 class PlayerDetailPanel extends BasePanel {
   late PlayerBase player;

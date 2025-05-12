@@ -8,7 +8,7 @@ import 'package:flame/game.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
-import 'package:card_combat_app/components/panel/player_stats_row.dart';
+import 'package:card_combat_app/components/panel/stats_row.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements CombatWatcher {
   EnemyBase enemy;
