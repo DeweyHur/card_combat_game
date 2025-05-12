@@ -5,7 +5,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
-import 'package:card_combat_app/components/panel/player_stats_row.dart';
+import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
@@ -19,7 +19,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
   late CombatManager combatManager;
   TextComponent? actionText;
   RectangleComponent? separatorLine;
-  late PlayerStatsRow statsRow;
+  late StatsRow statsRow;
   late NameEmojiComponent nameEmojiComponent;
   bool _isLoaded = false;
 
@@ -80,7 +80,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
     addToVerticalStack(nameEmojiComponent, 40);
 
     // Add stats row as the next row in the vertical stack
-    statsRow = PlayerStatsRow(player: player);
+    statsRow = StatsRow(character: player);
     addToVerticalStack(statsRow, 40);
 
     // Add other UI components using vertical stack

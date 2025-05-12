@@ -2,8 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 
-class PlayerStatsRow extends PositionComponent {
-  final PlayerBase player;
+class StatsRow extends PositionComponent {
+  dynamic character; // Can be PlayerBase or EnemyBase
   late TextComponent heartEmoji;
   late RectangleComponent healthBarBg;
   late RectangleComponent healthBarFg;
@@ -18,7 +18,7 @@ class PlayerStatsRow extends PositionComponent {
   static const double barWidth = 100;
   static const double barHeight = 16;
 
-  PlayerStatsRow({required this.player, Vector2? position, Vector2? size})
+  StatsRow({required this.character, Vector2? position, Vector2? size})
       : super(position: position ?? Vector2.zero(), size: size ?? Vector2(260, 32));
 
   @override
@@ -55,7 +55,7 @@ class PlayerStatsRow extends PositionComponent {
 
     // HP text
     hpText = TextComponent(
-      text: '${player.currentHealth}/${player.maxHealth}',
+      text: '${character.currentHealth}/${character.maxHealth}',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
@@ -76,7 +76,7 @@ class PlayerStatsRow extends PositionComponent {
     add(attackEmoji);
 
     attackText = TextComponent(
-      text: '${player.attack}',
+      text: '${character.attack}',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
@@ -97,7 +97,7 @@ class PlayerStatsRow extends PositionComponent {
     add(defenseEmoji);
 
     defenseText = TextComponent(
-      text: '${player.defense}',
+      text: '${character.defense}',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
@@ -106,34 +106,47 @@ class PlayerStatsRow extends PositionComponent {
     );
     add(defenseText);
 
-    // Energy bar and value
-    energyText = TextComponent(
-      text: _energyBarString(),
-      textRenderer: TextPaint(
-        style: const TextStyle(fontSize: 18, color: Colors.amber),
-      ),
-      position: Vector2(28 + barWidth + 160, 0),
-      anchor: Anchor.centerLeft,
-    );
-    add(energyText);
+    // Energy bar and value (only for player)
+    if (character is PlayerBase) {
+      energyText = TextComponent(
+        text: _energyBarString(),
+        textRenderer: TextPaint(
+          style: const TextStyle(fontSize: 18, color: Colors.amber),
+        ),
+        position: Vector2(28 + barWidth + 160, 0),
+        anchor: Anchor.centerLeft,
+      );
+      add(energyText);
+    }
   }
 
   double _healthBarFill() {
-    if (player.maxHealth == 0) return 0;
-    return barWidth * (player.currentHealth / player.maxHealth).clamp(0, 1);
+    if (character.maxHealth == 0) return 0;
+    return barWidth * (character.currentHealth / character.maxHealth).clamp(0, 1);
   }
 
   void updateUI() {
     healthBarFg.size.x = _healthBarFill();
-    hpText.text = '${player.currentHealth}/${player.maxHealth}';
-    attackText.text = '${player.attack}';
-    defenseText.text = '${player.defense}';
-    energyText.text = _energyBarString();
+    hpText.text = '${character.currentHealth}/${character.maxHealth}';
+    attackText.text = '${character.attack}';
+    defenseText.text = '${character.defense}';
+    if (character is PlayerBase) {
+      energyText.text = _energyBarString();
+    }
   }
 
   String _energyBarString() {
-    final filled = '⚡' * player.energy;
-    final empty = '◇' * (player.maxEnergy - player.energy);
-    return '$filled$empty ${player.energy}/${player.maxEnergy}';
+    if (character is PlayerBase) {
+      final player = character as PlayerBase;
+      final filled = '⚡' * player.energy;
+      final empty = '◇' * (player.maxEnergy - player.energy);
+      return '$filled$empty ${player.energy}/${player.maxEnergy}';
+    }
+    return '';
+  }
+
+  void setCharacter(dynamic newCharacter) {
+    character = newCharacter;
+    updateUI();
   }
 } 
