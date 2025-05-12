@@ -8,6 +8,7 @@ import 'package:flame/game.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
+import 'package:card_combat_app/components/panel/player_stats_row.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements CombatWatcher {
   EnemyBase enemy;
@@ -18,7 +19,7 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements C
   AudioPlayer? audioPlayer;
   bool _isLoaded = false;
   late final TextComponent nameText;
-  late final TextComponent statsText;
+  late final StatsRow statsRow;
 
   EnemyPanel({
     required this.enemy,
@@ -41,17 +42,9 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements C
     );
     addToVerticalStack(nameText, 30);
 
-    // Add enemy stats
-    statsText = TextComponent(
-      text: 'HP: ${enemy.maxHealth}\nATK: ${enemy.attack}\nDEF: ${enemy.defense}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-    );
-    addToVerticalStack(statsText, 60);
+    // Add enemy stats row
+    statsRow = StatsRow(character: enemy);
+    addToVerticalStack(statsRow, 40);
 
     // Add enemy sprite
     try {
@@ -127,13 +120,15 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements C
 
   @override
   void updateUI() {
+    if (!_isLoaded) return;
     updateHealth();
+    statsRow.updateUI();
   }
 
   void updateEnemy(EnemyBase newEnemy) {
     enemy = newEnemy;
     nameText.text = enemy.name;
-    statsText.text = 'HP: ${enemy.maxHealth}\nATK: ${enemy.attack}\nDEF: ${enemy.defense}';
+    statsRow.setCharacter(enemy);
     // TODO: Update sprite when enemy changes
   }
 

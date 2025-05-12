@@ -19,7 +19,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
   late CombatManager combatManager;
   TextComponent? actionText;
   RectangleComponent? separatorLine;
-  late PlayerStatsRow statsRow;
+  late StatsRow statsRow;
   late NameEmojiComponent nameEmojiComponent;
   bool _isLoaded = false;
 
@@ -80,7 +80,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
     addToVerticalStack(nameEmojiComponent, 40);
 
     // Add stats row as the next row in the vertical stack
-    statsRow = PlayerStatsRow(player: player);
+    statsRow = StatsRow(character: player);
     addToVerticalStack(statsRow, 40);
 
     // Add other UI components using vertical stack

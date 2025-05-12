@@ -6,6 +6,7 @@ import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
+import 'package:card_combat_app/components/panel/player_stats_row.dart';
 
 class PlayerDetailPanel extends BasePanel {
   late PlayerBase player;
@@ -15,6 +16,7 @@ class PlayerDetailPanel extends BasePanel {
   late TextComponent energyText;
   late TextComponent deckText;
   late NameEmojiComponent nameEmojiComponent;
+  late StatsRow statsRow;
 
   PlayerDetailPanel() {
     player = Knight();
@@ -29,18 +31,9 @@ class PlayerDetailPanel extends BasePanel {
     nameEmojiComponent = NameEmojiComponent(player: player);
     add(nameEmojiComponent);
 
-    statsText = TextComponent(
-      text: 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}',
-      position: Vector2(size.x * 0.5, 0),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-      anchor: Anchor.topCenter,
-    );
-    add(statsText);
+    // Add stats row
+    statsRow = StatsRow(character: player);
+    add(statsRow);
 
     descriptionText = TextComponent(
       text: player.description,
@@ -104,7 +97,7 @@ class PlayerDetailPanel extends BasePanel {
   void updatePlayer(PlayerBase newPlayer) {
     player = newPlayer;
     nameEmojiComponent.updatePlayer(newPlayer);
-    statsText.text = 'HP: ${player.maxHealth} | ATK: ${player.attack} | DEF: ${player.defense}';
+    statsRow.setCharacter(player);
     descriptionText.text = player.description;
     energyText.text = 'Max Energy: ${player.maxEnergy}';
     deckText.text = 'Starting Deck: ${player.deck.length} cards';
