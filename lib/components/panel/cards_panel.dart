@@ -56,15 +56,11 @@ class CardsPanel extends BasePanel {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Set text positions based on panel size
-    cardAreaText.position = Vector2(20, 20);
-    gameInfoText.position = Vector2(20, size.y - 40);
-    turnText.position = Vector2(size.x - 100, 20);
-
-    // Add text components
-    add(cardAreaText);
-    add(gameInfoText);
-    add(turnText);
+    // Add text components using vertical stack
+    resetVerticalStack();
+    addToVerticalStack(cardAreaText, 40);
+    addToVerticalStack(gameInfoText, 32);
+    addToVerticalStack(turnText, 32);
   }
 
   void updateGameInfo(String info) {

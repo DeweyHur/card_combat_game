@@ -38,7 +38,6 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.game, 'Loading PlayerSelectionBox for index $index');
 
     // Set initial selection state from DataController
     isSelected = isSelectedPlayer;
@@ -99,8 +98,6 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
       anchor: Anchor.center,
     );
     add(emojiText);
-
-    GameLogger.debug(LogCategory.game, 'PlayerSelectionBox loaded for index $index');
   }
 
   PlayerBase getPlayer() {

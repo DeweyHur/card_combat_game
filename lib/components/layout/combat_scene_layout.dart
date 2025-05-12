@@ -76,8 +76,8 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     addToVerticalStack(panels[1], size.y * 0.3); // Player panel (bottom)
 
     // Add text components
-    add(turnText);
-    add(gameMessageText);
+    addToVerticalStack(turnText, 40);
+    addToVerticalStack(gameMessageText, 40);
 
     _isInitialized = true;
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad completed, calling updateUI');

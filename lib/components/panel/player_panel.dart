@@ -5,72 +5,23 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/components/panel/player_stats_row.dart';
 
 class PlayerPanel extends BasePanel {
-  final TextComponent playerNameText;
-  final TextComponent playerHealthText;
-  final TextComponent playerStatsText;
-  final TextComponent playerEnergyText;
   final TextComponent playerDeckText;
   final TextComponent playerHandText;
   final TextComponent playerDiscardText;
   final TextComponent playerStatusText;
   final PlayerBase player;
   late CombatManager combatManager;
-  TextComponent? healthText;
-  TextComponent? energyText;
   TextComponent? actionText;
   RectangleComponent? separatorLine;
+  late PlayerStatsRow statsRow;
   bool _isLoaded = false;
 
   PlayerPanel({
     required this.player,
   }) : 
-    playerNameText = TextComponent(
-      text: '',
-      position: Vector2(0, 0), // Will be set in onLoad
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
-    ),
-    playerHealthText = TextComponent(
-      text: '',
-      position: Vector2(0, 0), // Will be set in onLoad
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      anchor: Anchor.center,
-    ),
-    playerStatsText = TextComponent(
-      text: '',
-      position: Vector2(0, 0), // Will be set in onLoad
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      anchor: Anchor.center,
-    ),
-    playerEnergyText = TextComponent(
-      text: '',
-      position: Vector2(0, 0), // Will be set in onLoad
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      anchor: Anchor.center,
-    ),
     playerDeckText = TextComponent(
       text: '',
       position: Vector2(0, 0), // Will be set in onLoad
@@ -119,66 +70,18 @@ class PlayerPanel extends BasePanel {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.ui, 'PlayerPanel loading...');
 
-    // Set size and position
-    size = Vector2(300, 400);
-    anchor = Anchor.center;
-    
-    GameLogger.info(LogCategory.ui, 'PlayerPanel dimensions:');
-    GameLogger.info(LogCategory.ui, '  - Size: ${size.x}x${size.y}');
-    GameLogger.info(LogCategory.ui, '  - Position: ${position.x},${position.y}');
-    GameLogger.info(LogCategory.ui, '  - Absolute Position: ${absolutePosition.x},${absolutePosition.y}');
+    // Add stats row as the first row in the vertical stack
+    statsRow = PlayerStatsRow(player: player);
+    addToVerticalStack(statsRow, 40);
 
-    // Set text positions based on panel size
-    playerNameText.position = Vector2(0, -size.y * 0.4);
-    playerHealthText.position = Vector2(0, -size.y * 0.3);
-    playerStatsText.position = Vector2(0, -size.y * 0.2);
-    playerEnergyText.position = Vector2(0, -size.y * 0.1);
-    playerDeckText.position = Vector2(0, 0);
-    playerHandText.position = Vector2(0, size.y * 0.1);
-    playerDiscardText.position = Vector2(0, size.y * 0.2);
-    playerStatusText.position = Vector2(0, size.y * 0.3);
-    
-    // Add UI components
-    add(playerNameText);
-    add(playerHealthText);
-    add(playerStatsText);
-    add(playerEnergyText);
-    add(playerDeckText);
-    add(playerHandText);
-    add(playerDiscardText);
-    add(playerStatusText);
+    // Add other UI components using vertical stack
+    addToVerticalStack(playerDeckText, 24);
+    addToVerticalStack(playerHandText, 24);
+    addToVerticalStack(playerDiscardText, 24);
+    addToVerticalStack(playerStatusText, 24);
 
-    // Create text components
-    healthText = TextComponent(
-      text: 'Health: ${player.currentHealth}/${player.maxHealth}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      position: Vector2(0, -size.y * 0.3),
-      anchor: Anchor.center,
-    );
-    add(healthText!);
-    GameLogger.info(LogCategory.ui, 'Health text position: ${healthText!.position.x},${healthText!.position.y}');
-
-    energyText = TextComponent(
-      text: 'Energy: ${player.energy}/${player.maxEnergy}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-      position: Vector2(0, -size.y * 0.2),
-      anchor: Anchor.center,
-    );
-    add(energyText!);
-    GameLogger.info(LogCategory.ui, 'Energy text position: ${energyText!.position.x},${energyText!.position.y}');
-
+    // Create and add extra text components using vertical stack
     actionText = TextComponent(
       text: 'Next Action: None',
       textRenderer: TextPaint(
@@ -187,23 +90,15 @@ class PlayerPanel extends BasePanel {
           fontSize: 16,
         ),
       ),
-      position: Vector2(0, -size.y * 0.1),
-      anchor: Anchor.center,
     );
-    add(actionText!);
-    GameLogger.info(LogCategory.ui, 'Action text position: ${actionText!.position.x},${actionText!.position.y}');
+    addToVerticalStack(actionText!, 20);
 
     // Add separator line
     separatorLine = RectangleComponent(
       size: Vector2(280, 2),
-      position: Vector2(0, 0),
       paint: Paint()..color = Colors.white.withOpacity(0.5),
-      anchor: Anchor.center,
     );
-    add(separatorLine!);
-    GameLogger.info(LogCategory.ui, 'Separator line:');
-    GameLogger.info(LogCategory.ui, '  - Position: ${separatorLine!.position.x},${separatorLine!.position.y}');
-    GameLogger.info(LogCategory.ui, '  - Size: ${separatorLine!.size.x}x${separatorLine!.size.y}');
+    addToVerticalStack(separatorLine!, 2);
 
     _isLoaded = true;
     GameLogger.debug(LogCategory.ui, 'PlayerPanel loaded successfully');
@@ -217,25 +112,16 @@ class PlayerPanel extends BasePanel {
   @override
   void updateUI() {
     if (combatManager == null) return;
-    
     final player = combatManager.player;
-    
-    // Update player info
-    playerNameText.text = '${player.name} ${player.emoji}';
-    playerHealthText.text = 'HP: ${player.currentHealth}/${player.maxHealth}';
-    playerStatsText.text = 'ATK: ${player.attack} | DEF: ${player.defense}';
-    playerEnergyText.text = 'Energy: ${player.energy}/${player.maxEnergy}';
-    playerDeckText.text = 'Deck: ${player.deck.length} cards';
-    playerHandText.text = 'Hand: ${player.hand.length} cards';
-    playerDiscardText.text = 'Discard: ${player.discardPile.length} cards';
-    playerStatusText.text = combatManager.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
-
     if (_isLoaded) {
-      if (healthText != null) {
-        healthText!.text = 'Health: ${player.currentHealth}/${player.maxHealth}';
-      }
-      if (energyText != null) {
-        energyText!.text = 'Energy: ${player.energy}/${player.maxEnergy}';
+      statsRow.updateUI();
+      // Update other info
+      playerDeckText.text = 'Deck: \u001b[36m${player.deck.length}\u001b[0m cards';
+      playerHandText.text = 'Hand: \u001b[36m${player.hand.length}\u001b[0m cards';
+      playerDiscardText.text = 'Discard: \u001b[36m${player.discardPile.length}\u001b[0m cards';
+      playerStatusText.text = combatManager.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
+      if (actionText != null) {
+        // actionText is handled below
       }
     }
   }

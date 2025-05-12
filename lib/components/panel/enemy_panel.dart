@@ -24,12 +24,6 @@ class EnemyPanel extends BasePanel with HasGameRef {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.ui, 'EnemyPanel loading...');
-
-    GameLogger.info(LogCategory.ui, 'EnemyPanel dimensions:');
-    GameLogger.info(LogCategory.ui, '  - Size: ${size.x}x${size.y}');
-    GameLogger.info(LogCategory.ui, '  - Position: ${position.x},${position.y}');
-    GameLogger.info(LogCategory.ui, '  - Absolute Position: ${absolutePosition.x},${absolutePosition.y}');
 
     // Add enemy name
     nameText = TextComponent(
