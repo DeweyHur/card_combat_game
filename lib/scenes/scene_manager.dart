@@ -1,23 +1,16 @@
 import 'package:flame/game.dart';
-import 'package:card_combat_app/scenes/base_scene.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/player_selection_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
-import 'package:card_combat_app/models/enemies/enemy_base.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
+import 'base_scene.dart';
 
 class SceneManager {
-  static SceneManager? _instance;
-  static SceneManager get instance {
-    _instance ??= SceneManager._internal();
-    return _instance!;
-  }
-
+  static final SceneManager _instance = SceneManager._internal();
+  factory SceneManager() => _instance;
   SceneManager._internal();
 
   FlameGame? _game;
   final Map<String, BaseScene Function()> _scenes = {};
-  final Map<String, BaseScene Function(PlayerBase, EnemyBase)> _paramScenes = {};
 
   void initialize(FlameGame game) {
     _game = game;
@@ -26,14 +19,8 @@ class SceneManager {
   }
 
   void _registerScenes() {
-    // Register regular scenes
-    _scenes['player_selection'] = () => PlayerSelectionScene();
-
-    // Register parameterized scenes
-    _paramScenes['combat'] = (player, enemy) => CombatScene(
-      player: player,
-      enemy: enemy,
-    );
+    registerScene('player_selection', () => PlayerSelectionScene());
+    registerScene('combat', () => CombatScene());
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 
@@ -42,17 +29,14 @@ class SceneManager {
     GameLogger.info(LogCategory.game, 'Registered scene: $name');
   }
 
-  void registerSceneWithParams(
-    String name,
-    BaseScene Function(PlayerBase, EnemyBase) sceneFactory,
-  ) {
-    _paramScenes[name] = sceneFactory;
-    GameLogger.info(LogCategory.game, 'Registered scene with params: $name');
-  }
-
-  void pushScene(String name, [dynamic param1, dynamic param2]) {
+  void pushScene(String name) {
     if (_game == null) {
       GameLogger.error(LogCategory.game, 'SceneManager not initialized with game');
+      return;
+    }
+
+    if (!_scenes.containsKey(name)) {
+      GameLogger.error(LogCategory.game, 'Scene not found: $name');
       return;
     }
 
@@ -61,24 +45,7 @@ class SceneManager {
       _game!.remove(currentScene);
     }
 
-    BaseScene? newScene;
-    if (_scenes.containsKey(name)) {
-      newScene = _scenes[name]!();
-    } else if (_paramScenes.containsKey(name)) {
-      if (param1 == null || param2 == null) {
-        GameLogger.error(LogCategory.game, 'Parameters required for scene: $name');
-        return;
-      }
-      if (param1 is! PlayerBase || param2 is! EnemyBase) {
-        GameLogger.error(LogCategory.game, 'Invalid parameter types for scene: $name');
-        return;
-      }
-      newScene = _paramScenes[name]!(param1, param2);
-    } else {
-      GameLogger.error(LogCategory.game, 'Scene not found: $name');
-      return;
-    }
-
+    final newScene = _scenes[name]!();
     _game!.add(newScene);
     GameLogger.info(LogCategory.game, 'Pushed scene: $name');
   }

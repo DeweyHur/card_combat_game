@@ -26,7 +26,6 @@ class CombatSceneLayout extends PositionComponent {
     required this.player,
     required this.enemy,
   }) : super(
-    size: gameSize,
     anchor: Anchor.topLeft,
   ) {
     combatManager = CombatManager(player: player, enemy: enemy);
@@ -35,6 +34,7 @@ class CombatSceneLayout extends PositionComponent {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    size = gameSize;
 
     // Initialize text components
     turnText = TextComponent(

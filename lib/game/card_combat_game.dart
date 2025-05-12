@@ -17,8 +17,8 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     GameLogger.info(LogCategory.game, 'CardCombatGame loading...');
 
     // Initialize scene manager and load initial scene
-    SceneManager.instance.initialize(this);
-    SceneManager.instance.pushScene('player_selection');
+    SceneManager().initialize(this);
+    SceneManager().pushScene('player_selection');
   }
 
   Future<bool> _initializeAudio() async {

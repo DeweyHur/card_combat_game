@@ -18,7 +18,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late EnemyPanel enemyPanel;
-  late TextComponent battleButton;
+  late PositionComponent battleButton;
   late EnemyBase selectedEnemy;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
@@ -59,21 +59,42 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     addToVerticalStack(detailPanel, size.y * 0.3);
     addToVerticalStack(selectionPanel, size.y * 0.2);
 
-    battleButton = TextComponent(
-      text: 'Start Battle',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 24,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+    battleButton = PositionComponent(
+      size: Vector2(200, 50),
+      position: Vector2(size.x / 2, size.y - 40),
+      anchor: Anchor.center,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 50),
+        paint: Paint()..color = Colors.blue,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Start Battle',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(100, 25),
         ),
-      ),
-      size: Vector2(200, 20),
-      position: Vector2(size.x / 2, 0),
-      anchor: Anchor.bottomCenter,
-    );
+      );
     add(battleButton);
 
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    if (battleButton.toRect().contains(event.localPosition.toOffset())) {
+      GameLogger.debug(LogCategory.ui, 'Start Battle button pressed');
+      // Just push the combat scene
+      SceneManager().pushScene('combat');
+    }
   }
 } 
