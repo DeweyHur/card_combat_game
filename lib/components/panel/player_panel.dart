@@ -9,8 +9,9 @@ import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
+import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 
-class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatcher {
+class PlayerPanel extends BasePanel with AreaFillerMixin, ShakeMixin implements CombatWatcher {
   final TextComponent playerDeckText;
   final TextComponent playerHandText;
   final TextComponent playerDiscardText;
@@ -167,6 +168,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
           value: event.value,
         )..priority = 100;
         add(effect);
+        shakeForType(event.card?.type ?? CardType.attack);
       } else if (event.type == CombatEventType.heal || event.type == CombatEventType.status) {
         final effect = GameEffects.createCardEffect(
           event.card?.type ?? CardType.heal,
@@ -178,6 +180,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin implements CombatWatche
           value: event.value,
         )..priority = 100;
         add(effect);
+        shakeForType(event.card?.type ?? CardType.heal);
       } else if (event.type == CombatEventType.cure) {
         updateUI();
       }

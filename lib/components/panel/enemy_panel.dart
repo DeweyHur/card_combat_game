@@ -9,8 +9,10 @@ import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 
-class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements CombatWatcher {
+class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
   EnemyBase enemy;
   TextComponent? actionText;
   TextComponent? healthText;
@@ -167,6 +169,7 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin implements C
         showEffectForCard(event.card ?? event, () {
           updateHealth();
         });
+        shakeForType(event.card?.type ?? CardType.attack);
       } else if (event.type == CombatEventType.cure) {
         updateHealth();
       }
