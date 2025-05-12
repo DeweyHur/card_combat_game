@@ -5,6 +5,14 @@ import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/enemies/tung_tung_tung_sahur.dart';
 import 'package:card_combat_app/models/enemies/trippi_troppi.dart';
 import 'package:card_combat_app/models/enemies/trullimero_trullicina.dart';
+import 'package:card_combat_app/models/enemies/ballerina_cappuccina.dart';
+import 'package:card_combat_app/models/enemies/bobombini_goosini.dart';
+import 'package:card_combat_app/models/enemies/bobrini_cocococini.dart';
+import 'package:card_combat_app/models/enemies/bombardino_crocodilo.dart';
+import 'package:card_combat_app/models/enemies/brr_brr_patapim.dart';
+import 'package:card_combat_app/models/enemies/burbaloni_luliloli.dart';
+import 'package:card_combat_app/models/enemies/capuccino_assasino.dart';
+import 'package:card_combat_app/models/enemies/tralalero_tralala.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
 import 'package:card_combat_app/components/panel/player_detail_panel.dart';
 import 'package:card_combat_app/components/panel/player_selection_panel.dart';
@@ -39,6 +47,14 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       TungTungTungSahur(),
       TrippiTroppi(),
       TrullimeroTrullicina(),
+      BallerinaCappuccina(),
+      BobombiniGoosini(),
+      BobriniCocococini(),
+      BombardinoCrocodilo(),
+      BrrBrrPatapim(),
+      BurbaloniLuliloli(),
+      CapuccinoAssasino(),
+      TralaleroTralala(),
     ];
     final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
     selectedEnemy = availableEnemies[random];
