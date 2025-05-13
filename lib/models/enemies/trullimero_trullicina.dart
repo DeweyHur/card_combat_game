@@ -10,8 +10,8 @@ class TrullimeroTrullicina extends EnemyBase {
     defense: 6,
     emoji: '🎭',
     color: Colors.purple,
-    imagePath: 'tru.jpg',
-    soundPath: 'tru.mp3',
+    imagePath: 'trullimero_trullicina.jpg',
+    soundPath: 'trullimero_trullicina.mp3',
   );
 
   @override

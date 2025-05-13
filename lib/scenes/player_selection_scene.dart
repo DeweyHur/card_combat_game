@@ -47,7 +47,7 @@ class PlayerSelectionScene extends BaseScene {
     DataController.instance.set('selectedPlayer', Knight());
     // Randomly select an enemy
     final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
-    selectedEnemy = availableEnemies[0];
+    selectedEnemy = availableEnemies[random];
     // Save selected enemy to DataController
     DataController.instance.set('selectedEnemy', selectedEnemy);
   }
