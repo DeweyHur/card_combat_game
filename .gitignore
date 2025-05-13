@@ -47,3 +47,4 @@ app.*.map.json
 
 # Audio files that should be added manually
 # /assets/sounds/
+.vercel

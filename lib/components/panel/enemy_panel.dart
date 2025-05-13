@@ -12,6 +12,7 @@ import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/components/action_with_emoji_component.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
   late EnemyBase enemy;
@@ -32,6 +33,22 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
 
     // Get the current enemy from DataController
     enemy = DataController.instance.get<EnemyBase>('selectedEnemy')!;
+
+    // Add enemy sprite
+    try {
+      final image = await gameRef.images.load(enemy.imagePath);
+      final sprite = Sprite(image);
+      enemySprite = SpriteComponent(
+        sprite: sprite,
+        size: Vector2(200, 200),
+      );
+      addToVerticalStack(enemySprite!, 200);
+      GameLogger.info(LogCategory.ui, 'Enemy sprite:');
+      GameLogger.info(LogCategory.ui, '  - Size: \\${enemySprite!.size.x}x\\${enemySprite!.size.y}');
+      GameLogger.info(LogCategory.ui, '  - Absolute Position: \\${enemySprite!.absolutePosition.x},\\${enemySprite!.absolutePosition.y}');
+    } catch (e) {
+      GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
+    }
 
     // Add enemy name
     nameText = TextComponent(
@@ -57,22 +74,6 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
       }
     });
 
-    // Add enemy sprite
-    try {
-      final image = await gameRef.images.load(enemy.imagePath);
-      final sprite = Sprite(image);
-      enemySprite = SpriteComponent(
-        sprite: sprite,
-        size: Vector2(200, 200),
-      );
-      addToVerticalStack(enemySprite!, 200);
-      GameLogger.info(LogCategory.ui, 'Enemy sprite:');
-      GameLogger.info(LogCategory.ui, '  - Size: \\${enemySprite!.size.x}x\\${enemySprite!.size.y}');
-      GameLogger.info(LogCategory.ui, '  - Absolute Position: \\${enemySprite!.absolutePosition.x},\\${enemySprite!.absolutePosition.y}');
-    } catch (e) {
-      GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
-    }
-
     // Load enemy sound
     try {
       audioPlayer = AudioPlayer();
@@ -84,8 +85,12 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
     }
 
     // Create text components
+    final initialAction = ActionWithEmojiComponent.format(
+      enemy,
+      enemy.getNextAction(),
+    );
     actionText = TextComponent(
-      text: 'Next Action: None',
+      text: 'Next Action: $initialAction',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,

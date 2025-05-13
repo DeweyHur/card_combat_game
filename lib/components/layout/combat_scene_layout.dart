@@ -12,6 +12,7 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
+import 'package:card_combat_app/components/action_with_emoji_component.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
@@ -94,9 +95,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
     // Add panels to the scene using vertical stack
     resetVerticalStack();
-    addToVerticalStack(panels[2], size.y * 0.3); // Enemy panel (top)
+    addToVerticalStack(panels[2], size.y * 0.4); // Enemy panel (top)
     addToVerticalStack(turnText, 40);
-    addToVerticalStack(panels[0], size.y * 0.3); // Cards panel (middle)
+    addToVerticalStack(panels[0], size.y * 0.2); // Cards panel (middle)
     addToVerticalStack(gameMessageText, 40);
     addToVerticalStack(panels[1], size.y * 0.1); // Player panel (bottom)
 
@@ -106,6 +107,11 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad completed, calling updateUI');
     updateUI();
     registerWatchers(CombatManager());
+  }
+
+  /// Helper to format the enemy's next action with emojis
+  String formatEnemyActionWithEmojis(EnemyBase enemy, GameCard action) {
+    return ActionWithEmojiComponent.format(enemy, action);
   }
 
   void updateUI() {
@@ -118,8 +124,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     final enemy = DataController.instance.get('selectedEnemy');
     if (enemy != null) {
       turnText.text = CombatManager().isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
-      // Update enemy's next action
-      (panels[2] as EnemyPanel).updateAction(CombatManager().enemy.getNextAction().name);
+      // Update enemy's next action with emojis
+      final nextAction = CombatManager().enemy.getNextAction();
+      (panels[2] as EnemyPanel).updateAction(formatEnemyActionWithEmojis(CombatManager().enemy, nextAction));
       // Update enemy health
       (panels[2] as EnemyPanel).updateHealth();
     }
