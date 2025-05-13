@@ -10,8 +10,8 @@ class BombardinoCrocodilo extends EnemyBase {
     defense: 5,
     emoji: '🐊',
     color: Colors.green,
-    imagePath: 'characters/bombardino_crocodilo/bombardino_crocodilo.webp',
-    soundPath: 'characters/bombardino_crocodilo/bombardino_crocodilo_italian_brainrot.mp3',
+    imagePath: 'bombardino_crocodilo.webp',
+    soundPath: 'bombardino_crocodilo_italian_brainrot.mp3',
   );
 
   @override

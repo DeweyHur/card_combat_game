@@ -27,7 +27,6 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   late PlayerSelectionPanel selectionPanel;
   late EnemyPanel enemyPanel;
   late PositionComponent battleButton;
-  late EnemyBase selectedEnemy;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
 
@@ -43,22 +42,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Initialize selected player and enemy
     detailPanel = PlayerDetailPanel();
     selectionPanel = PlayerSelectionPanel();
-    final availableEnemies = [
-      TungTungTungSahur(),
-      TrippiTroppi(),
-      TrullimeroTrullicina(),
-      BallerinaCappuccina(),
-      BobombiniGoosini(),
-      BobriniCocococini(),
-      BombardinoCrocodilo(),
-      BrrBrrPatapim(),
-      BurbaloniLuliloli(),
-      CapuccinoAssasino(),
-      TralaleroTralala(),
-    ];
-    final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
-    selectedEnemy = availableEnemies[random];
-    enemyPanel = EnemyPanel(enemy: selectedEnemy);
+    enemyPanel = EnemyPanel();
     
     addToVerticalStack(enemyPanel, size.y * 0.2);
     addToVerticalStack(TextComponent(

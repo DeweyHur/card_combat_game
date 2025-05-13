@@ -10,8 +10,8 @@ class TrippiTroppi extends EnemyBase {
     defense: 4,
     emoji: '🎪',
     color: Colors.orange,
-    imagePath: 'characters/trippi/trippi.jpg',
-    soundPath: 'characters/trippi/trippi.mp3',
+    imagePath: 'trippi.jpg',
+    soundPath: 'trippi.mp3',
   );
 
   @override

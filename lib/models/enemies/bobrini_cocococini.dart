@@ -10,8 +10,8 @@ class BobriniCocococini extends EnemyBase {
     defense: 8,
     emoji: '🥥',
     color: Colors.brown,
-    imagePath: 'characters/bobrini_cocococini/bobrini_cocococini.png',
-    soundPath: 'characters/bobrini_cocococini/bobrini_cocococini.mp3',
+    imagePath: 'bobrini_cocococini.png',
+    soundPath: 'bobrini_cocococini.mp3',
   );
 
   @override

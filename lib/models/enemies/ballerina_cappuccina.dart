@@ -10,8 +10,8 @@ class BallerinaCappuccina extends EnemyBase {
     defense: 7,
     emoji: '🩰',
     color: Colors.pink,
-    imagePath: 'characters/ballerina_cappuccina/Ballerina_Cappuccina.webp',
-    soundPath: 'characters/ballerina_cappuccina/ballerina_cappuccina.mp3',
+    imagePath: 'ballerina_cappuccina.webp',
+    soundPath: 'ballerina_cappuccina.mp3',
   );
 
   @override

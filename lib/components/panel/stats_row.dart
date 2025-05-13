@@ -147,6 +147,8 @@ class StatsRow extends PositionComponent {
 
   void setCharacter(dynamic newCharacter) {
     character = newCharacter;
-    updateUI();
+    if (isLoaded) {
+      updateUI();
+    }
   }
 } 

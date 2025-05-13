@@ -10,8 +10,8 @@ class BrrBrrPatapim extends EnemyBase {
     defense: 9,
     emoji: '❄️',
     color: Colors.blue,
-    imagePath: 'characters/brr_brr_patapim/brr_brr_patapim.webp',
-    soundPath: 'characters/brr_brr_patapim/brr_brr_patapim.mp3',
+    imagePath: 'brr_brr_patapim.webp',
+    soundPath: 'brr_brr_patapim.mp3',
   );
 
   @override

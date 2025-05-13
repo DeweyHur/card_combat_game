@@ -10,8 +10,8 @@ class CapuccinoAssasino extends EnemyBase {
     defense: 6,
     emoji: '☕️',
     color: Colors.brown,
-    imagePath: 'characters/capuccino_assasino/capuccino_assasino.webp',
-    soundPath: 'characters/capuccino_assasino/capuccino_assasino_italian_brainrot.mp3',
+    imagePath: 'capuccino_assasino.webp',
+    soundPath: 'capuccino_assasino_italian_brainrot.mp3',
   );
 
   @override

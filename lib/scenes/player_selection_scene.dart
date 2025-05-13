@@ -13,13 +13,29 @@ import 'package:card_combat_app/components/layout/player_selection_layout.dart';
 import 'base_scene.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/player/knight.dart';
+import 'package:card_combat_app/models/enemies/ballerina_cappuccina.dart';
+import 'package:card_combat_app/models/enemies/bobombini_goosini.dart';
+import 'package:card_combat_app/models/enemies/bobrini_cocococini.dart';
+import 'package:card_combat_app/models/enemies/bombardino_crocodilo.dart';
+import 'package:card_combat_app/models/enemies/brr_brr_patapim.dart';
+import 'package:card_combat_app/models/enemies/burbaloni_luliloli.dart';
+import 'package:card_combat_app/models/enemies/capuccino_assasino.dart';
+import 'package:card_combat_app/models/enemies/tralalero_tralala.dart';
 
 class PlayerSelectionScene extends BaseScene {
-  final List<EnemyBase> availableEnemies = [
-    TungTungTungSahur(),
-    TrippiTroppi(),
-    TrullimeroTrullicina(),
-  ];
+    final availableEnemies = [
+      TungTungTungSahur(),
+      TrippiTroppi(),
+      TrullimeroTrullicina(),
+      BallerinaCappuccina(),
+      BobombiniGoosini(),
+      BobriniCocococini(),
+      BombardinoCrocodilo(),
+      BrrBrrPatapim(),
+      BurbaloniLuliloli(),
+      CapuccinoAssasino(),
+      TralaleroTralala(),
+    ];
 
   late final PlayerSelectionLayout layout;
   late EnemyBase selectedEnemy;
@@ -31,7 +47,7 @@ class PlayerSelectionScene extends BaseScene {
     DataController.instance.set('selectedPlayer', Knight());
     // Randomly select an enemy
     final random = DateTime.now().millisecondsSinceEpoch % availableEnemies.length;
-    selectedEnemy = availableEnemies[random];
+    selectedEnemy = availableEnemies[0];
     // Save selected enemy to DataController
     DataController.instance.set('selectedEnemy', selectedEnemy);
   }

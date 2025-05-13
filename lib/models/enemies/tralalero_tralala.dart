@@ -10,8 +10,8 @@ class TralaleroTralala extends EnemyBase {
     defense: 9,
     emoji: '🎤',
     color: Colors.purpleAccent,
-    imagePath: 'characters/tralalero_tralala/tralalero_tralala.webp',
-    soundPath: 'characters/tralalero_tralala/tralalero_tralala_italian_brainrot_u3ai6wj.mp3',
+    imagePath: 'tralalero_tralala.webp',
+    soundPath: 'tralalero_tralala_italian_brainrot_u3ai6wj.mp3',
   );
 
   @override

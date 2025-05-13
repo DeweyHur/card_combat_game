@@ -82,7 +82,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
         }
       });
     };
-    enemyPanel = EnemyPanel(enemy: enemy);
+    enemyPanel = EnemyPanel();
     panels = [
       cardsPanel,
       PlayerPanel(player: player),

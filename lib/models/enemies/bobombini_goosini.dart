@@ -10,8 +10,8 @@ class BobombiniGoosini extends EnemyBase {
     defense: 7,
     emoji: '💣',
     color: Colors.red,
-    imagePath: 'characters/bobombini_goosini/bobombini_goosini.webp',
-    soundPath: 'characters/bobombini_goosini/bobombini_goosini_italian_brainrot.mp3',
+    imagePath: 'bobombini_goosini.webp',
+    soundPath: 'bobombini_goosini_italian_brainrot.mp3',
   );
 
   @override

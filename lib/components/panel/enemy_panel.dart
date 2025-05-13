@@ -11,9 +11,10 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
-  EnemyBase enemy;
+  late EnemyBase enemy;
   TextComponent? actionText;
   TextComponent? healthText;
   RectangleComponent? separatorLine;
@@ -23,13 +24,14 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
   late final TextComponent nameText;
   late final StatsRow statsRow;
 
-  EnemyPanel({
-    required this.enemy,
-  });
+  EnemyPanel();
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    // Get the current enemy from DataController
+    enemy = DataController.instance.get<EnemyBase>('selectedEnemy')!;
 
     // Add enemy name
     nameText = TextComponent(
@@ -48,6 +50,13 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
     statsRow = StatsRow(character: enemy);
     addToVerticalStack(statsRow, 40);
 
+    // Watch for changes to selectedEnemy (after nameText and statsRow are initialized)
+    DataController.instance.watch('selectedEnemy', (value) {
+      if (value is EnemyBase) {
+        updateEnemy(value);
+      }
+    });
+
     // Add enemy sprite
     try {
       final image = await gameRef.images.load(enemy.imagePath);
@@ -58,8 +67,8 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
       );
       addToVerticalStack(enemySprite!, 200);
       GameLogger.info(LogCategory.ui, 'Enemy sprite:');
-      GameLogger.info(LogCategory.ui, '  - Size: ${enemySprite!.size.x}x${enemySprite!.size.y}');
-      GameLogger.info(LogCategory.ui, '  - Absolute Position: ${enemySprite!.absolutePosition.x},${enemySprite!.absolutePosition.y}');
+      GameLogger.info(LogCategory.ui, '  - Size: \\${enemySprite!.size.x}x\\${enemySprite!.size.y}');
+      GameLogger.info(LogCategory.ui, '  - Absolute Position: \\${enemySprite!.absolutePosition.x},\\${enemySprite!.absolutePosition.y}');
     } catch (e) {
       GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
     }
@@ -87,7 +96,7 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
     addToVerticalStack(actionText!, 20);
 
     healthText = TextComponent(
-      text: 'Health: ${enemy.currentHealth}/${enemy.maxHealth}',
+      text: 'Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,

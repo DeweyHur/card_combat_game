@@ -10,8 +10,8 @@ class BurbaloniLuliloli extends EnemyBase {
     defense: 8,
     emoji: '🫧',
     color: Colors.lightBlueAccent,
-    imagePath: 'characters/burbaloni_luliloli/Burbaloni_Luliloli.webp',
-    soundPath: 'characters/burbaloni_luliloli/burbaloni_luliloli.mp3',
+    imagePath: 'burbaloni_luliloli.webp',
+    soundPath: 'burbaloni_luliloli.mp3',
   );
 
   @override
