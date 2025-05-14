@@ -91,7 +91,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
   @override
   void updateUI() {
     super.updateUI();
-    if (!_isLoaded || combatManager == null) return;
+    if (!_isLoaded) return;
     final player = combatManager.player;
     playerDeckText.text = 'Deck: [36m${player.deck.length}[0m cards';
     playerHandText.text = 'Hand: [36m${player.hand.length}[0m cards';

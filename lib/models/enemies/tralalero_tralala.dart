@@ -18,21 +18,21 @@ class TralaleroTralala extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 60) {
-      return GameCard(
+      return const GameCard(
         name: 'Singing Strike',
         description: 'A powerful vocal attack',
         type: CardType.attack,
         value: 10,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Melodic Heal',
         description: 'Heals with a soothing melody',
         type: CardType.heal,
         value: 8,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Discordant Note',
         description: 'Confuses the target with a discordant note',
         type: CardType.statusEffect,

@@ -1,6 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flame/palette.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/effects/fading_text_component.dart';

@@ -1,11 +1,7 @@
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
-import 'package:flame/game.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
 
 class PlayerSelectionPanel extends BasePanel with HasGameRef {
   PlayerSelectionPanel();

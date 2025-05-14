@@ -18,21 +18,21 @@ class BallerinaCappuccina extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 70) {
-      return GameCard(
+      return const GameCard(
         name: 'Pirouette Strike',
         description: 'A spinning attack',
         type: CardType.attack,
         value: 12,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Graceful Heal',
         description: 'Heals with a graceful dance',
         type: CardType.heal,
         value: 7,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Dizzy Spin',
         description: 'Confuses the target with a fast spin',
         type: CardType.statusEffect,

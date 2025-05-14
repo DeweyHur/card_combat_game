@@ -1,7 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:card_combat_app/components/effects/damage_effect.dart';
 import 'package:card_combat_app/components/effects/heal_effect.dart';
 import 'package:card_combat_app/components/effects/status_effect.dart';
@@ -107,7 +105,7 @@ class GameEffects {
     Function(GameCard) onCardPlayed,
     bool isPlayerTurn,
   ) {
-    final totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + 
+    const totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + 
         ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = cardAreaPosition.x + (cardAreaSize.x - totalWidth) / 2;
 

@@ -5,8 +5,6 @@ import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/components/panel/base_player_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/components/layout/name_emoji_component.dart';
-import 'package:card_combat_app/components/panel/stats_row.dart';
 
 class PlayerDetailPanel extends BasePlayerPanel {
   late TextComponent descriptionText;

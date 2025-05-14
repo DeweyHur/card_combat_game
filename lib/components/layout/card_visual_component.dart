@@ -1,11 +1,7 @@
 import 'package:flame/components.dart';
-import 'package:flame/game.dart';
-import 'package:flame/palette.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/game/card_combat_game.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 
 class CardVisualComponent extends PositionComponent with TapCallbacks {
   final GameCard cardData;
@@ -56,7 +52,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     add(cardBorder);
 
     // Add pixel art corner decorations
-    final cornerSize = 10.0;
+    const cornerSize = 10.0;
     final cornerPaint = Paint()
       ..color = _getCardColor()
       ..style = PaintingStyle.fill;
@@ -181,10 +177,6 @@ class CardVisualComponent extends PositionComponent with TapCallbacks {
     }
   }
 
-  @override
-  void onMount() {
-    super.onMount();
-  }
 
   Color _getCardColor() {
     switch (cardData.type) {

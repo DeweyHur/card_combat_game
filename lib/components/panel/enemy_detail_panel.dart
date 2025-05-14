@@ -1,4 +1,3 @@
-import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/components/panel/base_enemy_panel.dart';

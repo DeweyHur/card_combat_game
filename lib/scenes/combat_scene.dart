@@ -1,6 +1,4 @@
-import 'package:flame/game.dart';
 import 'package:flame/components.dart';
-import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/game_card.dart';

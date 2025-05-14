@@ -20,21 +20,21 @@ class TrullimeroTrullicina extends EnemyBase {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     
     if (random < 70) {
-      return GameCard(
+      return const GameCard(
         name: 'Comedy Strike',
         description: 'A joke that hurts',
         type: CardType.attack,
         value: 12,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Laughing Heal',
         description: 'Heals through laughter',
         type: CardType.heal,
         value: 6,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Confusing Joke',
         description: 'Confuses the target with a complex joke',
         type: CardType.statusEffect,

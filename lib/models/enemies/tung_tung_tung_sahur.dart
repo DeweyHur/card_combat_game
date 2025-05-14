@@ -20,21 +20,21 @@ class TungTungTungSahur extends EnemyBase {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     
     if (random < 60) {
-      return GameCard(
+      return const GameCard(
         name: 'Drum Strike',
         description: 'A powerful drum attack',
         type: CardType.attack,
         value: 10,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Rhythm Healing',
         description: 'Heals through the power of rhythm',
         type: CardType.heal,
         value: 8,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Dizzy Beat',
         description: 'Confuses the target with complex rhythms',
         type: CardType.statusEffect,

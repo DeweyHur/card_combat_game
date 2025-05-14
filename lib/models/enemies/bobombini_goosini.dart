@@ -18,21 +18,21 @@ class BobombiniGoosini extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 65) {
-      return GameCard(
+      return const GameCard(
         name: 'Bomb Toss',
         description: 'Throws a bomb at the target',
         type: CardType.attack,
         value: 13,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Fuse Heal',
         description: 'Heals by lighting a fuse',
         type: CardType.heal,
         value: 7,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Smoke Screen',
         description: 'Confuses the target with smoke',
         type: CardType.statusEffect,

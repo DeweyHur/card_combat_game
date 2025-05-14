@@ -42,8 +42,4 @@ class Paladin extends PlayerBase {
     super.heal(calculateHealing(amount));
   }
 
-  @override
-  void playCard(GameCard card) {
-    super.playCard(card);
-  }
 } 

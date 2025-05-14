@@ -18,21 +18,21 @@ class BrrBrrPatapim extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 75) {
-      return GameCard(
+      return const GameCard(
         name: 'Frost Strike',
         description: 'A chilling attack',
         type: CardType.attack,
         value: 16,
       );
     } else if (random < 95) {
-      return GameCard(
+      return const GameCard(
         name: 'Icy Heal',
         description: 'Heals with icy winds',
         type: CardType.heal,
         value: 10,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Snow Confusion',
         description: 'Confuses the target with a snowstorm',
         type: CardType.statusEffect,

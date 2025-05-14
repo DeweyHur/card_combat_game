@@ -1,5 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 
 mixin VerticalStackMixin on PositionComponent {
   double _currentTopPos = 0.0;

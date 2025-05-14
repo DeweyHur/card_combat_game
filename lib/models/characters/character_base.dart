@@ -1,4 +1,3 @@
-import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_card.dart';
 
@@ -70,7 +69,7 @@ abstract class CharacterBase {
     final statusStrings = statusEffects.entries.map((entry) {
       final effect = entry.key;
       final duration = entry.value;
-      String effectText = _getStatusEmoji(effect) + ' ' + effect.toString().split('.').last;
+      String effectText = '${_getStatusEmoji(effect)} ${effect.toString().split('.').last}';
       return '$effectText ($duration)';
     }).join(', ');
     

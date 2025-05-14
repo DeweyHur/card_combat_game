@@ -16,7 +16,7 @@ void main() async {
     print('card_play.mp3 is valid and playing');
     
     // Wait for sound to finish
-    await Future.delayed(Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 300));
     
     // Test damage sound
     print('\nTesting damage.mp3...');
@@ -25,7 +25,7 @@ void main() async {
     print('damage.mp3 is valid and playing');
     
     // Wait for sound to finish
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
     
   } catch (e) {
     print('Error testing sounds: $e');

@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
@@ -99,7 +98,7 @@ class CardsPanel extends BasePanel {
   }
 
   Vector2 calculateCardPosition(int index) {
-    final totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
+    const totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = (size.x - totalWidth) / 2;
 
     final pos = Vector2(

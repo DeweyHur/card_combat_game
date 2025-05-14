@@ -18,21 +18,21 @@ class BombardinoCrocodilo extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 70) {
-      return GameCard(
+      return const GameCard(
         name: 'Tail Whip',
         description: 'Whips with a powerful tail',
         type: CardType.attack,
         value: 14,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Swamp Heal',
         description: 'Heals in the swamp',
         type: CardType.heal,
         value: 7,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Croc Confusion',
         description: 'Confuses the target with a crocodile grin',
         type: CardType.statusEffect,

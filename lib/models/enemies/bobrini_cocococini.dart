@@ -18,21 +18,21 @@ class BobriniCocococini extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 60) {
-      return GameCard(
+      return const GameCard(
         name: 'Coconut Smash',
         description: 'Hits with a coconut',
         type: CardType.attack,
         value: 11,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Coconut Water',
         description: 'Heals with coconut water',
         type: CardType.heal,
         value: 8,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Slippery Shell',
         description: 'Confuses the target with a slippery shell',
         type: CardType.statusEffect,

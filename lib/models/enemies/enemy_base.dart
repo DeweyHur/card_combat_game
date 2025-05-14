@@ -2,7 +2,6 @@ import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/character.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:flutter/material.dart';
 
 abstract class EnemyBase extends Character {
   final String imagePath;

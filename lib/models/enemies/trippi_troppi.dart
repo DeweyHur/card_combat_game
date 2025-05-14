@@ -20,21 +20,21 @@ class TrippiTroppi extends EnemyBase {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     
     if (random < 80) {
-      return GameCard(
+      return const GameCard(
         name: 'Acrobatic Strike',
         description: 'A flip that hurts',
         type: CardType.attack,
         value: 15,
       );
     } else if (random < 95) {
-      return GameCard(
+      return const GameCard(
         name: 'Tumbling Heal',
         description: 'Heals through acrobatics',
         type: CardType.heal,
         value: 5,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Dizzy Flip',
         description: 'Confuses the target with complex flips',
         type: CardType.statusEffect,

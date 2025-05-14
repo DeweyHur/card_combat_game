@@ -15,7 +15,7 @@ abstract class BasePanel extends PositionComponent with VerticalStackMixin {
     resetVerticalStack();
     
     // Set size and position based on gameRef
-    GameLogger.info(LogCategory.ui, '${runtimeType} mounted at position ${position.x},${position.y} with size ${size.x}x${size.y}');
+    GameLogger.info(LogCategory.ui, '$runtimeType mounted at position ${position.x},${position.y} with size ${size.x}x${size.y}');
 
     // Create background
     background = RectangleComponent(

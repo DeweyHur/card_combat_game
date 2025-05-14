@@ -1,5 +1,3 @@
-import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';

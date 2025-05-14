@@ -80,7 +80,7 @@ abstract class Character {
 
   GameCard getNextAction() {
     // This is a placeholder. Enemy classes will override this method
-    return GameCard(
+    return const GameCard(
       name: 'Basic Attack',
       description: 'A basic attack',
       type: CardType.attack,

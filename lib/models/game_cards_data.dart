@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'game_card.dart';
 
 // Attack Cards
-final GameCard slash = GameCard(
+const GameCard slash = GameCard(
   name: 'Slash',
   description: 'Deal 5 damage',
   type: CardType.attack,
@@ -10,7 +10,7 @@ final GameCard slash = GameCard(
   color: Colors.red,
 );
 
-final GameCard heavyStrike = GameCard(
+const GameCard heavyStrike = GameCard(
   name: 'Heavy Strike',
   description: 'Deal 8 damage',
   type: CardType.attack,
@@ -19,7 +19,7 @@ final GameCard heavyStrike = GameCard(
 );
 
 // Healing Cards
-final GameCard heal = GameCard(
+const GameCard heal = GameCard(
   name: 'Heal',
   description: 'Restore 3 HP',
   type: CardType.heal,
@@ -27,7 +27,7 @@ final GameCard heal = GameCard(
   color: Colors.green,
 );
 
-final GameCard greaterHeal = GameCard(
+const GameCard greaterHeal = GameCard(
   name: 'Greater Heal',
   description: 'Restore 5 HP',
   type: CardType.heal,
@@ -36,7 +36,7 @@ final GameCard greaterHeal = GameCard(
 );
 
 // Status Effect Cards
-final GameCard poison = GameCard(
+const GameCard poison = GameCard(
   name: 'Poison',
   description: 'Apply poison for 3 turns',
   type: CardType.statusEffect,
@@ -47,7 +47,7 @@ final GameCard poison = GameCard(
 );
 
 // Cure Cards
-final GameCard cleanse = GameCard(
+const GameCard cleanse = GameCard(
   name: 'Cleanse',
   description: 'Remove all status effects',
   type: CardType.cure,

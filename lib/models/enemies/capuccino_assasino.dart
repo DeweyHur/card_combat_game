@@ -18,21 +18,21 @@ class CapuccinoAssasino extends EnemyBase {
   GameCard selectAction() {
     final random = DateTime.now().millisecondsSinceEpoch % 100;
     if (random < 70) {
-      return GameCard(
+      return const GameCard(
         name: 'Espresso Shot',
         description: 'A strong coffee attack',
         type: CardType.attack,
         value: 14,
       );
     } else if (random < 90) {
-      return GameCard(
+      return const GameCard(
         name: 'Foam Heal',
         description: 'Heals with creamy foam',
         type: CardType.heal,
         value: 7,
       );
     } else {
-      return GameCard(
+      return const GameCard(
         name: 'Caffeine Confusion',
         description: 'Confuses the target with a caffeine rush',
         type: CardType.statusEffect,

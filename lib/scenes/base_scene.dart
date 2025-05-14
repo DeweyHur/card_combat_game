@@ -1,7 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'scene_manager.dart';
 
 class BaseScene extends FlameGame {
   final Color sceneBackgroundColor;
@@ -16,13 +15,13 @@ class BaseScene extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.game, 'Scene loaded: ${runtimeType}');
+    GameLogger.debug(LogCategory.game, 'Scene loaded: $runtimeType');
   }
 
   @override
   void onMount() {
     super.onMount();
-    GameLogger.debug(LogCategory.game, 'Scene mounted: ${runtimeType}');
+    GameLogger.debug(LogCategory.game, 'Scene mounted: $runtimeType');
   }
 
   @override
@@ -31,14 +30,10 @@ class BaseScene extends FlameGame {
     for (final component in children.toList()) {
       component.removeFromParent();
     }
-    GameLogger.debug(LogCategory.game, 'Scene removed: ${runtimeType}');
+    GameLogger.debug(LogCategory.game, 'Scene removed: $runtimeType');
     super.onRemove();
   }
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-  }
 
   @override
   void render(Canvas canvas) {

@@ -1,4 +1,3 @@
-import 'package:flame/components.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';

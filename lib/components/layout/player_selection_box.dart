@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/player/knight.dart';
 import 'package:card_combat_app/models/player/mage.dart';
@@ -127,11 +126,9 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   }
 
   void updateAppearance() {
-    if (background != null) {
-      background.paint = Paint()
-        ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3);
+    background.paint = Paint()
+      ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3);
     }
-  }
 
   @override
   void onHoverEnter() {
@@ -149,6 +146,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     }
   }
 
+  @override
   bool containsPoint(Vector2 point) {
     return point.x >= position.x &&
            point.x <= position.x + size.x &&
@@ -206,8 +204,4 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     );
   }
 
-  @override
-  void update(double dt) {
-    super.update(dt);
-  }
 } 
