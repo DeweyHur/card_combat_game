@@ -46,7 +46,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     });
     try {
       audioPlayer = AudioPlayer();
-      await audioPlayer?.setSource(AssetSource(enemy.soundPath));
+      await audioPlayer?.setSource(AssetSource('sounds/${enemy.soundPath}'));
       await audioPlayer?.setVolume(0.3);
       await audioPlayer?.resume();
     } catch (e) {

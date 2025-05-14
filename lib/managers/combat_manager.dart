@@ -3,6 +3,7 @@ import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/managers/sound_manager.dart';
 
 // --- Combat Event System ---
 enum CombatEventType { damage, heal, status, cure }
@@ -37,6 +38,7 @@ class CombatManager {
   late EnemyBase enemy;
   bool isPlayerTurn = true;
   final List<CombatWatcher> _watchers = [];
+  final SoundManager _soundManager = SoundManager();
 
   void initialize({required PlayerBase player, required EnemyBase enemy}) {
     this.player = player;
@@ -84,6 +86,9 @@ class CombatManager {
 
     GameLogger.info(LogCategory.game, 'Playing card: ${card.name}');
 
+    // Play the card's sound effect
+    _soundManager.playCardSound(card.type);
+
     switch (card.type) {
       case CardType.attack:
         enemy.takeDamage(card.value);
@@ -110,6 +115,8 @@ class CombatManager {
       case CardType.statusEffect:
         if (card.statusEffectToApply != null) {
           enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration ?? 1);
+          // Play status effect sound
+          _soundManager.playStatusEffectSound(card.statusEffectToApply!);
           _notifyWatchers(CombatEvent(
             type: CombatEventType.status,
             target: enemy,
