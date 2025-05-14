@@ -4,7 +4,6 @@ import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/player_panel.dart';
-import 'package:card_combat_app/components/panel/enemy_panel.dart';
 import 'package:card_combat_app/components/panel/cards_panel.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
@@ -13,6 +12,7 @@ import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
+import 'package:card_combat_app/components/panel/enemy_panel.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
@@ -83,7 +83,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
         }
       });
     };
-    enemyPanel = EnemyPanel();
+    enemyPanel = EnemyPanel(mode: EnemyPanelMode.combat);
     panels = [
       cardsPanel,
       PlayerPanel(player: player),
@@ -127,7 +127,6 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
       // Update enemy's next action with emojis
       final nextAction = CombatManager().enemy.getNextAction();
       (panels[2] as EnemyPanel).updateAction(formatEnemyActionWithEmojis(CombatManager().enemy, nextAction));
-      // Update enemy health
       (panels[2] as EnemyPanel).updateHealth();
     }
 

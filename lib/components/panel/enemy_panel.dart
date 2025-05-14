@@ -18,7 +18,7 @@ import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
   late EnemyBase enemy;
   TextComponent? actionText;
-  TextComponent? healthText;
+  TextComponent? descriptionText;
   RectangleComponent? separatorLine;
   SpriteComponent? enemySprite;
   AudioPlayer? audioPlayer;
@@ -26,7 +26,9 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
   late final StatsRow statsRow;
   late final NameEmojiComponent nameEmojiComponent;
 
-  EnemyPanel();
+  final EnemyPanelMode mode;
+
+  EnemyPanel({this.mode = EnemyPanelMode.combat});
 
   @override
   Future<void> onLoad() async {
@@ -44,9 +46,6 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
         size: Vector2(200, 200),
       );
       addToVerticalStack(enemySprite!, 200);
-      GameLogger.info(LogCategory.ui, 'Enemy sprite:');
-      GameLogger.info(LogCategory.ui, '  - Size: \\${enemySprite!.size.x}x\\${enemySprite!.size.y}');
-      GameLogger.info(LogCategory.ui, '  - Absolute Position: \\${enemySprite!.absolutePosition.x},\\${enemySprite!.absolutePosition.y}');
     } catch (e) {
       GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
     }
@@ -76,32 +75,35 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
       GameLogger.warning(LogCategory.audio, 'Failed to load enemy sound: $e');
     }
 
-    // Create text components
-    final initialAction = ActionWithEmojiComponent.format(
-      enemy,
-      enemy.getNextAction(),
-    );
-    actionText = TextComponent(
-      text: 'Next Action: $initialAction',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+    if (mode == EnemyPanelMode.combat) {
+      // Create text components for next action
+      final initialAction = ActionWithEmojiComponent.format(
+        enemy,
+        enemy.getNextAction(),
+      );
+      actionText = TextComponent(
+        text: 'Next Action: $initialAction',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
-      ),
-    );
-    addToVerticalStack(actionText!, 20);
-
-    healthText = TextComponent(
-      text: 'Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+      );
+      addToVerticalStack(actionText!, 20);
+    } else if (mode == EnemyPanelMode.detail) {
+      // Create description text
+      descriptionText = TextComponent(
+        text: _getEnemyDescription(enemy),
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
-      ),
-    );
-    addToVerticalStack(healthText!, 20);
+      );
+      addToVerticalStack(descriptionText!, 20);
+    }
 
     // Add separator line
     separatorLine = RectangleComponent(
@@ -121,8 +123,8 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
   }
 
   void updateHealth() {
-    if (_isLoaded && healthText != null) {
-      healthText!.text = 'Health: ${enemy.currentHealth}/${enemy.maxHealth}';
+    if (_isLoaded) {
+      statsRow.updateUI();
     }
   }
 
@@ -137,7 +139,15 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
     enemy = newEnemy;
     nameEmojiComponent.updateCharacter(enemy);
     statsRow.setCharacter(enemy);
+    if (mode == EnemyPanelMode.detail && descriptionText != null) {
+      descriptionText!.text = _getEnemyDescription(enemy);
+    }
     // TODO: Update sprite when enemy changes
+  }
+
+  String _getEnemyDescription(EnemyBase enemy) {
+    // TODO: Replace with real description if available
+    return 'A mysterious enemy with unique abilities.';
   }
 
   @override
@@ -181,4 +191,6 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
       }
     }
   }
-} 
+}
+
+enum EnemyPanelMode { detail, combat } 

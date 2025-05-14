@@ -25,8 +25,8 @@ import 'package:card_combat_app/components/panel/player_panel.dart';
 class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
-  late EnemyPanel enemyPanel;
   late PositionComponent battleButton;
+  late EnemyPanel enemyPanel;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
 
@@ -42,9 +42,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Initialize selected player and enemy
     detailPanel = PlayerDetailPanel();
     selectionPanel = PlayerSelectionPanel();
-    enemyPanel = EnemyPanel();
     
-    addToVerticalStack(enemyPanel, size.y * 0.2);
     addToVerticalStack(TextComponent(
       text: 'Select Your Character',
       textRenderer: TextPaint(
@@ -56,7 +54,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       ),
       size: Vector2(size.x, 50),
     ), 50);
-    addToVerticalStack(detailPanel, size.y * 0.3);
+    addToVerticalStack(detailPanel, size.y * 0.17);
     addToVerticalStack(selectionPanel, size.y * 0.2);
 
     battleButton = PositionComponent(
@@ -84,6 +82,9 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
         ),
       );
     add(battleButton);
+
+    enemyPanel = EnemyPanel(mode: EnemyPanelMode.detail);
+    addToVerticalStack(enemyPanel, size.y * 0.4);
 
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
