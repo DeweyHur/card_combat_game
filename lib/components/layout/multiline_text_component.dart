@@ -2,24 +2,34 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class MultilineTextComponent extends PositionComponent {
-  final String text;
   final TextStyle style;
   final double maxWidth;
   late final TextPaint _textPaint;
-  late final List<String> _lines;
+  List<String> _lines = [];
   double _height = 0;
   double _lineHeight = 0;
+  String _text;
+
+  @override
+  String get text => _text;
+  set text(String value) {
+    _text = value;
+    _lines = _splitTextToLines(_text, style, maxWidth);
+    _height = _lines.length * _lineHeight;
+    size = Vector2(maxWidth, _height);
+  }
 
   MultilineTextComponent({
-    required this.text,
+    required String text,
     required this.style,
     required this.maxWidth,
     Vector2? position,
     Vector2? size,
     Anchor anchor = Anchor.topLeft,
-  }) : super(position: position ?? Vector2.zero(), size: size ?? Vector2.zero(), anchor: anchor) {
+  })  : _text = text,
+        super(position: position ?? Vector2.zero(), size: size ?? Vector2.zero(), anchor: anchor) {
     _textPaint = TextPaint(style: style);
-    _lines = _splitTextToLines(text, style, maxWidth);
+    _lines = _splitTextToLines(_text, style, maxWidth);
     _lineHeight = _calculateLineHeight(style);
     _height = _lines.length * _lineHeight;
     this.size = Vector2(maxWidth, _height);
