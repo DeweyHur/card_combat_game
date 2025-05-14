@@ -10,12 +10,10 @@ class EnemyCombatPanel extends BaseEnemyPanel {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final initialAction = ActionWithEmojiComponent.format(
-      enemy,
-      enemy.getNextAction(),
-    );
+    final action = enemy.getNextAction();
+    final initialAction = ActionWithEmojiComponent.format(enemy, action);
     actionText = TextComponent(
-      text: 'Next Action: $initialAction',
+      text: 'Next Action: $initialAction\n${action.description}',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -25,7 +23,13 @@ class EnemyCombatPanel extends BaseEnemyPanel {
     );
     addToVerticalStack(actionText!, 20);
   }
+  void updateActionWithDescription(String action, String description) {
+    if (isLoaded && actionText != null) {
+      actionText!.text = 'Next Action: $action\n$description';
+    }
+  }
   void updateAction(String action) {
+    // Deprecated: use updateActionWithDescription instead for description support
     if (isLoaded && actionText != null) {
       actionText!.text = 'Next Action: $action';
     }

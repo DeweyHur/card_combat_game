@@ -10,7 +10,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
   static const double cardWidth = 70.0;
   static const double cardHeight = 90.0;
   static const double cardSpacing = 8.0;
-  static const double cardTopMargin = 20.0;
+  static const double cardTopMargin = 40.0;
   static const int maxCards = 5;
 
   CardVisualComponent(

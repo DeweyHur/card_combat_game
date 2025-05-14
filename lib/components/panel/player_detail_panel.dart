@@ -16,27 +16,6 @@ class PlayerDetailPanel extends BasePlayerPanel {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
-
-    descriptionText = TextComponent(
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-    );
-    addToVerticalStack(descriptionText, 20);
-
-    deckText = TextComponent(
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-    );
-    addToVerticalStack(deckText, 20);
-
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
   }
 
@@ -58,14 +37,12 @@ class PlayerDetailPanel extends BasePlayerPanel {
   @override
   void updatePlayer(PlayerBase newPlayer) {
     super.updatePlayer(newPlayer);
-    descriptionText.text = player.description;
-    deckText.text = 'Starting Deck: [36m${player.deck.length}[0m cards';
+    updateDescription(player.description);
   }
 
   @override
   void updateUI() {
     super.updateUI();
-    descriptionText.text = player.description;
-    deckText.text = 'Starting Deck: [36m${player.deck.length}[0m cards';
+    updateDescription(player.description);
   }
 } 

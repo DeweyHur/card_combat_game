@@ -129,7 +129,10 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
       turnText.text = CombatManager().isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
       // Update enemy's next action with emojis
       final nextAction = CombatManager().enemy.getNextAction();
-      (panels[2] as EnemyCombatPanel).updateAction(formatEnemyActionWithEmojis(CombatManager().enemy, nextAction));
+      (panels[2] as EnemyCombatPanel).updateActionWithDescription(
+        formatEnemyActionWithEmojis(CombatManager().enemy, nextAction),
+        nextAction.description,
+      );
       (panels[2] as EnemyCombatPanel).updateHealth();
     }
 

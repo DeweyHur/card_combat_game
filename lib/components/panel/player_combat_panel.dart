@@ -34,6 +34,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     super.updateUI();
     if (!_isLoaded) return;
     final player = combatManager.player;
+    updateDescription(player.description);
   }
 
   @override
