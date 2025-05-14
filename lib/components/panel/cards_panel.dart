@@ -7,6 +7,7 @@ import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:flame/events.dart';
+import 'package:flame/input.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
@@ -15,9 +16,11 @@ class CardsPanel extends BasePanel {
 
   List<CardVisualComponent> cardVisuals = [];
   GameCard? selectedCard;
-  PositionComponent? playButton;
+  ButtonComponent? playButton;
   CardDetailPanel? cardDetailPanel;
   bool playButtonVisible = false;
+  
+  final double buttonHeight = 120.0;
 
   CardsPanel({
     required this.player,
@@ -46,31 +49,39 @@ class CardsPanel extends BasePanel {
     _showHand();
 
     // Add Play button (hidden by default)
-    playButton = PositionComponent(
-      size: Vector2(size.x/4, 140),
-      position: Vector2( 0, size.y),
-      anchor: Anchor.bottomLeft,
-    )
-      ..add(RectangleComponent(
-        size: Vector2(size.x/2, 140),
+    playButton = ButtonComponent(
+      button: RectangleComponent(
+        size: Vector2(size.x / 2, buttonHeight),
         paint: Paint()..color = Colors.blue,
         anchor: Anchor.topLeft,
-      ))
-      ..add(
-        TextComponent(
-          text: 'Play',
-          textRenderer: TextPaint(
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        children: [
+          TextComponent(
+            text: 'Play',
+            textRenderer: TextPaint(
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            size: Vector2(size.x / 2, buttonHeight),
+            position: Vector2((size.x / 2) / 2, buttonHeight / 2),
+            anchor: Anchor.center,
           ),
-          size: Vector2(size.x/2, 140),
-          position: Vector2( size.x/4, size.y/4),
-          anchor: Anchor.center,
-        ),
-      );
+        ],
+      ),
+      position: Vector2(0, size.y),
+      anchor: Anchor.bottomLeft,
+      onPressed: () {
+        if (onCardPlayed != null && selectedCard != null) {
+          onCardPlayed!(selectedCard!);
+          selectedCard = null;
+          _hidePlayButton();
+          cardDetailPanel?.removeFromParent();
+          cardDetailPanel = null;
+        }
+      },
+    );
     playButtonVisible = false;
   }
 
@@ -97,8 +108,8 @@ class CardsPanel extends BasePanel {
           // Show CardDetailPanel for selectedCard
           cardDetailPanel?.removeFromParent();
           cardDetailPanel = CardDetailPanel(
-            position: Vector2(size.x / 2, size.y - 140),
-            size: Vector2(size.x / 2, 140),
+            position: Vector2(size.x / 2, size.y - buttonHeight),
+            size: Vector2(size.x / 2, buttonHeight),
           );
           add(cardDetailPanel!);
           await cardDetailPanel!.onLoad();
@@ -133,16 +144,7 @@ class CardsPanel extends BasePanel {
 
   @override
   bool onTapDown(TapDownInfo info) {
-    final local = info.eventPosition.global;
-    if (playButton != null && playButtonVisible && playButton!.toRect().contains(local.toOffset()) && selectedCard != null) {
-      if (onCardPlayed != null) onCardPlayed!(selectedCard!);
-      selectedCard = null;
-      _hidePlayButton();
-      // Hide CardDetailPanel
-      cardDetailPanel?.removeFromParent();
-      cardDetailPanel = null;
-      return true;
-    }
+    // No longer handle play button tap here; ButtonComponent handles its own taps.
     return false;
   }
 
