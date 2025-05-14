@@ -45,6 +45,10 @@ abstract class EnemyBase extends Character {
         removeStatusEffect();
         GameLogger.info(LogCategory.combat, '$name removes status effects');
         break;
+      case CardType.shield:
+      case CardType.shieldAttack:
+        // Enemies do not use shield or shield attack cards by default
+        break;
     }
   }
 

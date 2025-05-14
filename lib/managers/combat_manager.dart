@@ -131,6 +131,35 @@ class CombatManager {
         ));
         GameLogger.info(LogCategory.game, 'Removed all status effects from ${player.name}');
         break;
+      case CardType.shield:
+        player.addShield(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.heal, // treat as positive effect
+          target: player,
+          value: card.value,
+          description: 'Player gained ${card.value} shield',
+          card: card,
+        ));
+        GameLogger.info(LogCategory.game, 'Gained ${card.value} shield for ${player.name}');
+        break;
+      case CardType.shieldAttack:
+        final shieldValue = player.shield;
+        if (shieldValue > 0) {
+          enemy.takeDamage(shieldValue);
+          _notifyWatchers(CombatEvent(
+            type: CombatEventType.damage,
+            target: enemy,
+            value: shieldValue,
+            description: 'Player dealt ${shieldValue} shield attack damage',
+            card: card,
+          ));
+          GameLogger.info(LogCategory.game, 'Dealt ${shieldValue} shield attack damage to ${enemy.name}');
+          player.shield = 0;
+          GameLogger.info(LogCategory.game, 'Player shield reset to 0 after shield attack');
+        } else {
+          GameLogger.info(LogCategory.game, 'No shield to use for shield attack');
+        }
+        break;
     }
 
     player.playCard(card);
@@ -201,6 +230,10 @@ class CombatManager {
           card: action,
         ));
         GameLogger.info(LogCategory.game, 'Enemy removed all status effects');
+        break;
+      case CardType.shield:
+      case CardType.shieldAttack:
+        // Enemies do not use shield or shield attack cards by default
         break;
     }
 

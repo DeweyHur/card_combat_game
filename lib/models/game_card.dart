@@ -5,6 +5,8 @@ enum CardType {
   heal,
   statusEffect,
   cure,
+  shield,        // Adds shield to the player
+  shieldAttack,  // Attacks using shield value
 }
 
 enum StatusEffect {

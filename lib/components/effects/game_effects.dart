@@ -18,6 +18,10 @@ class GameEffects {
         return Colors.purple;
       case CardType.cure:
         return Colors.blue;
+      case CardType.shield:
+        return Colors.blueAccent;
+      case CardType.shieldAttack:
+        return Colors.orange;
     }
   }
 
@@ -53,6 +57,23 @@ class GameEffects {
           size: size,
           value: value,
           onComplete: onComplete,
+        );
+      case CardType.shield:
+        return HealEffect(
+          position: position,
+          size: size,
+          value: value,
+          onComplete: onComplete,
+        );
+      case CardType.shieldAttack:
+        return DamageEffect(
+          position: position,
+          size: size,
+          value: value,
+          isPlayer: false,
+          onComplete: onComplete,
+          color: color ?? Colors.orange,
+          emoji: emoji ?? '🔰',
         );
     }
   }

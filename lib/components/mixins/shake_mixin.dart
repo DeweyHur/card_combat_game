@@ -29,6 +29,12 @@ mixin ShakeMixin on PositionComponent {
       case CardType.cure:
         await shake(horizontal: false, intensity: 2, times: 2);
         break;
+      case CardType.shield:
+        await shake(horizontal: false, intensity: 2, times: 2);
+        break;
+      case CardType.shieldAttack:
+        await shake(horizontal: true, intensity: 16, times: 10);
+        break;
     }
   }
 } 

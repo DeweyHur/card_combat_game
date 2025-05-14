@@ -67,7 +67,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
     add(emojiText);
 
     // Card value (bottom right)
-    if (cardData.type == CardType.attack || cardData.type == CardType.heal) {
+    if (cardData.type == CardType.attack || cardData.type == CardType.heal || cardData.type == CardType.shield) {
       final valueText = TextComponent(
         text: cardData.value.toString(),
         textRenderer: TextPaint(
@@ -95,6 +95,10 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
         return Colors.purple;
       case CardType.cure:
         return Colors.blue;
+      case CardType.shield:
+        return Colors.blueGrey;
+      case CardType.shieldAttack:
+        return Colors.amber;
     }
   }
 
@@ -108,6 +112,10 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
         return '🌀';
       case CardType.cure:
         return '✨';
+      case CardType.shield:
+        return '🛡️';
+      case CardType.shieldAttack:
+        return '🔰';
     }
   }
 

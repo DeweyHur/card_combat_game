@@ -14,6 +14,8 @@ class StatsRow extends PositionComponent {
   late TextComponent defenseText;
   late TextComponent energyEmoji;
   late TextComponent energyText;
+  late TextComponent shieldEmoji;
+  late TextComponent shieldText;
 
   static const double barWidth = 100;
   static const double barHeight = 16;
@@ -64,13 +66,34 @@ class StatsRow extends PositionComponent {
     );
     add(hpText);
 
-    // Attack emoji and value
+    // Shield emoji and value
+    shieldEmoji = TextComponent(
+      text: '🛡️',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 18),
+      ),
+      position: Vector2(28 + barWidth + 60, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(shieldEmoji);
+
+    shieldText = TextComponent(
+      text: '${character.shield}',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 14, color: Colors.lightBlueAccent),
+      ),
+      position: Vector2(28 + barWidth + 80, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(shieldText);
+
+    // Shift attack/defense/energy to the right
     attackEmoji = TextComponent(
       text: '🗡️',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 18),
       ),
-      position: Vector2(28 + barWidth + 60, 0),
+      position: Vector2(28 + barWidth + 110, 0),
       anchor: Anchor.centerLeft,
     );
     add(attackEmoji);
@@ -80,18 +103,17 @@ class StatsRow extends PositionComponent {
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
-      position: Vector2(28 + barWidth + 80, 0),
+      position: Vector2(28 + barWidth + 130, 0),
       anchor: Anchor.centerLeft,
     );
     add(attackText);
 
-    // Defense emoji and value
     defenseEmoji = TextComponent(
       text: '🛡️',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 18),
       ),
-      position: Vector2(28 + barWidth + 110, 0),
+      position: Vector2(28 + barWidth + 160, 0),
       anchor: Anchor.centerLeft,
     );
     add(defenseEmoji);
@@ -101,19 +123,18 @@ class StatsRow extends PositionComponent {
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
-      position: Vector2(28 + barWidth + 130, 0),
+      position: Vector2(28 + barWidth + 180, 0),
       anchor: Anchor.centerLeft,
     );
     add(defenseText);
 
-    // Energy bar and value (only for player)
     if (character is PlayerBase) {
       energyText = TextComponent(
         text: _energyBarString(),
         textRenderer: TextPaint(
           style: const TextStyle(fontSize: 18, color: Colors.amber),
         ),
-        position: Vector2(28 + barWidth + 160, 0),
+        position: Vector2(28 + barWidth + 210, 0),
         anchor: Anchor.centerLeft,
       );
       add(energyText);
@@ -128,6 +149,7 @@ class StatsRow extends PositionComponent {
   void updateUI() {
     healthBarFg.size.x = _healthBarFill();
     hpText.text = '${character.currentHealth}/${character.maxHealth}';
+    shieldText.text = '${character.shield}';
     attackText.text = '${character.attack}';
     defenseText.text = '${character.defense}';
     if (character is PlayerBase) {

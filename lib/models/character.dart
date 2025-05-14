@@ -12,6 +12,9 @@ abstract class Character {
   final Color color;
   StatusEffect? statusEffect;
   int? statusDuration;
+PlayerDetailPanel  
+  /// Shield can grow without limit and absorbs damage before HP.
+  int shield = 0;
 
   Character({
     required this.name,
@@ -22,7 +25,23 @@ abstract class Character {
     required this.color,
   }) : currentHealth = maxHealth;
 
-  void takeDamage(int damage) {
+  /// Damage is applied to shield first, then HP. If [bypassShield] is true, damage goes directly to HP (for Poison/Penetrate).
+  void takeDamage(int damage, {bool bypassShield = false}) {
+    if (!bypassShield && shield > 0) {
+      if (shield >= damage) {
+        shield -= damage;
+        GameLogger.info(LogCategory.combat, '$name loses $damage shield. Shield: $shield');
+        return;
+      } else {
+        int remaining = damage - shield;
+        GameLogger.info(LogCategory.combat, '$name loses $shield shield. Shield: 0');
+        shield = 0;
+        currentHealth = (currentHealth - remaining).clamp(0, maxHealth);
+        GameLogger.info(LogCategory.combat, '$name takes $remaining damage. Health: $currentHealth/$maxHealth');
+        return;
+      }
+    }
+    // If bypassShield or no shield
     currentHealth = (currentHealth - damage).clamp(0, maxHealth);
     GameLogger.info(LogCategory.combat, '$name takes $damage damage. Health: $currentHealth/$maxHealth');
   }
@@ -86,5 +105,11 @@ abstract class Character {
       type: CardType.attack,
       value: 5,
     );
+  }
+
+  /// Increase shield by [amount].
+  void addShield(int amount) {
+    shield += amount;
+    GameLogger.info(LogCategory.combat, '$name gains $amount shield. Shield: $shield');
   }
 } 

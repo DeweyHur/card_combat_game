@@ -55,6 +55,23 @@ const GameCard cleanse = GameCard(
   color: Colors.blue,
 );
 
+// Shield Cards
+const GameCard shieldUp = GameCard(
+  name: 'Shield Up',
+  description: 'Gain 8 shield',
+  type: CardType.shield,
+  value: 8,
+  color: Colors.blueGrey,
+);
+
+const GameCard shieldBash = GameCard(
+  name: 'Shield Bash',
+  description: 'Attack with your shield value (consumes shield)',
+  type: CardType.shieldAttack,
+  value: 0, // Value is determined at play time
+  color: Colors.amber,
+);
+
 // List of all available cards
 final List<GameCard> gameCards = [
   slash,
@@ -63,4 +80,6 @@ final List<GameCard> gameCards = [
   greaterHeal,
   poison,
   cleanse,
+  shieldUp,
+  shieldBash,
 ]; 

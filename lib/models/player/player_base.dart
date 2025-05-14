@@ -83,6 +83,10 @@ abstract class PlayerBase extends Character {
         removeStatusEffect();
         GameLogger.info(LogCategory.combat, '$name removes status effects');
         break;
+      case CardType.shield:
+      case CardType.shieldAttack:
+        // PlayerBase takeAction does not use shield or shield attack directly
+        break;
     }
   }
 

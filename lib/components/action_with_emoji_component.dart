@@ -32,6 +32,12 @@ class ActionWithEmojiComponent extends StatelessWidget {
       case CardType.cure:
         buffer.write('✨');
         break;
+      case CardType.shield:
+        buffer.write('🛡️');
+        break;
+      case CardType.shieldAttack:
+        buffer.write('🔰');
+        break;
     }
     buffer.write(' ');
     // Action name
