@@ -95,7 +95,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     resetVerticalStack();
     addToVerticalStack(panels[2], size.y * 0.4); // Enemy panel (top)
     addToVerticalStack(turnText, 40);
-    addToVerticalStack(panels[0], size.y * 0.2); // Cards panel (middle)
+    addToVerticalStack(panels[0], size.y * 0.3); // Cards panel (middle)
     addToVerticalStack(gameMessageText, 40);
     addToVerticalStack(panels[1], size.y * 0.1); // Player panel (bottom)
 
