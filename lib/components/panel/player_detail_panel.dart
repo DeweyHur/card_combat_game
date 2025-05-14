@@ -7,9 +7,6 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 
 class PlayerDetailPanel extends BasePlayerPanel {
-  late TextComponent descriptionText;
-  late TextComponent deckText;
-
   PlayerDetailPanel() : super(player: Knight());
 
   @override
