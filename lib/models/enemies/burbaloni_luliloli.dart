@@ -47,4 +47,7 @@ class BurbaloniLuliloli extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.1).round();
   }
+
+  @override
+  String get description => 'A bubbly spirit who attacks with popping bubbles and soothes with foamy waves.';
 } 

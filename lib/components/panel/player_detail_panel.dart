@@ -28,7 +28,7 @@ class PlayerDetailPanel extends BasePanel {
 
     // Add name + emoji at the top
     nameEmojiComponent = NameEmojiComponent(character: player);
-    addToVerticalStack(nameEmojiComponent, 40);
+    addToVerticalStack(nameEmojiComponent, 60);
 
     // Add stats row
     statsRow = StatsRow(character: player);
@@ -42,7 +42,7 @@ class PlayerDetailPanel extends BasePanel {
         ),
       ),
     );
-    addToVerticalStack(descriptionText, 0);
+    addToVerticalStack(descriptionText, 20);
 
     deckText = TextComponent(
       textRenderer: TextPaint(
@@ -52,7 +52,7 @@ class PlayerDetailPanel extends BasePanel {
         ),
       ),
     );
-    addToVerticalStack(deckText, 0);
+    addToVerticalStack(deckText, 20);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
     updateUI();

@@ -49,4 +49,7 @@ class TrippiTroppi extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.4).round(); // 40% more damage due to acrobatic momentum
   }
+
+  @override
+  String get description => 'A circus acrobat who flips, tumbles, and confuses with dizzying moves.';
 } 

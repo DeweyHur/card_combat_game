@@ -54,4 +54,6 @@ abstract class EnemyBase extends Character {
   }
 
   GameCard selectAction();
+
+  String get description;
 } 

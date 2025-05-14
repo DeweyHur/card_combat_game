@@ -47,4 +47,7 @@ class BobombiniGoosini extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.25).round();
   }
+
+  @override
+  String get description => 'A bombastic troublemaker who loves explosions and chaos. Watch out for the smoke!';
 } 

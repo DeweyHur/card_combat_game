@@ -47,4 +47,7 @@ class CapuccinoAssasino extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.3).round();
   }
+
+  @override
+  String get description => 'A caffeinated menace, quick and relentless. His espresso shots pack a punch!';
 } 

@@ -47,4 +47,7 @@ class BrrBrrPatapim extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.35).round();
   }
+
+  @override
+  String get description => 'A frosty foe who brings the chill of winter to every battle. His icy strikes are as cold as his heart.';
 } 

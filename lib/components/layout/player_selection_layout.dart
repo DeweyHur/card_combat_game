@@ -16,7 +16,7 @@ import 'package:card_combat_app/models/enemies/tralalero_tralala.dart';
 import 'package:card_combat_app/components/layout/player_selection_box.dart';
 import 'package:card_combat_app/components/panel/player_detail_panel.dart';
 import 'package:card_combat_app/components/panel/player_selection_panel.dart';
-import 'package:card_combat_app/components/panel/enemy_panel.dart';
+import 'package:card_combat_app/components/panel/enemy_detail_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
@@ -26,7 +26,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
-  late EnemyPanel enemyPanel;
+  late EnemyDetailPanel enemyPanel;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
 
@@ -83,8 +83,8 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       );
     add(battleButton);
 
-    enemyPanel = EnemyPanel(mode: EnemyPanelMode.detail);
-    addToVerticalStack(enemyPanel, size.y * 0.4);
+    enemyPanel = EnemyDetailPanel();
+    addToVerticalStack(enemyPanel, size.y * 0.45);
 
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }

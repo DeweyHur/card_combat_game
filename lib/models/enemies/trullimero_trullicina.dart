@@ -49,4 +49,7 @@ class TrullimeroTrullicina extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.3).round(); // 30% more damage due to comedic timing
   }
+
+  @override
+  String get description => 'A master of comedy and confusion, this trickster uses laughter as both shield and sword.';
 } 

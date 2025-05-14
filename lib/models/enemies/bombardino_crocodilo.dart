@@ -47,4 +47,7 @@ class BombardinoCrocodilo extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.2).round();
   }
+
+  @override
+  String get description => 'A swampy crocodile with a tail that whips and a grin that confounds. Don\'t get too close!';
 } 

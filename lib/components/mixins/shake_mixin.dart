@@ -24,10 +24,10 @@ mixin ShakeMixin on PositionComponent {
         await shake(horizontal: false, intensity: 6, times: 4);
         break;
       case CardType.statusEffect:
-        await shake(horizontal: true, intensity: 4, times: 12);
+        await shake(horizontal: true, intensity: 1, times: 4);
         break;
       case CardType.cure:
-        await shake(horizontal: false, intensity: 4, times: 2);
+        await shake(horizontal: false, intensity: 2, times: 2);
         break;
     }
   }

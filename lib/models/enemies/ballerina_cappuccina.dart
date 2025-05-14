@@ -47,4 +47,7 @@ class BallerinaCappuccina extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.2).round();
   }
+
+  @override
+  String get description => 'A graceful dancer whose pirouettes can dizzy and delight. Her elegance hides her strength.';
 } 

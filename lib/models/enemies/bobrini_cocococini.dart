@@ -47,4 +47,7 @@ class BobriniCocococini extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.15).round();
   }
+
+  @override
+  String get description => 'A coconut-wielding wild one, smashing and splashing with tropical chaos.';
 } 

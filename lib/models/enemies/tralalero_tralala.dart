@@ -47,4 +47,7 @@ class TralaleroTralala extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.15).round();
   }
+
+  @override
+  String get description => 'A flamboyant singer whose voice can both heal and harm. Beware the discordant notes!';
 } 

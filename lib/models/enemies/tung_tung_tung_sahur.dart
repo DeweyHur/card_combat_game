@@ -49,4 +49,7 @@ class TungTungTungSahur extends EnemyBase {
   int calculateDamage(int baseDamage) {
     return (baseDamage * 1.2).round(); // 20% more damage due to drum power
   }
+
+  @override
+  String get description => 'A rhythmic drummer whose beats can heal allies or leave foes reeling.';
 } 

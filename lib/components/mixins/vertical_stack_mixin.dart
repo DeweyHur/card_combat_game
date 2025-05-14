@@ -12,7 +12,7 @@ mixin VerticalStackMixin on PositionComponent {
     add(component);
     
     // Update the current top position with fixed spacing
-    _currentTopPos += component.size.y + 20;
+    _currentTopPos += component.size.y;
   }
 
   // Reset the vertical stack position
