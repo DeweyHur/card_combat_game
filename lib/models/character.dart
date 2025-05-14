@@ -12,7 +12,6 @@ abstract class Character {
   final Color color;
   StatusEffect? statusEffect;
   int? statusDuration;
-PlayerDetailPanel  
   /// Shield can grow without limit and absorbs damage before HP.
   int shield = 0;
 
