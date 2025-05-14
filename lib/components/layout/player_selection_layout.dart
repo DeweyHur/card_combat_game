@@ -20,7 +20,6 @@ import 'package:card_combat_app/components/panel/enemy_detail_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
-import 'package:card_combat_app/components/panel/player_panel.dart';
 
 class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
   late PlayerDetailPanel detailPanel;

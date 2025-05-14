@@ -17,110 +17,7 @@ import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:flutter/painting.dart';
 import 'package:card_combat_app/components/panel/base_enemy_panel.dart';
 
-abstract class _BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
-  late EnemyBase enemy;
-  RectangleComponent? separatorLine;
-  SpriteComponent? enemySprite;
-  AudioPlayer? audioPlayer;
-  bool _isLoaded = false;
-  late final StatsRow statsRow;
-  late final NameEmojiComponent nameEmojiComponent;
-
-  @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-    enemy = DataController.instance.get<EnemyBase>('selectedEnemy')!;
-    try {
-      final image = await gameRef.images.load(enemy.imagePath);
-      final sprite = Sprite(image);
-      enemySprite = SpriteComponent(
-        sprite: sprite,
-      );
-      addToVerticalStack(enemySprite!, 200);
-    } catch (e) {
-      GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
-    }
-    nameEmojiComponent = NameEmojiComponent(character: enemy);
-    addToVerticalStack(nameEmojiComponent, 30);
-    statsRow = StatsRow(character: enemy);
-    addToVerticalStack(statsRow, 20);
-    DataController.instance.watch('selectedEnemy', (value) {
-      if (value is EnemyBase) {
-        updateEnemy(value);
-      }
-    });
-    try {
-      audioPlayer = AudioPlayer();
-      await audioPlayer?.setSource(AssetSource(enemy.soundPath));
-      await audioPlayer?.setVolume(0.3);
-      await audioPlayer?.resume();
-    } catch (e) {
-      GameLogger.warning(LogCategory.audio, 'Failed to load enemy sound: $e');
-    }
-    separatorLine = RectangleComponent(
-      size: Vector2(280, 2),
-      paint: Paint()..color = Colors.white.withOpacity(0.5),
-    );
-    addToVerticalStack(separatorLine!, 2);
-    _isLoaded = true;
-    GameLogger.debug(LogCategory.ui, 'runtimeType loaded successfully');
-  }
-  void updateHealth() {
-    if (_isLoaded) {
-      statsRow.updateUI();
-    }
-  }
-  @override
-  void updateUI() {
-    if (!_isLoaded) return;
-    updateHealth();
-    statsRow.updateUI();
-  }
-  void updateEnemy(EnemyBase newEnemy) {
-    enemy = newEnemy;
-    nameEmojiComponent.updateCharacter(enemy);
-    statsRow.setCharacter(enemy);
-  }
-  @override
-  void onRemove() {
-    audioPlayer?.stop();
-    audioPlayer?.dispose();
-    super.onRemove();
-  }
-  void showEffectForCard(dynamic card, VoidCallback onComplete) {
-    final effect = GameEffects.createCardEffect(
-      card.type,
-      Vector2(size.x / 2 - 50, size.y / 2 - 50),
-      Vector2(100, 100),
-      onComplete: onComplete,
-    )..priority = 100;
-    add(effect);
-  }
-  List<String> splitTextToLines(String text, TextStyle style, double maxWidth) {
-    final words = text.split(' ');
-    final lines = <String>[];
-    var currentLine = '';
-    final tp = TextPainter(
-      textDirection: TextDirection.ltr,
-      textAlign: TextAlign.left,
-    );
-    for (final word in words) {
-      final testLine = currentLine.isEmpty ? word : '$currentLine $word';
-      tp.text = TextSpan(text: testLine, style: style);
-      tp.layout();
-      if (tp.width > maxWidth && currentLine.isNotEmpty) {
-        lines.add(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = currentLine.isEmpty ? word : '$currentLine $word';
-      }
-    }
-    if (currentLine.isNotEmpty) lines.add(currentLine);
-    return lines;
-  }
-}
-
-class EnemyCombatPanel extends _BaseEnemyPanel {
+class EnemyCombatPanel extends BaseEnemyPanel {
   TextComponent? actionText;
   @override
   Future<void> onLoad() async {
@@ -141,7 +38,7 @@ class EnemyCombatPanel extends _BaseEnemyPanel {
     addToVerticalStack(actionText!, 20);
   }
   void updateAction(String action) {
-    if (_isLoaded && actionText != null) {
+    if (isLoaded && actionText != null) {
       actionText!.text = 'Next Action: $action';
     }
   }

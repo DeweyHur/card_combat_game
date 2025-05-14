@@ -2,37 +2,22 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/knight.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
-import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/components/panel/base_player_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
 
-class PlayerDetailPanel extends BasePanel {
-  late PlayerBase player;
-  late TextComponent nameText;
-  late TextComponent statsText;
+class PlayerDetailPanel extends BasePlayerPanel {
   late TextComponent descriptionText;
   late TextComponent deckText;
-  late NameEmojiComponent nameEmojiComponent;
-  late StatsRow statsRow;
 
-  PlayerDetailPanel() {
-    player = Knight();
-  }
+  PlayerDetailPanel() : super(player: Knight());
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
-
-    // Add name + emoji at the top
-    nameEmojiComponent = NameEmojiComponent(character: player);
-    addToVerticalStack(nameEmojiComponent, 60);
-
-    // Add stats row
-    statsRow = StatsRow(character: player);
-    addToVerticalStack(statsRow, 20);
 
     descriptionText = TextComponent(
       textRenderer: TextPaint(
@@ -55,19 +40,16 @@ class PlayerDetailPanel extends BasePanel {
     addToVerticalStack(deckText, 20);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
-    updateUI();
   }
 
   @override
   void onMount() {
     super.onMount();
-    // Set initial player from DataController if available
+    updateUI();
     final selectedPlayer = DataController.instance.get<PlayerBase>('selectedPlayer');
     if (selectedPlayer != null) {
       player = selectedPlayer;
     }
-
-    // Watch for changes to selectedPlayer
     DataController.instance.watch('selectedPlayer', (value) {
       if (value is PlayerBase) {
         updatePlayer(value);
@@ -75,16 +57,17 @@ class PlayerDetailPanel extends BasePanel {
     });
   }
 
+  @override
   void updatePlayer(PlayerBase newPlayer) {
-    player = newPlayer;
-    nameEmojiComponent.updateCharacter(newPlayer);
-    statsRow.setCharacter(player);
+    super.updatePlayer(newPlayer);
     descriptionText.text = player.description;
-    deckText.text = 'Starting Deck: ${player.deck.length} cards';
+    deckText.text = 'Starting Deck: [36m${player.deck.length}[0m cards';
   }
 
   @override
   void updateUI() {
-    // Update any UI elements if needed
+    super.updateUI();
+    descriptionText.text = player.description;
+    deckText.text = 'Starting Deck: [36m${player.deck.length}[0m cards';
   }
 } 

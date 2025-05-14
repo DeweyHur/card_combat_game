@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/components/panel/player_panel.dart';
 import 'package:card_combat_app/components/panel/cards_panel.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
@@ -13,6 +12,7 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
 import 'package:card_combat_app/components/panel/enemy_combat_panel.dart';
+import 'package:card_combat_app/components/panel/player_combat_panel.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
@@ -86,12 +86,12 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     enemyPanel = EnemyCombatPanel();
     panels = [
       cardsPanel,
-      PlayerPanel(player: player),
+      PlayerCombatPanel(player: player),
       enemyPanel,
     ];
 
     // Initialize PlayerPanel with CombatManager singleton
-    (panels[1] as PlayerPanel).initialize(player, CombatManager());
+    (panels[1] as PlayerCombatPanel).initialize(player, CombatManager());
 
     // Add panels to the scene using vertical stack
     resetVerticalStack();
@@ -105,8 +105,13 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
     _isInitialized = true;
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad completed, calling updateUI');
-    updateUI();
     registerWatchers(CombatManager());
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
+    updateUI();
   }
 
   /// Helper to format the enemy's next action with emojis
@@ -154,6 +159,6 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
   void registerWatchers(CombatManager manager) {
     manager.addWatcher(enemyPanel);
-    manager.addWatcher(panels[1] as PlayerPanel);
+    manager.addWatcher(panels[1] as PlayerCombatPanel);
   }
 } 
