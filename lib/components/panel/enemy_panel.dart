@@ -13,6 +13,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
+import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 
 class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
   late EnemyBase enemy;
@@ -22,8 +23,8 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
   SpriteComponent? enemySprite;
   AudioPlayer? audioPlayer;
   bool _isLoaded = false;
-  late final TextComponent nameText;
   late final StatsRow statsRow;
+  late final NameEmojiComponent nameEmojiComponent;
 
   EnemyPanel();
 
@@ -50,18 +51,9 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
       GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
     }
 
-    // Add enemy name
-    nameText = TextComponent(
-      text: enemy.name,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-    addToVerticalStack(nameText, 30);
+    // Add enemy name + emoji
+    nameEmojiComponent = NameEmojiComponent(character: enemy);
+    addToVerticalStack(nameEmojiComponent, 30);
 
     // Add enemy stats row
     statsRow = StatsRow(character: enemy);
@@ -143,7 +135,7 @@ class EnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin 
 
   void updateEnemy(EnemyBase newEnemy) {
     enemy = newEnemy;
-    nameText.text = enemy.name;
+    nameEmojiComponent.updateCharacter(enemy);
     statsRow.setCharacter(enemy);
     // TODO: Update sprite when enemy changes
   }

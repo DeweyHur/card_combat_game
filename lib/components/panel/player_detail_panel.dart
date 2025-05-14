@@ -13,7 +13,6 @@ class PlayerDetailPanel extends BasePanel {
   late TextComponent nameText;
   late TextComponent statsText;
   late TextComponent descriptionText;
-  late TextComponent energyText;
   late TextComponent deckText;
   late NameEmojiComponent nameEmojiComponent;
   late StatsRow statsRow;
@@ -28,53 +27,35 @@ class PlayerDetailPanel extends BasePanel {
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
 
     // Add name + emoji at the top
-    nameEmojiComponent = NameEmojiComponent(player: player);
-    add(nameEmojiComponent);
+    nameEmojiComponent = NameEmojiComponent(character: player);
+    addToVerticalStack(nameEmojiComponent, 40);
 
     // Add stats row
     statsRow = StatsRow(character: player);
-    add(statsRow);
+    addToVerticalStack(statsRow, 20);
 
     descriptionText = TextComponent(
-      text: player.description,
-      position: Vector2(size.x * 0.5, 130),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
         ),
       ),
-      anchor: Anchor.topCenter,
     );
-    add(descriptionText);
-
-    energyText = TextComponent(
-      text: 'Max Energy: ${player.maxEnergy}',
-      position: Vector2(size.x * 0.5, 180),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
-      ),
-      anchor: Anchor.topCenter,
-    );
-    add(energyText);
+    addToVerticalStack(descriptionText, 0);
 
     deckText = TextComponent(
-      text: 'Starting Deck: ${player.deck.length} cards',
-      position: Vector2(size.x * 0.5, 230),
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
         ),
       ),
-      anchor: Anchor.topCenter,
     );
-    add(deckText);
+    addToVerticalStack(deckText, 0);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');
+    updateUI();
   }
 
   @override
@@ -96,10 +77,9 @@ class PlayerDetailPanel extends BasePanel {
 
   void updatePlayer(PlayerBase newPlayer) {
     player = newPlayer;
-    nameEmojiComponent.updatePlayer(newPlayer);
+    nameEmojiComponent.updateCharacter(newPlayer);
     statsRow.setCharacter(player);
     descriptionText.text = player.description;
-    energyText.text = 'Max Energy: ${player.maxEnergy}';
     deckText.text = 'Starting Deck: ${player.deck.length} cards';
   }
 

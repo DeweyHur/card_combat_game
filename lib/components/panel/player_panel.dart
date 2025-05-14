@@ -77,7 +77,7 @@ class PlayerPanel extends BasePanel with AreaFillerMixin, ShakeMixin implements 
     await super.onLoad();
 
     // Add name + emoji at the top
-    nameEmojiComponent = NameEmojiComponent(player: player);
+    nameEmojiComponent = NameEmojiComponent(character: player);
     addToVerticalStack(nameEmojiComponent, 40);
 
     // Add stats row as the next row in the vertical stack
