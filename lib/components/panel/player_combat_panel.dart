@@ -9,48 +9,7 @@ import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 
 class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin implements CombatWatcher {
-  final TextComponent playerDeckText = TextComponent(
-    text: '',
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-    anchor: Anchor.center,
-  );
-  final TextComponent playerHandText = TextComponent(
-    text: '',
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-    anchor: Anchor.center,
-  );
-  final TextComponent playerDiscardText = TextComponent(
-    text: '',
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-    anchor: Anchor.center,
-  );
-  final TextComponent playerStatusText = TextComponent(
-    text: '',
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-    anchor: Anchor.center,
-  );
-  TextComponent? actionText;
-  RectangleComponent? separatorLine;
+
   late CombatManager combatManager;
   bool _isLoaded = false;
 
@@ -59,25 +18,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    addToVerticalStack(playerDeckText, 24);
-    addToVerticalStack(playerHandText, 24);
-    addToVerticalStack(playerDiscardText, 24);
-    addToVerticalStack(playerStatusText, 24);
-    actionText = TextComponent(
-      text: 'Next Action: None',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
-    );
-    addToVerticalStack(actionText!, 20);
-    separatorLine = RectangleComponent(
-      size: Vector2(280, 2),
-      paint: Paint()..color = Colors.white.withOpacity(0.5),
-    );
-    addToVerticalStack(separatorLine!, 2);
+    
     _isLoaded = true;
   }
 
@@ -93,16 +34,6 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     super.updateUI();
     if (!_isLoaded) return;
     final player = combatManager.player;
-    playerDeckText.text = 'Deck: [36m${player.deck.length}[0m cards';
-    playerHandText.text = 'Hand: [36m${player.hand.length}[0m cards';
-    playerDiscardText.text = 'Discard: [36m${player.discardPile.length}[0m cards';
-    playerStatusText.text = combatManager.isPlayerTurn ? 'Your Turn' : 'Opponent\'s Turn';
-  }
-
-  void updateAction(String action) {
-    if (actionText != null) {
-      actionText!.text = 'Next Action: $action';
-    }
   }
 
   @override
