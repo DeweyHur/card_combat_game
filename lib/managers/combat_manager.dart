@@ -75,10 +75,12 @@ class CombatManager {
       GameLogger.warning(LogCategory.game, 'Not player\'s turn');
       return;
     }
-
-    // Implement hand and energy logic as needed
-    // For now, just apply the card effect
-    GameLogger.info(LogCategory.game, 'Playing card: \'${card.name}\'');
+    if (player.currentEnergy < card.cost) {
+      GameLogger.warning(LogCategory.game, 'Not enough energy to play this card');
+      return;
+    }
+    player.currentEnergy -= card.cost;
+    GameLogger.info(LogCategory.game, 'Playing card: \'${card.name}\' (cost: ${card.cost}, remaining energy: ${player.currentEnergy})');
     _soundManager.playCardSound(card.type);
 
     switch (card.type) {
@@ -115,9 +117,7 @@ class CombatManager {
         // Implement shield logic as needed
         break;
     }
-
-    // End player turn after playing a card
-    endPlayerTurn();
+    // Do not end player turn automatically after playing a card
   }
 
   void endPlayerTurn() {
@@ -183,6 +183,7 @@ class CombatManager {
 
   void _startNewPlayerTurn() {
     GameLogger.info(LogCategory.game, 'Starting new player turn');
+    player.currentEnergy = player.maxEnergy;
     // Implement any logic needed at the start of a new player turn
   }
 

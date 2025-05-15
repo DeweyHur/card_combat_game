@@ -44,7 +44,6 @@ class CombatScene extends BaseScene with HasGameRef {
       handleCombatEnd();
       return;
     }
-    endTurn();
   }
 
   void handleCombatEnd() {

@@ -23,7 +23,7 @@ class PlayerSelectionScene extends BaseScene {
     // Randomly select an enemy
     final random = DateTime.now().millisecondsSinceEpoch % (enemies.isNotEmpty ? enemies.length : 1);
     selectedEnemy = enemies.isNotEmpty ? enemies[random] : GameCharacter(
-      name: 'Unknown', maxHealth: 1, attack: 1, defense: 1, emoji: '?', color: 'grey', imagePath: '', soundPath: '', description: '', deck: []);
+      name: 'Unknown', maxHealth: 1, attack: 1, defense: 1, emoji: '?', color: 'grey', imagePath: '', soundPath: '', description: '', deck: [], maxEnergy: 3);
     DataController.instance.set('selectedEnemy', selectedEnemy);
   }
 

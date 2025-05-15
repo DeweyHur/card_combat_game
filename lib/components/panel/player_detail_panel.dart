@@ -55,4 +55,5 @@ GameCharacter _emptyPlayer() => GameCharacter(
   soundPath: '',
   description: 'No player selected',
   deck: [],
+  maxEnergy: 3,
 ); 

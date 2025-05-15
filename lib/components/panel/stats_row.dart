@@ -14,6 +14,8 @@ class StatsRow extends PositionComponent {
   late TextComponent defenseText;
   late TextComponent shieldEmoji;
   late TextComponent shieldText;
+  late TextComponent energyEmoji;
+  late TextComponent energyText;
 
   static const double barWidth = 100;
   static const double barHeight = 16;
@@ -119,6 +121,27 @@ class StatsRow extends PositionComponent {
       anchor: Anchor.centerLeft,
     );
     add(defenseText);
+
+    // Energy
+    energyEmoji = TextComponent(
+      text: '⚡',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 18),
+      ),
+      position: Vector2(28 + barWidth + 210, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(energyEmoji);
+
+    energyText = TextComponent(
+      text: '${character.currentEnergy}/${character.maxEnergy}',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 14, color: Colors.white),
+      ),
+      position: Vector2(28 + barWidth + 230, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(energyText);
   }
 
   double _healthBarFill() {
@@ -133,6 +156,7 @@ class StatsRow extends PositionComponent {
     shieldText.text = '0';
     attackText.text = '${character.attack}';
     defenseText.text = '${character.defense}';
+    energyText.text = '${character.currentEnergy}/${character.maxEnergy}';
   }
 
   void setCharacter(GameCharacter newCharacter) {
