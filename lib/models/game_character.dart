@@ -13,6 +13,10 @@ class GameCharacter {
   final String description;
   final List<GameCard> deck;
 
+  // Energy properties
+  final int maxEnergy;
+  int currentEnergy;
+
   // Mutable combat state
   StatusEffect? statusEffect;
   int? statusDuration;
@@ -28,5 +32,7 @@ class GameCharacter {
     required this.soundPath,
     required this.description,
     required this.deck,
-  }) : currentHealth = maxHealth;
+    this.maxEnergy = 3,
+  }) : currentHealth = maxHealth,
+       currentEnergy = maxEnergy;
 } 

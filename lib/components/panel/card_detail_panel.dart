@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_card.dart';
 
-class CardDetailPanel extends PositionComponent {
+class CardDetailPanel extends PositionComponent with HasVisibility {
   late TextComponent nameText;
   late TextComponent descText;
   late TextComponent typeText;
