@@ -1,7 +1,6 @@
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
-import 'package:flutter/material.dart';
 
 class Warlock extends PlayerBase {
   Warlock() : super(
@@ -10,7 +9,7 @@ class Warlock extends PlayerBase {
     attack: 20,
     defense: 5,
     emoji: '👹',
-    color: Colors.red,
+    color: 'red',
     deck: [
       slash,
       poison,

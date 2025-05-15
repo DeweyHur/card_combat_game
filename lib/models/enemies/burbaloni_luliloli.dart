@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BurbaloniLuliloli extends EnemyBase {
   BurbaloniLuliloli() : super(
@@ -9,7 +8,7 @@ class BurbaloniLuliloli extends EnemyBase {
     attack: 12,
     defense: 8,
     emoji: '🫧',
-    color: Colors.lightBlueAccent,
+    color: 'lightBlueAccent',
     imagePath: 'burbaloni_luliloli.webp',
     soundPath: 'burbaloni_luliloli.mp3',
   );

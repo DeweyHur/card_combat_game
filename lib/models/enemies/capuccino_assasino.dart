@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class CapuccinoAssasino extends EnemyBase {
   CapuccinoAssasino() : super(
@@ -9,7 +8,7 @@ class CapuccinoAssasino extends EnemyBase {
     attack: 16,
     defense: 6,
     emoji: '☕️',
-    color: Colors.brown,
+    color: 'brown',
     imagePath: 'capuccino_assasino.webp',
     soundPath: 'capuccino_assasino_italian_brainrot.mp3',
   );

@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
-import 'package:flutter/material.dart';
 
 class Knight extends PlayerBase {
   Knight() : super(
@@ -9,7 +8,7 @@ class Knight extends PlayerBase {
     attack: 15,
     defense: 10,
     emoji: '🛡️',
-    color: Colors.blue,
+    color: 'blue',
     deck: [
       slash,
       heavyStrike,

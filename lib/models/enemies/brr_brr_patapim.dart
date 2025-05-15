@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BrrBrrPatapim extends EnemyBase {
   BrrBrrPatapim() : super(
@@ -9,7 +8,7 @@ class BrrBrrPatapim extends EnemyBase {
     attack: 17,
     defense: 9,
     emoji: '❄️',
-    color: Colors.blue,
+    color: 'brown',
     imagePath: 'brr_brr_patapim.webp',
     soundPath: 'brr_brr_patapim.mp3',
   );

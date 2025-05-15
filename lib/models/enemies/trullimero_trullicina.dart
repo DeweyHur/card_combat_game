@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class TrullimeroTrullicina extends EnemyBase {
   TrullimeroTrullicina() : super(
@@ -9,7 +8,7 @@ class TrullimeroTrullicina extends EnemyBase {
     attack: 15,
     defense: 6,
     emoji: '🎭',
-    color: Colors.purple,
+    color: 'purple',
     imagePath: 'trullimero_trullicina.jpg',
     soundPath: 'trullimero_trullicina.mp3',
   );

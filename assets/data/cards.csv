@@ -1,0 +1,9 @@
+name,description,type,value,statusEffect,statusDuration,color
+Slash,Deal 5 damage,attack,5,,,red
+Heavy Strike,Deal 8 damage,attack,8,,,red
+Heal,Restore 3 HP,heal,3,,,green
+Greater Heal,Restore 5 HP,heal,5,,,green
+Poison,Apply poison for 3 turns,statusEffect,2,poison,3,purple
+Cleanse,Remove all status effects,cure,0,,,blue
+Shield Up,Gain 8 shield,shield,8,,,blueGrey
+Shield Bash,Attack with your shield value (consumes shield),shieldAttack,0,,,amber

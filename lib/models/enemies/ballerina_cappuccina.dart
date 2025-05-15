@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BallerinaCappuccina extends EnemyBase {
   BallerinaCappuccina() : super(
@@ -9,7 +8,7 @@ class BallerinaCappuccina extends EnemyBase {
     attack: 13,
     defense: 7,
     emoji: '🩰',
-    color: Colors.pink,
+    color: 'pink',
     imagePath: 'ballerina_cappuccina.webp',
     soundPath: 'ballerina_cappuccina.mp3',
   );

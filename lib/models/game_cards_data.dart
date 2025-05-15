@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'game_card.dart';
 
 // Attack Cards
@@ -7,7 +6,7 @@ const GameCard slash = GameCard(
   description: 'Deal 5 damage',
   type: CardType.attack,
   value: 5,
-  color: Colors.red,
+  color: 'red',
 );
 
 const GameCard heavyStrike = GameCard(
@@ -15,7 +14,7 @@ const GameCard heavyStrike = GameCard(
   description: 'Deal 8 damage',
   type: CardType.attack,
   value: 8,
-  color: Colors.red,
+  color: 'red',
 );
 
 // Healing Cards
@@ -24,7 +23,7 @@ const GameCard heal = GameCard(
   description: 'Restore 3 HP',
   type: CardType.heal,
   value: 3,
-  color: Colors.green,
+  color: 'green',
 );
 
 const GameCard greaterHeal = GameCard(
@@ -32,7 +31,7 @@ const GameCard greaterHeal = GameCard(
   description: 'Restore 5 HP',
   type: CardType.heal,
   value: 5,
-  color: Colors.green,
+  color: 'green',
 );
 
 // Status Effect Cards
@@ -43,7 +42,7 @@ const GameCard poison = GameCard(
   value: 2,
   statusEffectToApply: StatusEffect.poison,
   statusDuration: 3,
-  color: Colors.purple,
+  color: 'purple',
 );
 
 // Cure Cards
@@ -52,7 +51,7 @@ const GameCard cleanse = GameCard(
   description: 'Remove all status effects',
   type: CardType.cure,
   value: 0,
-  color: Colors.blue,
+  color: 'blue',
 );
 
 // Shield Cards
@@ -61,7 +60,7 @@ const GameCard shieldUp = GameCard(
   description: 'Gain 8 shield',
   type: CardType.shield,
   value: 8,
-  color: Colors.blueGrey,
+  color: 'blueGrey',
 );
 
 const GameCard shieldBash = GameCard(
@@ -69,7 +68,7 @@ const GameCard shieldBash = GameCard(
   description: 'Attack with your shield value (consumes shield)',
   type: CardType.shieldAttack,
   value: 0, // Value is determined at play time
-  color: Colors.amber,
+  color: 'amber',
 );
 
 // List of all available cards

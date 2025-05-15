@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class TralaleroTralala extends EnemyBase {
   TralaleroTralala() : super(
@@ -9,7 +8,7 @@ class TralaleroTralala extends EnemyBase {
     attack: 11,
     defense: 9,
     emoji: '🎤',
-    color: Colors.purpleAccent,
+    color: 'purpleAccent',
     imagePath: 'tralalero_tralala.webp',
     soundPath: 'tralalero_tralala_italian_brainrot_u3ai6wj.mp3',
   );

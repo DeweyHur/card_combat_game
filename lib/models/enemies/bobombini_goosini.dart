@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BobombiniGoosini extends EnemyBase {
   BobombiniGoosini() : super(
@@ -9,7 +8,7 @@ class BobombiniGoosini extends EnemyBase {
     attack: 14,
     defense: 7,
     emoji: '💣',
-    color: Colors.red,
+    color: 'orange',
     imagePath: 'bobombini_goosini.webp',
     soundPath: 'bobombini_goosini_italian_brainrot.mp3',
   );

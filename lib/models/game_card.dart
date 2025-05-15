@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart' hide Card;
-
 enum CardType {
   attack,
   heal,
@@ -23,7 +21,7 @@ class GameCard {
   final int value;
   final StatusEffect? statusEffectToApply;
   final int? statusDuration;
-  final Color color;
+  final String color;
 
   const GameCard({
     required this.name,
@@ -32,7 +30,7 @@ class GameCard {
     required this.value,
     this.statusEffectToApply,
     this.statusDuration,
-    this.color = Colors.blue,
+    this.color = "blue",
   });
 
   @override

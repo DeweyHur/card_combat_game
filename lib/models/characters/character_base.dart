@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_card.dart';
 
 abstract class CharacterBase {
@@ -6,7 +5,7 @@ abstract class CharacterBase {
   final String emoji;
   int currentHp;
   final int maxHp;
-  final Color color;
+  final String color;
   Map<StatusEffect, int> statusEffects = {};
 
   CharacterBase({

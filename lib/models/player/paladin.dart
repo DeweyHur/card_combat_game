@@ -1,7 +1,6 @@
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_cards_data.dart' as cards;
-import 'package:flutter/material.dart';
 
 class Paladin extends PlayerBase {
   static final List<GameCard> _defaultDeck = [
@@ -18,7 +17,7 @@ class Paladin extends PlayerBase {
     attack: 15,
     defense: 10,
     emoji: '🛡️',
-    color: Colors.amber,
+    color: 'amber',
     deck: _defaultDeck,
     description: 'Highest HP, heals 2 HP per turn, all healing effects are increased by 2',
   );

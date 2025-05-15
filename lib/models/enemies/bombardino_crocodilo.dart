@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BombardinoCrocodilo extends EnemyBase {
   BombardinoCrocodilo() : super(
@@ -9,7 +8,7 @@ class BombardinoCrocodilo extends EnemyBase {
     attack: 16,
     defense: 5,
     emoji: '🐊',
-    color: Colors.green,
+    color: 'green',
     imagePath: 'bombardino_crocodilo.webp',
     soundPath: 'bombardino_crocodilo_italian_brainrot.mp3',
   );

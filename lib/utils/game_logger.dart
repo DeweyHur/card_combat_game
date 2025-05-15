@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
+
+const bool kDebugMode = true;
 
 enum LogCategory {
   system,

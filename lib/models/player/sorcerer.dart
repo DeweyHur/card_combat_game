@@ -1,7 +1,6 @@
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
-import 'package:flutter/material.dart';
 
 class Sorcerer extends PlayerBase {
   Sorcerer() : super(
@@ -10,7 +9,7 @@ class Sorcerer extends PlayerBase {
     attack: 15,
     defense: 5,
     emoji: '🧙‍♂️',
-    color: Colors.blue,
+    color: 'blue',
     deck: [
       slash,
       poison,

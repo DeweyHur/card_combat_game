@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class TrippiTroppi extends EnemyBase {
   TrippiTroppi() : super(
@@ -9,7 +8,7 @@ class TrippiTroppi extends EnemyBase {
     attack: 18,
     defense: 4,
     emoji: '🎪',
-    color: Colors.orange,
+    color: 'blueAccent',
     imagePath: 'trippi_troppi.webp',
     soundPath: 'trippi_troppi_italian_brainrot.mp3',
   );

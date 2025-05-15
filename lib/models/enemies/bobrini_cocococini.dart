@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class BobriniCocococini extends EnemyBase {
   BobriniCocococini() : super(
@@ -9,7 +8,7 @@ class BobriniCocococini extends EnemyBase {
     attack: 13,
     defense: 8,
     emoji: '🥥',
-    color: Colors.brown,
+    color: 'green',
     imagePath: 'bobrini_cocococini.png',
     soundPath: 'bobrini_cocococini.mp3',
   );

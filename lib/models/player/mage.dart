@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/player/player_base.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
-import 'package:flutter/material.dart';
 
 class Mage extends PlayerBase {
   Mage() : super(
@@ -9,7 +8,7 @@ class Mage extends PlayerBase {
     attack: 20,
     defense: 5,
     emoji: '🧙',
-    color: Colors.purple,
+    color: 'purple',
     deck: [
       slash,
       poison,

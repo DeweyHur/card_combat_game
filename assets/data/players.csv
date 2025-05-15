@@ -1,0 +1,7 @@
+name,maxHealth,attack,defense,emoji,color,deck,description,maxEnergy,special
+Knight,100,15,10,🛡️,blue,Slash|Heavy Strike|Heal|Greater Heal|Cleanse,High HP; deals 20% more damage,3,Deals 20% more damage
+Paladin,120,15,10,🛡️,amber,Slash|Poison|Heal|Greater Heal|Cleanse,Highest HP; heals 2 HP per turn; all healing effects are increased by 2,3,Heals 2 HP/turn, healing +2
+Sorcerer,80,15,5,🧙‍♂️,blue,Slash|Poison|Heal|Greater Heal|Cleanse,Low HP; draws extra card; status effects last longer,3,Draws extra card, status effects last longer
+Warlock,90,20,5,👹,red,Slash|Poison|Heal|Greater Heal|Cleanse,Medium HP; takes 2 damage per turn but gets +1 energy; attack cards deal +2 damage but cost +1 energy,4,Takes 2 dmg/turn, +1 energy, attacks +2 dmg, +1 energy cost
+Fighter,100,15,8,⚔️,green,Slash|Poison|Heal|Greater Heal|Cleanse,Medium HP; gets +1 energy per turn; attack cards deal +1 damage,4,+1 energy/turn, attacks +1 dmg
+Mage,80,20,5,🧙,purple,Slash|Poison|Heal|Greater Heal|Cleanse,Low HP; deals 50% more damage,4,Deals 50% more damage

@@ -1,6 +1,5 @@
 import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:flutter/material.dart';
 
 class TungTungTungSahur extends EnemyBase {
   TungTungTungSahur() : super(
@@ -9,7 +8,7 @@ class TungTungTungSahur extends EnemyBase {
     attack: 12,
     defense: 8,
     emoji: '🥁',
-    color: Colors.brown,
+    color: 'blueGrey',
     imagePath: 'tung_tung_tung_sahur.jpg',
     soundPath: 'tung_tung_tung_sahur.mp3',
   );

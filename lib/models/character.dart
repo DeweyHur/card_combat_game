@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'game_card.dart';
 
@@ -9,7 +8,7 @@ abstract class Character {
   final int attack;
   final int defense;
   final String emoji;
-  final Color color;
+  final String color;
   StatusEffect? statusEffect;
   int? statusDuration;
   /// Shield can grow without limit and absorbs damage before HP.
