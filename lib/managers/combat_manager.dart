@@ -83,29 +83,29 @@ class CombatManager {
 
     switch (card.type) {
       case CardType.attack:
-        enemyTakeDamage(card.value);
+        playerTakeDamage(card.value);
         _notifyWatchers(CombatEvent(
           type: CombatEventType.damage,
-          target: enemy,
-          value: card.value,
-          description: 'Player dealt ${card.value} damage',
-          card: card,
-        ));
-        GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${enemy.name}');
-        break;
-      case CardType.heal:
-        playerHeal(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.heal,
           target: player,
           value: card.value,
-          description: 'Player healed for ${card.value}',
+          description: '${enemy.name} dealt ${card.value} damage',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Healed ${player.name} for ${card.value} HP');
+        GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
+        break;
+      case CardType.heal:
+        enemyHeal(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.heal,
+          target: enemy,
+          value: card.value,
+          description: '${enemy.name} healed for ${card.value}',
+          card: card,
+        ));
+        GameLogger.info(LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
         break;
       case CardType.statusEffect:
-        // Implement status effect logic as needed
+        applyStatusEffectToPlayer(card);
         break;
       case CardType.cure:
         // Implement cure logic as needed
@@ -132,8 +132,51 @@ class CombatManager {
     }
 
     GameLogger.info(LogCategory.game, 'Enemy turn starting');
-    // Implement enemy action logic here
-    // For now, just end the enemy turn
+
+    // 1. Select an action (e.g., first card or random)
+    if (enemy.deck.isNotEmpty) {
+      final card = enemy.deck.first; // You can randomize or use probability if desired
+
+      // 2. Apply effect
+      switch (card.type) {
+        case CardType.attack:
+          playerTakeDamage(card.value);
+          _notifyWatchers(CombatEvent(
+            type: CombatEventType.damage,
+            target: player,
+            value: card.value,
+            description: '${enemy.name} dealt ${card.value} damage',
+            card: card,
+          ));
+          GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
+          break;
+        case CardType.heal:
+          enemyHeal(card.value);
+          _notifyWatchers(CombatEvent(
+            type: CombatEventType.heal,
+            target: enemy,
+            value: card.value,
+            description: '${enemy.name} healed for ${card.value}',
+            card: card,
+          ));
+          GameLogger.info(LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
+          break;
+        case CardType.statusEffect:
+          // Apply status effect to player
+          // You may want to check for nulls
+          // For now, just log
+          GameLogger.info(LogCategory.game, '${enemy.name} applies status effect to ${player.name}');
+          break;
+        case CardType.cure:
+          // Implement cure logic if needed
+          break;
+        case CardType.shield:
+        case CardType.shieldAttack:
+          // Implement shield logic if needed
+          break;
+      }
+    }
+
     isPlayerTurn = true;
     _startNewPlayerTurn();
   }
@@ -160,5 +203,43 @@ class CombatManager {
 
   void playerHeal(int value) {
     // Implement heal logic
+  }
+
+  // Helper methods for enemy actions
+  void playerTakeDamage(int value) {
+    // Actually apply damage to the player
+    if (player.currentHealth != null) {
+      player.currentHealth = (player.currentHealth - value).clamp(0, player.maxHealth);
+      GameLogger.info(LogCategory.combat, 'Player takes $value damage. Health: ${player.currentHealth}/${player.maxHealth}');
+    } else {
+      GameLogger.info(LogCategory.combat, 'Player takes $value damage');
+    }
+  }
+
+  void enemyHeal(int value) {
+    // Actually heal the enemy
+    if (enemy.currentHealth != null) {
+      enemy.currentHealth = (enemy.currentHealth + value).clamp(0, enemy.maxHealth);
+      GameLogger.info(LogCategory.combat, 'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
+    } else {
+      GameLogger.info(LogCategory.combat, 'Enemy heals for $value');
+    }
+  }
+
+  // Optionally, implement status effect application for statusEffect cards
+  void applyStatusEffectToPlayer(GameCard card) {
+    if (card.statusEffectToApply != null && card.statusDuration != null) {
+      // Assuming player has statusEffect and statusDuration fields
+      player.statusEffect = card.statusEffectToApply;
+      player.statusDuration = card.statusDuration;
+      GameLogger.info(LogCategory.combat, 'Player is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns');
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.status,
+        target: player,
+        value: 0,
+        description: '${enemy.name} applied ${card.statusEffectToApply} to ${player.name}',
+        card: card,
+      ));
+    }
   }
 } 

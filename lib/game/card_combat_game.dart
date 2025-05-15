@@ -11,6 +11,7 @@ import 'package:card_combat_app/models/game_character_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/models/enemy_action_loader.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -26,9 +27,15 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     final allCards = await loadAllGameCards();
     // Load decks
     final decks = await loadPlayerDecksFromCsv('assets/data/decks.csv', allCards);
+    // Load enemy actions and convert to GameCards
+    final enemyActionsByName = await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
+    final Map<String, List<GameCard>> enemyDecks = {};
+    enemyActionsByName.forEach((enemyName, actions) {
+      enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
+    });
     // Load players and enemies
     final players = await loadCharactersFromCsv('assets/data/players.csv', decks, isEnemy: false);
-    final enemies = await loadCharactersFromCsv('assets/data/enemies.csv', decks, isEnemy: true);
+    final enemies = await loadCharactersFromCsv('assets/data/enemies.csv', enemyDecks, isEnemy: true);
     // Store in DataController
     DataController.instance.set<List<GameCharacter>>('players', players);
     DataController.instance.set<List<GameCharacter>>('enemies', enemies);

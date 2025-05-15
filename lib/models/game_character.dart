@@ -3,6 +3,7 @@ import 'game_card.dart';
 class GameCharacter {
   final String name;
   final int maxHealth;
+  int currentHealth;
   final int attack;
   final int defense;
   final String emoji;
@@ -11,6 +12,10 @@ class GameCharacter {
   final String soundPath;
   final String description;
   final List<GameCard> deck;
+
+  // Mutable combat state
+  StatusEffect? statusEffect;
+  int? statusDuration;
 
   GameCharacter({
     required this.name,
@@ -23,5 +28,5 @@ class GameCharacter {
     required this.soundPath,
     required this.description,
     required this.deck,
-  });
+  }) : currentHealth = maxHealth;
 } 
