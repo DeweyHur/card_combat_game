@@ -55,7 +55,7 @@ Future<List<GameCharacter>> loadCharactersFromCsv(String assetPath, Map<String, 
       color: row[5] as String,
       imagePath: isEnemy ? row[6] as String : '',
       soundPath: isEnemy ? row[7] as String : '',
-      description: isEnemy ? row[8] as String : row[7] as String,
+      description: isEnemy ? row[8] as String : row[6] as String,
       deck: decks[name] ?? [],
     );
   }).toList();
