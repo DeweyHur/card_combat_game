@@ -1,13 +1,13 @@
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/managers/sound_manager.dart';
+import 'package:card_combat_app/utils/audio_config.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
-  final bool _audioEnabled = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final SoundManager _soundManager = SoundManager();
 
   CardCombatGame();
 
@@ -16,30 +16,17 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     await super.onLoad();
     GameLogger.info(LogCategory.game, 'CardCombatGame loading...');
 
+    // Initialize audio configuration
+    await AudioConfig.initialize();
+    GameLogger.info(LogCategory.audio, 'Audio configuration initialized');
+
+    // Initialize sound system
+    await _soundManager.initialize();
+    GameLogger.info(LogCategory.audio, 'Sound system initialized');
+
     // Initialize scene manager and load initial scene
     SceneManager().initialize(this);
     SceneManager().pushScene('player_selection');
-  }
-
-  Future<bool> _initializeAudio() async {
-    try {
-      await _audioPlayer.setSource(AssetSource('sounds/card_play.mp3'));
-      GameLogger.info(LogCategory.audio, 'Audio player initialized successfully');
-      return true;
-    } catch (e) {
-      GameLogger.error(LogCategory.audio, 'Failed to initialize audio: $e');
-      return false;
-    }
-  }
-
-  Future<void> playCardSound() async {
-    if (_audioEnabled) {
-      try {
-        await _audioPlayer.play(AssetSource('sounds/card_play.mp3'));
-      } catch (e) {
-        GameLogger.error(LogCategory.audio, 'Failed to play card sound: $e');
-      }
-    }
   }
 
   @override
@@ -54,7 +41,6 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   @override
   void onRemove() {
     GameLogger.debug(LogCategory.system, 'Game being removed, cleaning up resources');
-    _audioPlayer.dispose();
     super.onRemove();
   }
 
