@@ -12,6 +12,7 @@ class GameCharacter {
   final String soundPath;
   final String description;
   final List<GameCard> deck;
+
   final int maxEnergy;
   int currentEnergy;
 
@@ -30,7 +31,7 @@ class GameCharacter {
     required this.soundPath,
     required this.description,
     required this.deck,
-    required this.maxEnergy,
+  this.maxEnergy = 3,
   }) : currentHealth = maxHealth,
        currentEnergy = maxEnergy;
 } 
