@@ -58,6 +58,7 @@ Future<List<GameCharacter>> loadCharactersFromCsv(String assetPath, Map<String, 
       description: isEnemy ? row[8] as String : row[6] as String,
       deck: decks[name] ?? [],
       maxEnergy: 3,
+      handSize: isEnemy ? 5 : int.parse(row[8].toString()),
     );
   }).toList();
 } 
