@@ -7,6 +7,7 @@ import 'package:card_combat_app/components/panel/base_player_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
+import 'package:card_combat_app/utils/color_utils.dart';
 
 class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin implements CombatWatcher {
 
@@ -42,8 +43,8 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     super.render(canvas);
     drawAreaFiller(
       canvas,
-      player.color.withOpacity(0.3),
-      borderColor: player.color,
+      colorFromString(player.color).withOpacity(0.3),
+      borderColor: colorFromString(player.color),
       borderWidth: 2.0,
     );
   }
