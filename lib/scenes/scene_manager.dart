@@ -1,5 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/scenes/title_scene.dart';
 import 'package:card_combat_app/scenes/player_selection_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'base_scene.dart';
@@ -19,6 +20,7 @@ class SceneManager {
   }
 
   void _registerScenes() {
+    registerScene('title', () => TitleScene());
     registerScene('player_selection', () => PlayerSelectionScene());
     registerScene('combat', () => CombatScene());
     GameLogger.info(LogCategory.game, 'Scenes registered');
