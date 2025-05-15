@@ -1,9 +1,10 @@
 import 'package:flame/components.dart';
+import 'package:flame/components.dart' show HasVisibility;
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:card_combat_app/models/game_card.dart';
 
-class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRef {
+class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRef, HasVisibility {
   final GameCard cardData;
   final bool enabled;
   final Function(GameCard) onCardPlayed;
