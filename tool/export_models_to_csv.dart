@@ -19,20 +19,68 @@ import 'package:card_combat_app/models/enemies/bombardino_crocodilo.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:card_combat_app/models/game_card.dart';
 
-void main() async {
-  // Ensure output directory exists
-  final dataDir = Directory('assets/data');
-  if (!await dataDir.exists()) {
-    await dataDir.create(recursive: true);
-  }
+const Map<String, Map<String, int>> playerDecks = {
+  'Knight': {
+    'Slash': 8,
+    'Heavy Strike': 4,
+    'Heal': 6,
+    'Greater Heal': 2,
+    'Cleanse': 2,
+    'Shield Up': 8,
+  },
+  'Paladin': {
+    'Slash': 6,
+    'Poison': 2,
+    'Heal': 8,
+    'Greater Heal': 4,
+    'Cleanse': 4,
+    'Shield Up': 6,
+  },
+  'Sorcerer': {
+    'Slash': 6,
+    'Poison': 6,
+    'Heal': 6,
+    'Greater Heal': 2,
+    'Cleanse': 2,
+    'Shield Up': 8,
+  },
+  'Warlock': {
+    'Slash': 6,
+    'Poison': 6,
+    'Heal': 4,
+    'Greater Heal': 2,
+    'Cleanse': 2,
+    'Shield Up': 10,
+  },
+  'Fighter': {
+    'Slash': 10,
+    'Poison': 2,
+    'Heal': 4,
+    'Greater Heal': 2,
+    'Cleanse': 2,
+    'Shield Up': 10,
+  },
+  'Mage': {
+    'Slash': 4,
+    'Poison': 8,
+    'Heal': 6,
+    'Greater Heal': 2,
+    'Cleanse': 2,
+    'Shield Up': 8,
+  },
+};
 
-  await exportPlayers();
-  await exportEnemies();
-  await exportCards();
-  print('Export complete!');
+void assignPlayerDecks(List players, List<GameCard> allCards) {
+  for (final p in players) {
+    final deckMap = playerDecks[p.name] ?? {};
+    p.deck = [
+      for (final entry in deckMap.entries)
+        ...List.generate(entry.value, (_) => allCards.firstWhere((c) => c.name == entry.key))
+    ];
+  }
 }
 
-Future<void> exportPlayers() async {
+Future<void> exportPlayersAndDecks() async {
   final players = [
     Knight(),
     Paladin(),
@@ -41,6 +89,10 @@ Future<void> exportPlayers() async {
     Fighter(),
     Mage(),
   ];
+  final allCards = gameCards;
+  assignPlayerDecks(players, allCards);
+
+  // Export players
   final buffer = StringBuffer();
   buffer.writeln('name,maxHealth,attack,defense,emoji,color,deck,description,maxEnergy,special');
   for (final p in players) {
@@ -59,6 +111,20 @@ Future<void> exportPlayers() async {
     ].join(','));
   }
   await File('assets/data/players.csv').writeAsString(buffer.toString());
+
+  // Export decks (long format)
+  final deckBuffer = StringBuffer();
+  deckBuffer.writeln('player,card,count');
+  for (var p in players) {
+    final cardCounts = <String, int>{};
+    for (var card in p.deck) {
+      cardCounts[card.name] = (cardCounts[card.name] ?? 0) + 1;
+    }
+    for (var entry in cardCounts.entries) {
+      deckBuffer.writeln('${p.name},${entry.key},${entry.value}');
+    }
+  }
+  await File('assets/data/decks.csv').writeAsString(deckBuffer.toString());
 }
 
 String _playerSpecial(dynamic p) {
@@ -120,4 +186,17 @@ Future<void> exportCards() async {
     ].join(','));
   }
   await File('assets/data/cards.csv').writeAsString(buffer.toString());
+}
+
+void main() async {
+  // Ensure output directory exists
+  final dataDir = Directory('assets/data');
+  if (!await dataDir.exists()) {
+    await dataDir.create(recursive: true);
+  }
+
+  await exportPlayersAndDecks();
+  await exportEnemies();
+  await exportCards();
+  print('Export complete!');
 } 

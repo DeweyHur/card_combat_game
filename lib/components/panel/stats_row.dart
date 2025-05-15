@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class StatsRow extends PositionComponent {
-  dynamic character; // Can be PlayerBase or EnemyBase
+  GameCharacter character;
   late TextComponent heartEmoji;
   late RectangleComponent healthBarBg;
   late RectangleComponent healthBarFg;
@@ -12,8 +12,6 @@ class StatsRow extends PositionComponent {
   late TextComponent attackText;
   late TextComponent defenseEmoji;
   late TextComponent defenseText;
-  late TextComponent energyEmoji;
-  late TextComponent energyText;
   late TextComponent shieldEmoji;
   late TextComponent shieldText;
 
@@ -25,50 +23,45 @@ class StatsRow extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
-    await super.onLoad();
-    // Heart emoji
+    super.onLoad();
     heartEmoji = TextComponent(
       text: '❤️',
       textRenderer: TextPaint(
-        style: const TextStyle(fontSize: 20),
+        style: const TextStyle(fontSize: 18),
       ),
       position: Vector2(0, 0),
       anchor: Anchor.centerLeft,
     );
     add(heartEmoji);
 
-    // Health bar background
     healthBarBg = RectangleComponent(
       size: Vector2(barWidth, barHeight),
+      paint: Paint()..color = Colors.grey.withOpacity(0.3),
       position: Vector2(28, 0),
-      paint: Paint()..color = Colors.grey.shade800,
       anchor: Anchor.centerLeft,
     );
     add(healthBarBg);
 
-    // Health bar foreground
     healthBarFg = RectangleComponent(
       size: Vector2(_healthBarFill(), barHeight),
+      paint: Paint()..color = Colors.red,
       position: Vector2(28, 0),
-      paint: Paint()..color = Colors.redAccent,
       anchor: Anchor.centerLeft,
     );
     add(healthBarFg);
 
-    // HP text
     hpText = TextComponent(
-      text: '${character.currentHealth}/${character.maxHealth}',
+      text: '${character.maxHealth}/${character.maxHealth}',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
-      position: Vector2(28 + barWidth + 8, 0),
+      position: Vector2(28 + barWidth + 10, 0),
       anchor: Anchor.centerLeft,
     );
     add(hpText);
 
-    // Shield emoji and value
     shieldEmoji = TextComponent(
-      text: '🛡️',
+      text: '🛡',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 18),
       ),
@@ -78,18 +71,17 @@ class StatsRow extends PositionComponent {
     add(shieldEmoji);
 
     shieldText = TextComponent(
-      text: '${character.shield}',
+      text: '0',
       textRenderer: TextPaint(
-        style: const TextStyle(fontSize: 14, color: Colors.lightBlueAccent),
+        style: const TextStyle(fontSize: 14, color: Colors.white),
       ),
       position: Vector2(28 + barWidth + 80, 0),
       anchor: Anchor.centerLeft,
     );
     add(shieldText);
 
-    // Shift attack/defense/energy to the right
     attackEmoji = TextComponent(
-      text: '🗡️',
+      text: '⚔️',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 18),
       ),
@@ -127,47 +119,23 @@ class StatsRow extends PositionComponent {
       anchor: Anchor.centerLeft,
     );
     add(defenseText);
-
-    if (character is PlayerBase) {
-      energyText = TextComponent(
-        text: _energyBarString(),
-        textRenderer: TextPaint(
-          style: const TextStyle(fontSize: 18, color: Colors.amber),
-        ),
-        position: Vector2(28 + barWidth + 210, 0),
-        anchor: Anchor.centerLeft,
-      );
-      add(energyText);
-    }
   }
 
   double _healthBarFill() {
     if (character.maxHealth == 0) return 0;
-    return barWidth * (character.currentHealth / character.maxHealth).clamp(0, 1);
+    // If you add currentHealth to GameCharacter, use it here
+    return barWidth * (1.0); // Placeholder: always full
   }
 
   void updateUI() {
     healthBarFg.size.x = _healthBarFill();
-    hpText.text = '${character.currentHealth}/${character.maxHealth}';
-    shieldText.text = '${character.shield}';
+    hpText.text = '${character.maxHealth}/${character.maxHealth}';
+    shieldText.text = '0';
     attackText.text = '${character.attack}';
     defenseText.text = '${character.defense}';
-    if (character is PlayerBase) {
-      energyText.text = _energyBarString();
-    }
   }
 
-  String _energyBarString() {
-    if (character is PlayerBase) {
-      final player = character as PlayerBase;
-      final filled = '⚡' * player.energy;
-      final empty = '◇' * (player.maxEnergy - player.energy);
-      return '$filled$empty ${player.energy}/${player.maxEnergy}';
-    }
-    return '';
-  }
-
-  void setCharacter(dynamic newCharacter) {
+  void setCharacter(GameCharacter newCharacter) {
     character = newCharacter;
     if (isLoaded) {
       updateUI();

@@ -7,6 +7,8 @@ import 'package:card_combat_app/components/panel/enemy_detail_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
   late PlayerDetailPanel detailPanel;
@@ -25,7 +27,16 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Set size from gameRef
     size = gameRef.size;
 
-    // Initialize selected player and enemy
+    // Ensure a selected player is set before constructing detailPanel
+    final players = DataController.instance.get<List<GameCharacter>>('players');
+    if (players != null && players.isNotEmpty) {
+      final selectedPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
+      if (selectedPlayer == null) {
+        DataController.instance.set<GameCharacter>('selectedPlayer', players.first);
+      }
+    }
+
+    // Now it's safe to construct detailPanel
     detailPanel = PlayerDetailPanel();
     selectionPanel = PlayerSelectionPanel();
     

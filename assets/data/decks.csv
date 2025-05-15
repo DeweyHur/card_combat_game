@@ -1,0 +1,37 @@
+player,card,count
+Knight,Slash,8
+Knight,Heavy Strike,4
+Knight,Heal,6
+Knight,Greater Heal,2
+Knight,Cleanse,2
+Knight,Shield Up,8
+Paladin,Slash,6
+Paladin,Poison,2
+Paladin,Heal,8
+Paladin,Greater Heal,4
+Paladin,Cleanse,4
+Paladin,Shield Up,6
+Sorcerer,Slash,6
+Sorcerer,Poison,6
+Sorcerer,Heal,6
+Sorcerer,Greater Heal,2
+Sorcerer,Cleanse,2
+Sorcerer,Shield Up,8
+Warlock,Slash,6
+Warlock,Poison,6
+Warlock,Heal,4
+Warlock,Greater Heal,2
+Warlock,Cleanse,2
+Warlock,Shield Up,10
+Fighter,Slash,10
+Fighter,Poison,2
+Fighter,Heal,4
+Fighter,Greater Heal,2
+Fighter,Cleanse,2
+Fighter,Shield Up,10
+Mage,Slash,4
+Mage,Poison,8
+Mage,Heal,6
+Mage,Greater Heal,2
+Mage,Cleanse,2
+Mage,Shield Up,8

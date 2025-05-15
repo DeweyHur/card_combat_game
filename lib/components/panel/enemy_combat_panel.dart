@@ -4,16 +4,18 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
 import 'package:card_combat_app/components/panel/base_enemy_panel.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class EnemyCombatPanel extends BaseEnemyPanel {
   TextComponent? actionText;
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final action = enemy.getNextAction();
-    final initialAction = ActionWithEmojiComponent.format(enemy, action);
+    // You may want to implement a getNextAction method for GameCharacter
+    final action = enemy.deck.isNotEmpty ? enemy.deck.first : null;
+    final initialAction = action != null ? ActionWithEmojiComponent.format(enemy, action) : '';
     actionText = TextComponent(
-      text: 'Next Action: $initialAction\n${action.description}',
+      text: 'Next Action: $initialAction\n${action?.description ?? ''}',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -38,10 +40,10 @@ class EnemyCombatPanel extends BaseEnemyPanel {
   void onCombatEvent(CombatEvent event) {
     if (event.target == enemy) {
       if (event.type == CombatEventType.damage || event.type == CombatEventType.heal || event.type == CombatEventType.status) {
-        showEffectForCard(event.card ?? event, () {
+        showEffectForCard(event.card, () {
           updateHealth();
         });
-        shakeForType(event.card?.type ?? CardType.attack);
+        shakeForType(event.card.type);
       } else if (event.type == CombatEventType.cure) {
         updateHealth();
       }

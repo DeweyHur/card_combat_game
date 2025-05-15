@@ -1,4 +1,4 @@
-import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/layout/multiline_text_component.dart';
 
 abstract class BasePlayerPanel extends BasePanel {
-  late PlayerBase player;
+  late GameCharacter player;
   late NameEmojiComponent nameEmojiComponent;
   late StatsRow statsRow;
   late MultilineTextComponent descriptionText;
@@ -30,7 +30,7 @@ abstract class BasePlayerPanel extends BasePanel {
     addToVerticalStack(descriptionText, -60);
   }
 
-  void updatePlayer(PlayerBase newPlayer) {
+  void updatePlayer(GameCharacter newPlayer) {
     player = newPlayer;
     nameEmojiComponent.updateCharacter(newPlayer);
     statsRow.setCharacter(player);

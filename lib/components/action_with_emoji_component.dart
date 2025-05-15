@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/enemies/enemy_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 
 class ActionWithEmojiComponent extends StatelessWidget {
-  final EnemyBase enemy;
+  final GameCharacter enemy;
   final GameCard action;
   final TextStyle? style;
 
@@ -14,7 +14,7 @@ class ActionWithEmojiComponent extends StatelessWidget {
     this.style,
   }) : super(key: key);
 
-  static String format(EnemyBase enemy, GameCard action) {
+  static String format(GameCharacter enemy, GameCard action) {
     final buffer = StringBuffer();
     // Enemy emoji
     buffer.write('${enemy.emoji} ');

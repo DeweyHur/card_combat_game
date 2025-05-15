@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/enemies/enemy_base.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/cards_panel.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
@@ -11,6 +10,7 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
 import 'package:card_combat_app/components/panel/enemy_combat_panel.dart';
 import 'package:card_combat_app/components/panel/player_combat_panel.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
   late final List<BasePanel> panels;
@@ -26,8 +26,8 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
   Future<void> onLoad() async {
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad started');
     await super.onLoad();
-    final player = DataController.instance.get('selectedPlayer');
-    final enemy = DataController.instance.get('selectedEnemy');
+    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
+    final enemy = DataController.instance.get<GameCharacter>('selectedEnemy');
     if (player == null || enemy == null) {
       GameLogger.error(LogCategory.game, 'CombatSceneLayout: player or enemy not set in DataController');
       GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad aborted due to missing player/enemy');
@@ -113,7 +113,7 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
   }
 
   /// Helper to format the enemy's next action with emojis
-  String formatEnemyActionWithEmojis(EnemyBase enemy, GameCard action) {
+  String formatEnemyActionWithEmojis(GameCharacter enemy, GameCard action) {
     return ActionWithEmojiComponent.format(enemy, action);
   }
 
@@ -127,12 +127,14 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     final enemy = DataController.instance.get('selectedEnemy');
     if (enemy != null) {
       turnText.text = CombatManager().isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
-      // Update enemy's next action with emojis
-      final nextAction = CombatManager().enemy.getNextAction();
-      (panels[2] as EnemyCombatPanel).updateActionWithDescription(
-        formatEnemyActionWithEmojis(CombatManager().enemy, nextAction),
-        nextAction.description,
-      );
+      // Use the first card in the enemy's deck as the next action (or random if you prefer)
+      final nextAction = CombatManager().enemy.deck.isNotEmpty ? CombatManager().enemy.deck.first : null;
+      if (nextAction != null) {
+        (panels[2] as EnemyCombatPanel).updateActionWithDescription(
+          formatEnemyActionWithEmojis(CombatManager().enemy, nextAction),
+          nextAction.description,
+        );
+      }
       (panels[2] as EnemyCombatPanel).updateHealth();
     }
 

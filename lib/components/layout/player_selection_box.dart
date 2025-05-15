@@ -1,13 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
-import 'package:card_combat_app/models/player/knight.dart';
-import 'package:card_combat_app/models/player/mage.dart';
-import 'package:card_combat_app/models/player/sorcerer.dart';
-import 'package:card_combat_app/models/player/paladin.dart';
-import 'package:card_combat_app/models/player/warlock.dart';
-import 'package:card_combat_app/models/player/fighter.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 
 class PlayerSelectionBox extends PositionComponent with TapCallbacks {
@@ -19,6 +13,8 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   late TextComponent nameText;
   late TextComponent emojiText;
 
+  late final List<GameCharacter> players;
+
   PlayerSelectionBox({
     required Vector2 position,
     required Vector2 size,
@@ -27,11 +23,13 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     position: position,
     size: size,
     anchor: Anchor.topLeft,
-  );
+  ) {
+    players = DataController.instance.get<List<GameCharacter>>('players') ?? [];
+  }
 
   bool get isSelectedPlayer {
-    final selectedPlayer = DataController.instance.get<PlayerBase>('selectedPlayer');
-    return selectedPlayer?.runtimeType == getPlayer().runtimeType;
+    final selectedPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
+    return selectedPlayer?.name == getPlayer().name;
   }
 
   @override
@@ -41,7 +39,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     // Set initial selection state from DataController
     isSelected = isSelectedPlayer;
     if (isSelected) {
-      DataController.instance.set<PlayerBase>('selectedPlayer', getPlayer());
+      DataController.instance.set<GameCharacter>('selectedPlayer', getPlayer());
     }
 
     // Watch for changes to selectedPlayer
@@ -99,30 +97,18 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     add(emojiText);
   }
 
-  PlayerBase getPlayer() {
-    switch (index) {
-      case 0:
-        return Knight();
-      case 1:
-        return Mage();
-      case 2:
-        return Sorcerer();
-      case 3:
-        return Paladin();
-      case 4:
-        return Warlock();
-      case 5:
-        return Fighter();
-      default:
-        throw Exception('Invalid player index: $index');
+  GameCharacter getPlayer() {
+    if (index < 0 || index >= players.length) {
+      throw Exception('Invalid player index: $index');
     }
+    return players[index];
   }
 
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
     // Set selectedPlayer in DataController
-    DataController.instance.set<PlayerBase>('selectedPlayer', getPlayer());
+    DataController.instance.set<GameCharacter>('selectedPlayer', getPlayer());
   }
 
   void updateAppearance() {
@@ -203,5 +189,4 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
       anchor: Anchor.center,
     );
   }
-
 } 

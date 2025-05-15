@@ -1,0 +1,34 @@
+enemy,action_name,description,type,value,statusEffect,statusDuration,probability
+Trippi Troppi,Acrobatic Strike,A flip that hurts,attack,15,,,0.8
+Trippi Troppi,Tumbling Heal,Heals through acrobatics,heal,5,,,0.15
+Trippi Troppi,Dizzy Flip,Confuses the target,statusEffect,5,poison,2,0.05
+Trullimero Trullicina,Comedy Strike,A joke that hurts,attack,12,,,0.7
+Trullimero Trullicina,Laughing Heal,Heals through laughter,heal,6,,,0.2
+Trullimero Trullicina,Confusing Joke,Confuses the target,statusEffect,4,poison,3,0.1
+Tung Tung Tung Sahur,Drum Strike,A powerful drum attack,attack,10,,,0.6
+Tung Tung Tung Sahur,Rhythm Healing,Heals through rhythm,heal,8,,,0.3
+Tung Tung Tung Sahur,Dizzy Beat,Confuses the target,statusEffect,3,poison,2,0.1
+Brr Brr Patapim,Frost Strike,A chilling attack,attack,16,,,0.75
+Brr Brr Patapim,Icy Heal,Heals with icy winds,heal,10,,,0.2
+Brr Brr Patapim,Snow Confusion,Confuses the target,statusEffect,6,poison,3,0.05
+Burbaloni Luliloli,Bubble Pop,Pops a bubble at the target,attack,10,,,0.65
+Burbaloni Luliloli,Soothing Foam,Heals with soothing foam,heal,8,,,0.25
+Burbaloni Luliloli,Slippery Soap,Confuses the target,statusEffect,3,poison,2,0.1
+Capuccino Assasino,Espresso Shot,A strong coffee attack,attack,14,,,0.7
+Capuccino Assasino,Foam Heal,Heals with creamy foam,heal,7,,,0.2
+Capuccino Assasino,Caffeine Confusion,Confuses the target,statusEffect,5,poison,2,0.1
+Tralalero Tralala,Singing Strike,A powerful vocal attack,attack,10,,,0.6
+Tralalero Tralala,Melodic Heal,Heals with a soothing melody,heal,8,,,0.3
+Tralalero Tralala,Discordant Note,Confuses the target,statusEffect,4,poison,2,0.1
+Ballerina Cappuccina,Pirouette Strike,A spinning attack,attack,12,,,0.7
+Ballerina Cappuccina,Graceful Heal,Heals with a graceful dance,heal,7,,,0.2
+Ballerina Cappuccina,Dizzy Spin,Confuses the target,statusEffect,4,poison,2,0.1
+Bobombini Goosini,Bomb Toss,Throws a bomb at the target,attack,13,,,0.65
+Bobombini Goosini,Fuse Heal,Heals by lighting a fuse,heal,7,,,0.25
+Bobombini Goosini,Smoke Screen,Confuses the target,statusEffect,3,poison,2,0.1
+Bobrini Cocococini,Coconut Smash,Hits with a coconut,attack,11,,,0.6
+Bobrini Cocococini,Coconut Water,Heals with coconut water,heal,8,,,0.3
+Bobrini Cocococini,Slippery Shell,Confuses the target,statusEffect,4,poison,2,0.1
+Bombardino Crocodilo,Tail Whip,Whips with a powerful tail,attack,14,,,0.7
+Bombardino Crocodilo,Swamp Heal,Heals in the swamp,heal,7,,,0.2
+Bombardino Crocodilo,Croc Confusion,Confuses the target,statusEffect,5,poison,2,0.1 

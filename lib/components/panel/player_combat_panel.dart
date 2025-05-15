@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/components/panel/base_player_panel.dart';
@@ -19,11 +19,10 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
     _isLoaded = true;
   }
 
-  void initialize(PlayerBase player, CombatManager combatManager) {
+  void initialize(GameCharacter player, CombatManager combatManager) {
     this.combatManager = combatManager;
     if (_isLoaded) {
       updateUI();
@@ -54,7 +53,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     if (event.target == player) {
       if (event.type == CombatEventType.damage) {
         final effect = GameEffects.createCardEffect(
-          event.card?.type ?? CardType.attack,
+          event.card.type,
           Vector2(size.x / 2 - 50, size.y / 2 - 50),
           Vector2(100, 100),
           onComplete: () {
@@ -65,10 +64,10 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
           value: event.value,
         )..priority = 100;
         add(effect);
-        shakeForType(event.card?.type ?? CardType.attack);
+        shakeForType(event.card.type);
       } else if (event.type == CombatEventType.heal || event.type == CombatEventType.status) {
         final effect = GameEffects.createCardEffect(
-          event.card?.type ?? CardType.heal,
+          event.card.type,
           Vector2(size.x / 2 - 50, size.y / 2 - 50),
           Vector2(100, 100),
           onComplete: () {
@@ -77,7 +76,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
           value: event.value,
         )..priority = 100;
         add(effect);
-        shakeForType(event.card?.type ?? CardType.heal);
+        shakeForType(event.card.type);
       } else if (event.type == CombatEventType.cure) {
         updateUI();
       }

@@ -51,6 +51,22 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
     );
     add(cardBorder);
 
+    // Card cost (top left)
+    final costText = TextComponent(
+      text: '⚡${cardData.cost}',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.orange,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      position: Vector2(8, 8),
+      anchor: Anchor.topLeft,
+      priority: 2,
+    );
+    add(costText);
+
     // Large emoji in the center
     final emoji = _getCardEmoji();
     final emojiText = TextComponent(

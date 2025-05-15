@@ -95,16 +95,6 @@ abstract class Character {
 
   bool isAlive() => currentHealth > 0;
 
-  GameCard getNextAction() {
-    // This is a placeholder. Enemy classes will override this method
-    return const GameCard(
-      name: 'Basic Attack',
-      description: 'A basic attack',
-      type: CardType.attack,
-      value: 5,
-    );
-  }
-
   /// Increase shield by [amount].
   void addShield(int amount) {
     shield += amount;

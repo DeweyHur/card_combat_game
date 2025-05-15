@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/player/player_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
@@ -11,7 +11,7 @@ import 'package:flame/input.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
-  final PlayerBase player;
+  final GameCharacter player;
   void Function(GameCard card)? onCardPlayed;
 
   List<CardVisualComponent> cardVisuals = [];
@@ -40,14 +40,11 @@ class CardsPanel extends BasePanel {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
     // Add text components using vertical stack
     resetVerticalStack();
     addToVerticalStack(cardAreaText, 40);
-
     // Show the player's hand as cards
     _showHand();
-
     // Add Play button (hidden by default)
     playButton = ButtonComponent(
       button: RectangleComponent(
@@ -95,8 +92,8 @@ class CardsPanel extends BasePanel {
     cardDetailPanel?.removeFromParent();
     cardDetailPanel = null;
     // Add new card visuals for each card in hand
-    for (int i = 0; i < player.hand.length; i++) {
-      final card = player.hand[i];
+    for (int i = 0; i < player.deck.length; i++) {
+      final card = player.deck[i];
       final cardVisual = GameEffects.createCardVisual(
         card,
         i,

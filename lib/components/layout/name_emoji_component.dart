@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/character.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class NameEmojiComponent extends PositionComponent {
-  Character character;
+  GameCharacter character;
   TextComponent? nameEmojiText;
 
   NameEmojiComponent({
@@ -30,7 +30,7 @@ class NameEmojiComponent extends PositionComponent {
     add(nameEmojiText!);
   }
 
-  void updateCharacter(Character newCharacter) {
+  void updateCharacter(GameCharacter newCharacter) {
     character = newCharacter;
     if (nameEmojiText != null) {
       nameEmojiText!.text = '${character.name} ${character.emoji}';

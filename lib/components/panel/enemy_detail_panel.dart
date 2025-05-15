@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/enemies/enemy_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_enemy_panel.dart';
 import 'package:card_combat_app/components/layout/multiline_text_component.dart';
 
@@ -25,7 +25,7 @@ class EnemyDetailPanel extends BaseEnemyPanel {
     // No-op for detail panel
   }
 
-  String _getEnemyDescription(EnemyBase enemy) {
+  String _getEnemyDescription(GameCharacter enemy) {
     return enemy.description;
   }
 } 

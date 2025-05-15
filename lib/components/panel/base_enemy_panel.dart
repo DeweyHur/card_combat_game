@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:card_combat_app/models/enemies/enemy_base.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
@@ -13,7 +13,7 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 
 abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
-  late EnemyBase enemy;
+  late GameCharacter enemy;
   RectangleComponent? separatorLine;
   SpriteComponent? enemySprite;
   AudioPlayer? audioPlayer;
@@ -24,7 +24,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    enemy = DataController.instance.get<EnemyBase>('selectedEnemy')!;
+    enemy = DataController.instance.get<GameCharacter>('selectedEnemy')!;
     try {
       final image = await gameRef.images.load(enemy.imagePath);
       final sprite = Sprite(image);
@@ -40,7 +40,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     statsRow = StatsRow(character: enemy);
     addToVerticalStack(statsRow, 40);
     DataController.instance.watch('selectedEnemy', (value) {
-      if (value is EnemyBase) {
+      if (value is GameCharacter) {
         updateEnemy(value);
       }
     });
@@ -54,7 +54,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     }
     separatorLine = RectangleComponent(
       size: Vector2(280, 2),
-      paint: Paint()..color = Colors.white.withValues(alpha: 0.5),
+      paint: Paint()..color = Colors.white.withOpacity(0.5),
     );
     addToVerticalStack(separatorLine!, 2);
     _isLoaded = true;
@@ -71,7 +71,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     updateHealth();
     statsRow.updateUI();
   }
-  void updateEnemy(EnemyBase newEnemy) {
+  void updateEnemy(GameCharacter newEnemy) {
     enemy = newEnemy;
     nameEmojiComponent.updateCharacter(enemy);
     statsRow.setCharacter(enemy);

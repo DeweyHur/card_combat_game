@@ -5,6 +5,12 @@ import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'package:card_combat_app/utils/audio_config.dart';
+import 'package:card_combat_app/models/game_cards_data.dart';
+import 'package:card_combat_app/models/deck_loader.dart';
+import 'package:card_combat_app/models/game_character_loader.dart';
+import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -15,6 +21,19 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.info(LogCategory.game, 'CardCombatGame loading...');
+
+    // Load all cards
+    final allCards = await loadAllGameCards();
+    // Load decks
+    final decks = await loadPlayerDecksFromCsv('assets/data/decks.csv', allCards);
+    // Load players and enemies
+    final players = await loadCharactersFromCsv('assets/data/players.csv', decks, isEnemy: false);
+    final enemies = await loadCharactersFromCsv('assets/data/enemies.csv', decks, isEnemy: true);
+    // Store in DataController
+    DataController.instance.set<List<GameCharacter>>('players', players);
+    DataController.instance.set<List<GameCharacter>>('enemies', enemies);
+    DataController.instance.set<List<GameCard>>('cards', allCards);
+    DataController.instance.set<Map<String, List<GameCard>>>('decks', decks);
 
     // Initialize audio configuration
     await AudioConfig.initialize();
