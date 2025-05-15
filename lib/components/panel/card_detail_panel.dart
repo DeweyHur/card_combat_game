@@ -75,4 +75,12 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
     valueText.text = 'Value: ${card.value}';
     descText.text = card.description;
   }
+
+  void showDeckAndDiscardInfo(int deckCount, int discardCount) {
+    nameText.text = '';
+    typeText.text = '';
+    costText.text = '';
+    valueText.text = '';
+    descText.text = 'Deck: $deckCount  |  Discard: $discardCount';
+  }
 } 

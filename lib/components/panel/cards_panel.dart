@@ -80,7 +80,8 @@ class CardsPanel extends BasePanel {
           _hidePlayButton();
           _showEndTurnButton();
           if (cardDetailPanel != null) {
-            cardDetailPanel!.isVisible = false;
+            cardDetailPanel!.showDeckAndDiscardInfo(player.deck.length, player.discardPile.length);
+            cardDetailPanel!.isVisible = true;
           }
         }
       },
@@ -164,6 +165,12 @@ class CardsPanel extends BasePanel {
     }
     _hidePlayButton();
     _showEndTurnButton();
+
+    // Show deck/discard info if no card is selected
+    if (cardDetailPanel != null && selectedCard == null) {
+      cardDetailPanel!.showDeckAndDiscardInfo(player.deck.length, player.discardPile.length);
+      cardDetailPanel!.isVisible = true;
+    }
   }
 
   Vector2 calculateCardPosition(int index) {

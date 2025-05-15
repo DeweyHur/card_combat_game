@@ -65,8 +65,6 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     cardsPanel.onCardPlayed = (card) {
       if (!CombatManager().isPlayerTurn) return;
       CombatManager().playCard(card);
-      // Remove the card from the player's hand
-      player.hand.remove(card);
       updateUI();
       if (CombatManager().isCombatOver()) {
         // Optionally, show game over message here

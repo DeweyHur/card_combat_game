@@ -61,7 +61,16 @@ class CombatManager {
   }
 
   void _drawHand(GameCharacter character) {
-    while (character.hand.length < character.handSize && character.deck.isNotEmpty) {
+    while (character.hand.length < character.handSize) {
+      if (character.deck.isEmpty && character.discardPile.isNotEmpty) {
+        // Move discard pile to deck and shuffle
+        character.deck.addAll(character.discardPile);
+        character.discardPile.clear();
+        character.deck.shuffle();
+      }
+      if (character.deck.isEmpty) {
+        break;
+      }
       character.hand.add(character.deck.removeAt(0));
     }
   }
@@ -97,6 +106,12 @@ class CombatManager {
     player.currentEnergy -= card.cost;
     GameLogger.info(LogCategory.game, 'Playing card: \'${card.name}\' (cost: ${card.cost}, remaining energy: ${player.currentEnergy})');
     _soundManager.playCardSound(card.type);
+
+    // Always move the card from hand to discard pile if present
+    if (player.hand.contains(card)) {
+      player.hand.remove(card);
+      player.discardPile.add(card);
+    }
 
     switch (card.type) {
       case CardType.attack:
@@ -201,7 +216,6 @@ class CombatManager {
   void _startNewPlayerTurn() {
     GameLogger.info(LogCategory.game, 'Starting new player turn');
     player.currentEnergy = player.maxEnergy;
-    _discardHand(player);
     _drawHand(player);
     // Implement any logic needed at the start of a new player turn
   }
