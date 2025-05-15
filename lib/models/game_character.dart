@@ -20,6 +20,10 @@ class GameCharacter {
   StatusEffect? statusEffect;
   int? statusDuration;
 
+  List<GameCard> hand = [];
+  int handSize;
+  List<GameCard> discardPile = [];
+
   GameCharacter({
     required this.name,
     required this.maxHealth,
@@ -31,7 +35,8 @@ class GameCharacter {
     required this.soundPath,
     required this.description,
     required this.deck,
-  this.maxEnergy = 3,
+    this.maxEnergy = 3,
+    this.handSize = 5,
   }) : currentHealth = maxHealth,
        currentEnergy = maxEnergy;
 } 

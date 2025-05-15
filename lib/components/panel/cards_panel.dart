@@ -132,14 +132,18 @@ class CardsPanel extends BasePanel {
     if (cardDetailPanel != null) {
       cardDetailPanel!.isVisible = false;
     }
-    // Ensure cardVisuals list matches hand size
-    while (cardVisuals.length < player.deck.length) {
-      // Create new CardVisualComponent with HasVisibility
-      final idx = cardVisuals.length;
-      final card = player.deck[idx];
+    // Remove all old visuals
+    for (final visual in cardVisuals) {
+      visual.removeFromParent();
+    }
+    cardVisuals.clear();
+    cardVisualsVisible.clear();
+    // Add visuals for current hand
+    for (int i = 0; i < player.hand.length; i++) {
+      final card = player.hand[i];
       final cardVisual = GameEffects.createCardVisual(
         card,
-        idx,
+        i,
         Vector2(0, 0),
         size,
         (selected) async {
@@ -154,24 +158,9 @@ class CardsPanel extends BasePanel {
         },
         player.currentEnergy >= card.cost,
       ) as CardVisualComponent;
-      if (cardVisual is HasVisibility) {
-        cardVisual.isVisible = false;
-      }
       add(cardVisual);
       cardVisuals.add(cardVisual);
-      cardVisualsVisible.add(false);
-    }
-    // Hide all visuals first
-    for (final visual in cardVisuals) {
-      if (visual is HasVisibility) visual.isVisible = false;
-    }
-    // Show and update only the ones in hand
-    for (int i = 0; i < player.deck.length; i++) {
-      final card = player.deck[i];
-      final visual = cardVisuals[i];
-      if (visual is HasVisibility) visual.isVisible = true;
-      // Optionally update card data if needed (if visuals are reused)
-      // visual.cardData = card; // If you want to support dynamic hand changes
+      cardVisualsVisible.add(true);
     }
     _hidePlayButton();
     _showEndTurnButton();

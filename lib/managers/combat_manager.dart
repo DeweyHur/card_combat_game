@@ -43,17 +43,32 @@ class CombatManager {
     this.enemy = enemy;
     isPlayerTurn = true;
     _watchers.clear();
+    _discardHand(player);
+    _drawHand(player);
   }
 
   void startCombat() {
     GameLogger.info(LogCategory.game, 'Starting combat: ${player.name} vs ${enemy.name}');
     _initializePlayerDeck();
+    _discardHand(player);
+    _drawHand(player);
     // Draw initial hand logic can be implemented here if needed
   }
 
   void _initializePlayerDeck() {
     // Shuffle the player's deck at the start of combat
     player.deck.shuffle();
+  }
+
+  void _drawHand(GameCharacter character) {
+    while (character.hand.length < character.handSize && character.deck.isNotEmpty) {
+      character.hand.add(character.deck.removeAt(0));
+    }
+  }
+
+  void _discardHand(GameCharacter character) {
+    character.discardPile.addAll(character.hand);
+    character.hand.clear();
   }
 
   void addWatcher(CombatWatcher watcher) {
@@ -123,6 +138,8 @@ class CombatManager {
   void endPlayerTurn() {
     isPlayerTurn = false;
     GameLogger.info(LogCategory.game, 'Player turn ended');
+    _discardHand(player);
+    _drawHand(player);
   }
 
   void executeEnemyTurn() {
@@ -184,6 +201,8 @@ class CombatManager {
   void _startNewPlayerTurn() {
     GameLogger.info(LogCategory.game, 'Starting new player turn');
     player.currentEnergy = player.maxEnergy;
+    _discardHand(player);
+    _drawHand(player);
     // Implement any logic needed at the start of a new player turn
   }
 
