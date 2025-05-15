@@ -52,7 +52,7 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
     );
     add(cardBorder);
 
-    // Card cost (top left)
+    // Card cost (left bottom)
     final costText = TextComponent(
       text: '⚡${cardData.cost}',
       textRenderer: TextPaint(
@@ -62,8 +62,8 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
           fontWeight: FontWeight.bold,
         ),
       ),
-      position: Vector2(8, 8),
-      anchor: Anchor.topLeft,
+      position: Vector2(8, size.y - 8),
+      anchor: Anchor.bottomLeft,
       priority: 2,
     );
     add(costText);

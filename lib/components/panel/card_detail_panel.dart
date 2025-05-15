@@ -8,6 +8,7 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
   late TextComponent descText;
   late TextComponent typeText;
   late TextComponent valueText;
+  late TextComponent costText;
   late RectangleComponent background;
 
   CardDetailPanel({Vector2? position, Vector2? size}) : super(position: position ?? Vector2.zero(), size: size ?? Vector2(180, 120));
@@ -38,6 +39,15 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
       anchor: Anchor.topLeft,
     );
     add(typeText);
+    costText = TextComponent(
+      text: '',
+      textRenderer: TextPaint(
+        style: const TextStyle(color: Colors.orange, fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+      position: Vector2(120, 10),
+      anchor: Anchor.topRight,
+    );
+    add(costText);
     valueText = TextComponent(
       text: '',
       textRenderer: TextPaint(
@@ -61,6 +71,7 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
   void setCard(GameCard card) {
     nameText.text = card.name;
     typeText.text = card.type.toString().split('.').last.toUpperCase();
+    costText.text = 'Cost: \u26A1${card.cost}';
     valueText.text = 'Value: ${card.value}';
     descText.text = card.description;
   }
