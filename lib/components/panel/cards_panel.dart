@@ -8,6 +8,18 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:flame/events.dart';
 import 'package:flame/input.dart';
+import 'package:flame/components.dart' show HasVisibility;
+import 'package:card_combat_app/components/panel/visible_button_component.dart';
+
+class VisibleButtonComponent extends ButtonComponent with HasVisibility {
+  VisibleButtonComponent({
+    required super.button,
+    super.position,
+    super.size,
+    super.anchor,
+    super.onPressed,
+  });
+}
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
@@ -15,10 +27,12 @@ class CardsPanel extends BasePanel {
   void Function(GameCard card)? onCardPlayed;
 
   List<CardVisualComponent> cardVisuals = [];
+  List<bool> cardVisualsVisible = [];
   GameCard? selectedCard;
-  ButtonComponent? playButton;
+  VisibleButtonComponent? playButton;
   CardDetailPanel? cardDetailPanel;
-  bool playButtonVisible = false;
+  VisibleButtonComponent? endTurnButton;
+  void Function()? onEndTurn;
   
   final double buttonHeight = 120.0;
 
@@ -46,7 +60,7 @@ class CardsPanel extends BasePanel {
     // Show the player's hand as cards
     _showHand();
     // Add Play button (hidden by default)
-    playButton = ButtonComponent(
+    playButton = VisibleButtonComponent(
       button: RectangleComponent(
         size: Vector2(size.x / 2, buttonHeight),
         paint: Paint()..color = Colors.blue,
@@ -74,50 +88,104 @@ class CardsPanel extends BasePanel {
           onCardPlayed!(selectedCard!);
           selectedCard = null;
           _hidePlayButton();
-          cardDetailPanel?.removeFromParent();
-          cardDetailPanel = null;
+          _showEndTurnButton();
+          if (cardDetailPanel != null) {
+            cardDetailPanel!.isVisible = false;
+          }
         }
       },
     );
-    playButtonVisible = false;
+    playButton!.isVisible = false;
+    add(playButton!);
+    // Add End Turn button (hidden by default)
+    endTurnButton = VisibleButtonComponent(
+      button: RectangleComponent(
+        size: Vector2(size.x / 2, buttonHeight),
+        paint: Paint()..color = Colors.orange,
+        anchor: Anchor.topLeft,
+        children: [
+          TextComponent(
+            text: 'End Turn',
+            textRenderer: TextPaint(
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            size: Vector2(size.x / 2, buttonHeight),
+            position: Vector2((size.x / 2) / 2, buttonHeight / 2),
+            anchor: Anchor.center,
+          ),
+        ],
+      ),
+      position: Vector2(0, size.y),
+      anchor: Anchor.bottomLeft,
+      onPressed: () {
+        if (onEndTurn != null) {
+          onEndTurn!();
+        }
+      },
+    );
+    endTurnButton!.isVisible = true;
+    add(endTurnButton!);
+    // Create card detail panel once, hidden by default
+    cardDetailPanel = CardDetailPanel(
+      position: Vector2(size.x / 2, size.y - buttonHeight),
+      size: Vector2(size.x / 2, buttonHeight),
+    );
+    cardDetailPanel!.isVisible = false;
+    add(cardDetailPanel!);
   }
 
   void _showHand() {
-    // Remove old card visuals
-    for (final cardVisual in cardVisuals) {
-      cardVisual.removeFromParent();
+    // Hide card detail panel
+    if (cardDetailPanel != null) {
+      cardDetailPanel!.isVisible = false;
     }
-    cardVisuals.clear();
-    // Remove card detail panel if present
-    cardDetailPanel?.removeFromParent();
-    cardDetailPanel = null;
-    // Add new card visuals for each card in hand
-    for (int i = 0; i < player.deck.length; i++) {
-      final card = player.deck[i];
+    // Ensure cardVisuals list matches hand size
+    while (cardVisuals.length < player.deck.length) {
+      // Create new CardVisualComponent with HasVisibility
+      final idx = cardVisuals.length;
+      final card = player.deck[idx];
       final cardVisual = GameEffects.createCardVisual(
         card,
-        i,
-        Vector2(0, 0), // CardsPanel's own position/size
+        idx,
+        Vector2(0, 0),
         size,
         (selected) async {
+          if (player.currentEnergy < card.cost) return;
           selectedCard = selected;
+          _hideEndTurnButton();
           _showPlayButton();
-          // Show CardDetailPanel for selectedCard
-          cardDetailPanel?.removeFromParent();
-          cardDetailPanel = CardDetailPanel(
-            position: Vector2(size.x / 2, size.y - buttonHeight),
-            size: Vector2(size.x / 2, buttonHeight),
-          );
-          add(cardDetailPanel!);
-          await cardDetailPanel!.onLoad();
-          cardDetailPanel!.setCard(selectedCard!);
+          if (cardDetailPanel != null) {
+            cardDetailPanel!.isVisible = true;
+            cardDetailPanel!.setCard(selectedCard!);
+          }
         },
-        true, // isPlayerTurn (stubbed for now)
+        player.currentEnergy >= card.cost,
       ) as CardVisualComponent;
+      if (cardVisual is HasVisibility) {
+        cardVisual.isVisible = false;
+      }
       add(cardVisual);
       cardVisuals.add(cardVisual);
+      cardVisualsVisible.add(false);
+    }
+    // Hide all visuals first
+    for (final visual in cardVisuals) {
+      if (visual is HasVisibility) visual.isVisible = false;
+    }
+    // Show and update only the ones in hand
+    for (int i = 0; i < player.deck.length; i++) {
+      final card = player.deck[i];
+      final visual = cardVisuals[i];
+      if (visual is HasVisibility) visual.isVisible = true;
+      // Optionally update card data if needed (if visuals are reused)
+      // visual.cardData = card; // If you want to support dynamic hand changes
     }
     _hidePlayButton();
+    _showEndTurnButton();
   }
 
   Vector2 calculateCardPosition(int index) {
@@ -134,28 +202,24 @@ class CardsPanel extends BasePanel {
 
   @override
   void updateUI() {
-    // Update any UI elements that need to be refreshed
-    // This could include updating card positions, turn information, etc.
     _showHand();
   }
 
-  @override
-  bool onTapDown(TapDownInfo info) {
-    // No longer handle play button tap here; ButtonComponent handles its own taps.
-    return false;
-  }
-
   void _showPlayButton() {
-    if (!playButtonVisible && playButton != null) {
-      add(playButton!);
-      playButtonVisible = true;
-    }
+    if (playButton != null) playButton!.isVisible = true;
+    if (endTurnButton != null) endTurnButton!.isVisible = false;
   }
 
   void _hidePlayButton() {
-    if (playButtonVisible && playButton != null) {
-      playButton!.removeFromParent();
-      playButtonVisible = false;
-    }
+    if (playButton != null) playButton!.isVisible = false;
+  }
+
+  void _showEndTurnButton() {
+    if (endTurnButton != null) endTurnButton!.isVisible = true;
+    if (playButton != null) playButton!.isVisible = false;
+  }
+
+  void _hideEndTurnButton() {
+    if (endTurnButton != null) endTurnButton!.isVisible = false;
   }
 } 
