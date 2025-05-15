@@ -9,17 +9,6 @@ import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:flame/events.dart';
 import 'package:flame/input.dart';
 import 'package:flame/components.dart' show HasVisibility;
-import 'package:card_combat_app/components/panel/visible_button_component.dart';
-
-class VisibleButtonComponent extends ButtonComponent with HasVisibility {
-  VisibleButtonComponent({
-    required super.button,
-    super.position,
-    super.size,
-    super.anchor,
-    super.onPressed,
-  });
-}
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
@@ -29,9 +18,9 @@ class CardsPanel extends BasePanel {
   List<CardVisualComponent> cardVisuals = [];
   List<bool> cardVisualsVisible = [];
   GameCard? selectedCard;
-  VisibleButtonComponent? playButton;
+  ButtonComponent? playButton;
   CardDetailPanel? cardDetailPanel;
-  VisibleButtonComponent? endTurnButton;
+  ButtonComponent? endTurnButton;
   void Function()? onEndTurn;
   
   final double buttonHeight = 120.0;
@@ -59,8 +48,8 @@ class CardsPanel extends BasePanel {
     addToVerticalStack(cardAreaText, 40);
     // Show the player's hand as cards
     _showHand();
-    // Add Play button (hidden by default)
-    playButton = VisibleButtonComponent(
+    // Add Play button (not attached by default)
+    playButton = ButtonComponent(
       button: RectangleComponent(
         size: Vector2(size.x / 2, buttonHeight),
         paint: Paint()..color = Colors.blue,
@@ -84,6 +73,7 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
+        print('[PlayButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onCardPlayed != null && selectedCard != null) {
           onCardPlayed!(selectedCard!);
           selectedCard = null;
@@ -95,10 +85,9 @@ class CardsPanel extends BasePanel {
         }
       },
     );
-    playButton!.isVisible = false;
-    add(playButton!);
-    // Add End Turn button (hidden by default)
-    endTurnButton = VisibleButtonComponent(
+    // Do not add playButton yet
+    // Add End Turn button (attached by default)
+    endTurnButton = ButtonComponent(
       button: RectangleComponent(
         size: Vector2(size.x / 2, buttonHeight),
         paint: Paint()..color = Colors.orange,
@@ -122,12 +111,12 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
+        print('[EndTurnButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onEndTurn != null) {
           onEndTurn!();
         }
       },
     );
-    endTurnButton!.isVisible = true;
     add(endTurnButton!);
     // Create card detail panel once, hidden by default
     cardDetailPanel = CardDetailPanel(
@@ -206,20 +195,32 @@ class CardsPanel extends BasePanel {
   }
 
   void _showPlayButton() {
-    if (playButton != null) playButton!.isVisible = true;
-    if (endTurnButton != null) endTurnButton!.isVisible = false;
+    if (playButton != null && playButton!.parent == null) {
+      add(playButton!);
+    }
+    if (endTurnButton != null && endTurnButton!.parent != null) {
+      endTurnButton!.removeFromParent();
+    }
   }
 
   void _hidePlayButton() {
-    if (playButton != null) playButton!.isVisible = false;
+    if (playButton != null && playButton!.parent != null) {
+      playButton!.removeFromParent();
+    }
   }
 
   void _showEndTurnButton() {
-    if (endTurnButton != null) endTurnButton!.isVisible = true;
-    if (playButton != null) playButton!.isVisible = false;
+    if (endTurnButton != null && endTurnButton!.parent == null) {
+      add(endTurnButton!);
+    }
+    if (playButton != null && playButton!.parent != null) {
+      playButton!.removeFromParent();
+    }
   }
 
   void _hideEndTurnButton() {
-    if (endTurnButton != null) endTurnButton!.isVisible = false;
+    if (endTurnButton != null && endTurnButton!.parent != null) {
+      endTurnButton!.removeFromParent();
+    }
   }
 } 
