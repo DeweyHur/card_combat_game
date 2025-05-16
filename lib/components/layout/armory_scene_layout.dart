@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/panel/equipment_panel.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
+import 'package:card_combat_app/components/panel/player_selection_panel.dart';
 
 class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   late final TextComponent _titleText;
@@ -30,6 +31,11 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
       size: Vector2(size.x, 50),
     );
     addToVerticalStack(_titleText, 50);
+
+    // Player Selection Panel
+    final playerSelectionPanel = PlayerSelectionPanel()
+      ..size = Vector2(size.x, size.y * 0.28);
+    addToVerticalStack(playerSelectionPanel, size.y * 0.28);
 
     // Equipment Panel
     final equipmentPanel = EquipmentPanel(size: Vector2(size.x, size.y * 0.28));
