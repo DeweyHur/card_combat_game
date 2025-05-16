@@ -56,5 +56,6 @@ GameCard enemyActionToGameCard(EnemyAction action) {
         : null,
     statusDuration: action.statusDuration,
     color: "red",
+    target: "player", // Enemy actions target player by default
   );
 } 

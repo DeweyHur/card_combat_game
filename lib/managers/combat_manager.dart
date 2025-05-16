@@ -130,10 +130,10 @@ class CombatManager {
           type: CombatEventType.damage,
           target: enemy,
           value: card.value,
-          description: '[32m${player.name}[0m dealt ${card.value} damage',
+          description: '\u001b[32m${player.name}\u001b[0m dealt ${card.value} damage',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Dealt [31m${card.value}[0m damage to [31m${enemy.name}[0m');
+        GameLogger.info(LogCategory.game, 'Dealt \u001b[31m${card.value}\u001b[0m damage to \u001b[31m${enemy.name}\u001b[0m');
         break;
       case CardType.heal:
         playerHeal(card.value);
@@ -141,20 +141,24 @@ class CombatManager {
           type: CombatEventType.heal,
           target: player,
           value: card.value,
-          description: '[32m${player.name}[0m healed for ${card.value}',
+          description: '\u001b[32m${player.name}\u001b[0m healed for ${card.value}',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Healed [32m${player.name}[0m for ${card.value} HP');
+        GameLogger.info(LogCategory.game, 'Healed \u001b[32m${player.name}\u001b[0m for ${card.value} HP');
         break;
       case CardType.statusEffect:
-        applyStatusEffectToPlayer(card);
+        if (card.target == "enemy") {
+          applyStatusEffectToEnemy(card);
+        } else if (card.target == "player" || card.target == "self") {
+          applyStatusEffectToPlayer(card);
+        }
         break;
       case CardType.cure:
         // Implement cure logic as needed
         break;
       case CardType.shield:
         player.shield += card.value;
-        GameLogger.info(LogCategory.combat, '[32m${player.name}[0m gains ${card.value} shield. Shield: [36m${player.shield}[0m');
+        GameLogger.info(LogCategory.combat, '\u001b[32m${player.name}\u001b[0m gains ${card.value} shield. Shield: \u001b[36m${player.shield}\u001b[0m');
         break;
       case CardType.shieldAttack:
         // Implement shieldAttack logic as needed
@@ -244,8 +248,11 @@ class CombatManager {
           GameLogger.info(LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
           break;
         case CardType.statusEffect:
-          // Apply status effect to player
-          GameLogger.info(LogCategory.game, '${enemy.name} applies status effect to ${player.name}');
+          if (card.target == "enemy" || card.target == "self") {
+            applyStatusEffectToEnemy(card);
+          } else if (card.target == "player") {
+            applyStatusEffectToPlayer(card);
+          }
           break;
         case CardType.cure:
           // Implement cure logic if needed
@@ -348,15 +355,27 @@ class CombatManager {
   // Optionally, implement status effect application for statusEffect cards
   void applyStatusEffectToPlayer(GameCard card) {
     if (card.statusEffectToApply != null && card.statusDuration != null) {
-      // Assuming player has statusEffect and statusDuration fields
-      player.statusEffect = card.statusEffectToApply;
-      player.statusDuration = card.statusDuration;
+      player.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
       GameLogger.info(LogCategory.combat, 'Player is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns');
       _notifyWatchers(CombatEvent(
         type: CombatEventType.status,
         target: player,
         value: 0,
-        description: '${enemy.name} applied ${card.statusEffectToApply} to ${player.name}',
+        description: '${enemy.name} applied ${card.statusEffectToApply} to ${player.name} (x${card.statusDuration})',
+        card: card,
+      ));
+    }
+  }
+
+  void applyStatusEffectToEnemy(GameCard card) {
+    if (card.statusEffectToApply != null && card.statusDuration != null) {
+      enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
+      GameLogger.info(LogCategory.combat, 'Enemy is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns');
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.status,
+        target: enemy,
+        value: 0,
+        description: '${enemy.name} applied ${card.statusEffectToApply} to self (x${card.statusDuration})',
         card: card,
       ));
     }

@@ -38,7 +38,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     nameEmojiComponent = NameEmojiComponent(character: enemy);
     addToVerticalStack(nameEmojiComponent, 60);
     statsRow = StatsRow(character: enemy);
-    addToVerticalStack(statsRow, 40);
+    addToVerticalStack(statsRow, 20);
     DataController.instance.watch('selectedEnemy', (value) {
       if (value is GameCharacter) {
         updateEnemy(value);

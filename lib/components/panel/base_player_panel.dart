@@ -4,13 +4,11 @@ import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/components/layout/multiline_text_component.dart';
 
 abstract class BasePlayerPanel extends BasePanel {
   late GameCharacter player;
   late NameEmojiComponent nameEmojiComponent;
   late StatsRow statsRow;
-  late MultilineTextComponent descriptionText;
 
   BasePlayerPanel({required this.player});
 
@@ -21,13 +19,7 @@ abstract class BasePlayerPanel extends BasePanel {
     resetVerticalStack();
     addToVerticalStack(nameEmojiComponent, 60);
     statsRow = StatsRow(character: player);
-    addToVerticalStack(statsRow, 40);
-    descriptionText = MultilineTextComponent(
-      text: '',
-      style: const TextStyle(color: Colors.white, fontSize: 16),
-      maxWidth: size.x,
-    );
-    addToVerticalStack(descriptionText, -60);
+    addToVerticalStack(statsRow, 20);
   }
 
   void updatePlayer(GameCharacter newPlayer) {
@@ -35,10 +27,6 @@ abstract class BasePlayerPanel extends BasePanel {
     nameEmojiComponent.updateCharacter(newPlayer);
     statsRow.setCharacter(player);
     updateUI();
-  }
-
-  void updateDescription(String description) {
-    descriptionText.text = description;
   }
 
   @override

@@ -23,6 +23,7 @@ class GameCard {
   final StatusEffect? statusEffectToApply;
   final int? statusDuration;
   final String color;
+  final String target; // 'player' or 'enemy' (or 'self')
 
   const GameCard({
     required this.name,
@@ -33,6 +34,7 @@ class GameCard {
     this.statusEffectToApply,
     this.statusDuration,
     this.color = "blue",
+    this.target = "enemy", // default for player cards
   });
 
   @override
@@ -46,6 +48,7 @@ extension GameCardClone on GameCard {
     StatusEffect? statusEffectToApply,
     int? statusDuration,
     String? color,
+    String? target,
   }) {
     return GameCard(
       name: name,
@@ -56,6 +59,7 @@ extension GameCardClone on GameCard {
       statusEffectToApply: statusEffectToApply ?? this.statusEffectToApply,
       statusDuration: statusDuration ?? this.statusDuration,
       color: color ?? this.color,
+      target: target ?? this.target,
     );
   }
 } 

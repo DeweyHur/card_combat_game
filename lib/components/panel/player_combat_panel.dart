@@ -13,12 +13,21 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
 
   late CombatManager combatManager;
   bool _isLoaded = false;
+  late TextComponent statusEffectText;
 
   PlayerCombatPanel({required super.player});
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    // Add status effect text below the health bar (after statsRow)
+    statusEffectText = TextComponent(
+      text: '',
+      textRenderer: TextPaint(
+        style: const TextStyle(color: Colors.purple, fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+    );
+    addToVerticalStack(statusEffectText, 24);
     _isLoaded = true;
   }
 
@@ -34,7 +43,33 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     super.updateUI();
     if (!_isLoaded) return;
     final player = combatManager.player;
-    updateDescription(player.description);
+    // Update status effect text for all effects
+    if (player.statusEffects.isNotEmpty) {
+      final effectStrings = player.statusEffects.entries.map((entry) {
+        final effect = entry.key;
+        final duration = entry.value;
+        String emoji;
+        switch (effect) {
+          case StatusEffect.poison:
+            emoji = '☠️';
+            break;
+          case StatusEffect.burn:
+            emoji = '🔥';
+            break;
+          case StatusEffect.freeze:
+            emoji = '❄️';
+            break;
+          case StatusEffect.none:
+          default:
+            emoji = '';
+            break;
+        }
+        return '$emoji ${effect.toString().split('.').last.toUpperCase()} x$duration';
+      }).join('   ');
+      statusEffectText.text = effectStrings;
+    } else {
+      statusEffectText.text = 'No Status Effect';
+    }
   }
 
   @override
