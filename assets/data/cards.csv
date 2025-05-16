@@ -7,3 +7,4 @@ Player,Poison,Apply poison for 3 turns,statusEffect,2,1,poison,3,purple
 Player,Cleanse,Remove all status effects,cure,0,1,,,blue
 Player,Shield Up,Gain 8 shield,shield,8,1,,,blueGrey
 Player,Shield Bash,Attack with your shield value (consumes shield),shieldAttack,0,2,,,amber
+Player,Burn,Apply burn (stacks and halves each turn),statusEffect,4,1,burn,4,orange

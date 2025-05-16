@@ -47,7 +47,11 @@ class GameCharacter {
     if (effect == StatusEffect.poison) {
       // Poison stacks: add to existing amount
       statusEffects[StatusEffect.poison] = (statusEffects[StatusEffect.poison] ?? 0) + amount;
-      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is poisoned for ${statusEffects[StatusEffect.poison]}');
+      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is poisoned for [32m${statusEffects[StatusEffect.poison]}\x1B[0m');
+    } else if (effect == StatusEffect.burn) {
+      // Burn stacks: add to existing amount
+      statusEffects[StatusEffect.burn] = (statusEffects[StatusEffect.burn] ?? 0) + amount;
+      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is burned for [31m${statusEffects[StatusEffect.burn]}\x1B[0m');
     } else {
       // Other effects: overwrite duration
       statusEffects[effect] = amount;
@@ -92,8 +96,33 @@ class GameCharacter {
           }
           break;
         case StatusEffect.burn:
-          takeDamage(3);
-          GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m takes 3 burn damage');
+          if (value > 0) {
+            // Burn damage: apply to shield first, then HP
+            int burnDamage = value;
+            if (shield > 0) {
+              if (shield >= burnDamage) {
+                shield -= burnDamage;
+                GameLogger.info(LogCategory.combat, '$name loses $burnDamage shield from burn. Shield: $shield');
+              } else {
+                int remaining = burnDamage - shield;
+                GameLogger.info(LogCategory.combat, '$name loses $shield shield from burn. Shield: 0');
+                shield = 0;
+                currentHealth = (currentHealth - remaining).clamp(0, maxHealth);
+                GameLogger.info(LogCategory.combat, '$name takes $remaining burn damage. Health: $currentHealth/$maxHealth');
+              }
+            } else {
+              currentHealth = (currentHealth - burnDamage).clamp(0, maxHealth);
+              GameLogger.info(LogCategory.combat, '$name takes $burnDamage burn damage. Health: $currentHealth/$maxHealth');
+            }
+            // Halve the burn stack (rounded down)
+            int newBurn = (value / 2).floor();
+            if (newBurn > 0) {
+              statusEffects[StatusEffect.burn] = newBurn;
+              GameLogger.info(LogCategory.combat, '$name burn stack is now $newBurn');
+            } else {
+              expired.add(StatusEffect.burn);
+            }
+          }
           break;
         case StatusEffect.freeze:
           // Freeze effect is handled in the combat logic

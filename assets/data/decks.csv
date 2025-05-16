@@ -11,18 +11,20 @@ Paladin,Heal,8
 Paladin,Greater Heal,4
 Paladin,Cleanse,4
 Paladin,Shield Up,6
-Sorcerer,Slash,6
+Sorcerer,Slash,3
 Sorcerer,Poison,6
+Sorcerer,Burn,4
 Sorcerer,Heal,6
 Sorcerer,Greater Heal,2
 Sorcerer,Cleanse,2
-Sorcerer,Shield Up,8
-Warlock,Slash,6
+Sorcerer,Shield Up,4
+Warlock,Slash,2
 Warlock,Poison,6
+Warlock,Burn,6
 Warlock,Heal,4
 Warlock,Greater Heal,2
 Warlock,Cleanse,2
-Warlock,Shield Up,10
+Warlock,Shield Up,4
 Fighter,Slash,10
 Fighter,Poison,2
 Fighter,Heal,4
