@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class StatsRow extends PositionComponent {
   GameCharacter character;
@@ -16,6 +17,9 @@ class StatsRow extends PositionComponent {
   late TextComponent shieldText;
   late TextComponent energyEmoji;
   late TextComponent energyText;
+  late TextComponent healthBonusText;
+  late TextComponent energyBonusText;
+  late TextComponent shieldBonusText;
 
   static const double barWidth = 100;
   static const double barHeight = 16;
@@ -62,6 +66,17 @@ class StatsRow extends PositionComponent {
     );
     add(hpText);
 
+    // Health bonus text
+    healthBonusText = TextComponent(
+      text: '',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 14, color: Colors.green),
+      ),
+      position: Vector2(28 + barWidth + 50, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(healthBonusText);
+
     shieldEmoji = TextComponent(
       text: '🛡',
       textRenderer: TextPaint(
@@ -81,6 +96,17 @@ class StatsRow extends PositionComponent {
       anchor: Anchor.centerLeft,
     );
     add(shieldText);
+
+    // Shield bonus text
+    shieldBonusText = TextComponent(
+      text: '',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 14, color: Colors.green),
+      ),
+      position: Vector2(28 + barWidth + 90, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(shieldBonusText);
 
     attackEmoji = TextComponent(
       text: '⚔️',
@@ -142,11 +168,51 @@ class StatsRow extends PositionComponent {
       anchor: Anchor.centerLeft,
     );
     add(energyText);
+
+    // Energy bonus text
+    energyBonusText = TextComponent(
+      text: '',
+      textRenderer: TextPaint(
+        style: const TextStyle(fontSize: 14, color: Colors.green),
+      ),
+      position: Vector2(28 + barWidth + 250, 0),
+      anchor: Anchor.centerLeft,
+    );
+    add(energyBonusText);
   }
 
   double _healthBarFill() {
     if (character.maxHealth == 0) return 0;
     return barWidth * (character.currentHealth / character.maxHealth);
+  }
+
+  void _updateBonusTexts() {
+    // Get upgrade history from DataController
+    final upgradeHistory = DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
+    
+    // Calculate bonuses
+    int healthBonus = 0;
+    int energyBonus = 0;
+    int shieldBonus = 0;
+
+    for (var upgrade in upgradeHistory) {
+      switch (upgrade['type']) {
+        case 'Health Upgrade':
+          healthBonus += 10;
+          break;
+        case 'Energy Upgrade':
+          energyBonus += 1;
+          break;
+        case 'Shield Upgrade':
+          shieldBonus += 5;
+          break;
+      }
+    }
+
+    // Update bonus text components
+    healthBonusText.text = healthBonus > 0 ? '(+$healthBonus)' : '';
+    energyBonusText.text = energyBonus > 0 ? '(+$energyBonus)' : '';
+    shieldBonusText.text = shieldBonus > 0 ? '(+$shieldBonus)' : '';
   }
 
   void updateUI() {
@@ -156,6 +222,7 @@ class StatsRow extends PositionComponent {
     attackText.text = '${character.attack}';
     defenseText.text = '${character.defense}';
     energyText.text = '${character.currentEnergy}/${character.maxEnergy}';
+    _updateBonusTexts();
   }
 
   void setCharacter(GameCharacter newCharacter) {

@@ -8,6 +8,7 @@ import 'package:card_combat_app/models/game_character.dart';
 class GameResultScene extends BaseScene with TapCallbacks {
   String result = '';
   GameCharacter? nextEnemy;
+  List<Map<String, dynamic>> upgradeHistory = [];
 
   GameResultScene() : super(sceneBackgroundColor: Colors.black);
 
@@ -18,6 +19,8 @@ class GameResultScene extends BaseScene with TapCallbacks {
     if (result == 'Victory') {
       // Get the next enemy from DataController
       nextEnemy = DataController.instance.get<GameCharacter>('nextEnemy');
+      // Get upgrade history
+      upgradeHistory = DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
     }
   }
 
@@ -40,7 +43,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
     )..layout();
     textPainter.paint(
       canvas,
-      Offset((size.x - textPainter.width) / 2, size.y * 0.3),
+      Offset((size.x - textPainter.width) / 2, size.y * 0.1),
     );
 
     if (result == 'Victory') {
@@ -59,7 +62,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
       )..layout();
       compensationPainter.paint(
         canvas,
-        Offset((size.x - compensationPainter.width) / 2, size.y * 0.4),
+        Offset((size.x - compensationPainter.width) / 2, size.y * 0.2),
       );
 
       // Render next enemy information if available
@@ -77,8 +80,49 @@ class GameResultScene extends BaseScene with TapCallbacks {
         )..layout();
         nextEnemyPainter.paint(
           canvas,
-          Offset((size.x - nextEnemyPainter.width) / 2, size.y * 0.5),
+          Offset((size.x - nextEnemyPainter.width) / 2, size.y * 0.3),
         );
+      }
+
+      // Render upgrade history
+      if (upgradeHistory.isNotEmpty) {
+        final historyTitle = 'Upgrade History:';
+        final historyTitlePainter = TextPainter(
+          text: TextSpan(
+            text: historyTitle,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        historyTitlePainter.paint(
+          canvas,
+          Offset((size.x - historyTitlePainter.width) / 2, size.y * 0.4),
+        );
+
+        // Render each upgrade
+        double yOffset = 0.45;
+        for (var upgrade in upgradeHistory) {
+          final upgradeText = '${upgrade['type']}: ${upgrade['description']}';
+          final upgradePainter = TextPainter(
+            text: TextSpan(
+              text: upgradeText,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white70,
+              ),
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          upgradePainter.paint(
+            canvas,
+            Offset((size.x - upgradePainter.width) / 2, size.y * yOffset),
+          );
+          yOffset += 0.05;
+        }
       }
     }
 
@@ -173,7 +217,6 @@ class GameResultScene extends BaseScene with TapCallbacks {
         height: 60,
       );
       if (continueRect.contains(pos)) {
-        // TODO: Navigate to card upgrade scene
         SceneManager().pushScene('card_upgrade');
         return;
       }

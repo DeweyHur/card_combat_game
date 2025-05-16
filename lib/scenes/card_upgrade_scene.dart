@@ -327,6 +327,10 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     final player = DataController.instance.get<GameCharacter>('selectedPlayer');
     if (player == null) return;
 
+    // Get current upgrade history
+    List<Map<String, dynamic>> upgradeHistory = 
+        DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
+
     switch (selectedUpgradeType) {
       case UpgradeType.card:
         if (selectedCard != null) {
@@ -336,6 +340,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
           final cardIndex = player.deck.indexOf(selectedCard!);
           if (cardIndex != -1) {
             player.deck[cardIndex] = upgradedCard;
+            // Add to upgrade history
+            upgradeHistory.add({
+              'type': 'Card Upgrade',
+              'description': '${selectedCard!.name} value increased to ${upgradedCard.value}',
+            });
           }
         }
         break;
@@ -356,6 +365,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
           handSize: player.handSize,
         );
         DataController.instance.set('selectedPlayer', upgradedPlayer);
+        // Add to upgrade history
+        upgradeHistory.add({
+          'type': 'Energy Upgrade',
+          'description': 'Max energy increased to ${upgradedPlayer.maxEnergy}',
+        });
         break;
       case UpgradeType.health:
         // Create a new player with increased max health
@@ -375,6 +389,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         );
         upgradedPlayer.currentHealth = upgradedPlayer.maxHealth;
         DataController.instance.set('selectedPlayer', upgradedPlayer);
+        // Add to upgrade history
+        upgradeHistory.add({
+          'type': 'Health Upgrade',
+          'description': 'Max health increased to ${upgradedPlayer.maxHealth}',
+        });
         break;
       case UpgradeType.shield:
         // Create a new player with increased shield
@@ -394,10 +413,18 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         );
         upgradedPlayer.shield = player.shield + 5;
         DataController.instance.set('selectedPlayer', upgradedPlayer);
+        // Add to upgrade history
+        upgradeHistory.add({
+          'type': 'Shield Upgrade',
+          'description': 'Starting shield increased to ${upgradedPlayer.shield}',
+        });
         break;
       default:
         break;
     }
+
+    // Save updated upgrade history
+    DataController.instance.set('upgradeHistory', upgradeHistory);
 
     // Return to player selection scene
     SceneManager().pushScene('player_selection');
