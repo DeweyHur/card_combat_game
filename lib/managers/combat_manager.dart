@@ -2,6 +2,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
+import 'dart:math';
 
 // --- Combat Event System ---
 enum CombatEventType { damage, heal, status, cure }
@@ -37,6 +38,15 @@ class CombatManager {
   bool isPlayerTurn = true;
   final List<CombatWatcher> _watchers = [];
   final SoundManager _soundManager = SoundManager();
+
+  // Store enemy actions by name for probability-based selection
+  Map<String, List<dynamic>>? _enemyActionsByName; // dynamic for EnemyAction
+  void setEnemyActionsByName(Map<String, List<dynamic>> actions) {
+    _enemyActionsByName = actions;
+  }
+
+  // Store the last picked enemy action for UI
+  GameCard? lastEnemyAction;
 
   void initialize({required GameCharacter player, required GameCharacter enemy}) {
     this.player = player;
@@ -168,9 +178,46 @@ class CombatManager {
 
     GameLogger.info(LogCategory.game, 'Enemy turn starting');
 
-    // 1. Select an action (e.g., first card or random)
+    // 1. Select an action using probability if available
     if (enemy.deck.isNotEmpty) {
-      final card = enemy.deck.first; // You can randomize or use probability if desired
+      final enemyName = enemy.name;
+      GameCard? card;
+      dynamic pickedAction;
+      if (_enemyActionsByName != null && _enemyActionsByName![enemyName] != null) {
+        final actions = _enemyActionsByName![enemyName]!;
+        // Log all possible actions and their probabilities
+        for (final a in actions) {
+          GameLogger.info(LogCategory.game, 'Enemy action option: ${a.actionName} (probability: ${a.probability})');
+        }
+        // Weighted random selection
+        final totalProb = actions.fold<double>(0, (sum, a) => sum + (a.probability ?? 0));
+        if (totalProb > 0) {
+          final random = Random();
+          final rand = random.nextDouble() * totalProb;
+          GameLogger.info(LogCategory.game, 'Random value for selection: $rand (totalProb: $totalProb)');
+          double cumulative = 0;
+          for (int i = 0; i < actions.length; i++) {
+            cumulative += actions[i].probability;
+            GameLogger.info(LogCategory.game, 'Cumulative probability after ${actions[i].actionName}: $cumulative');
+            if (rand <= cumulative) {
+              pickedAction = actions[i];
+              // Find the corresponding GameCard in the deck by name
+              card = enemy.deck.firstWhere((c) => c.name == actions[i].actionName, orElse: () => enemy.deck.first);
+              break;
+            }
+          }
+        }
+      }
+      // Fallback: uniform random
+      card ??= (enemy.deck..shuffle()).first;
+      if (pickedAction != null) {
+        GameLogger.info(LogCategory.game, 'Enemy picked action: ${pickedAction.actionName} (probability: ${pickedAction.probability})');
+      } else {
+        GameLogger.info(LogCategory.game, 'Enemy picked action (fallback): ${card.name}');
+      }
+
+      // Store the picked action for UI
+      lastEnemyAction = card;
 
       // 2. Apply effect
       switch (card.type) {
@@ -198,8 +245,6 @@ class CombatManager {
           break;
         case CardType.statusEffect:
           // Apply status effect to player
-          // You may want to check for nulls
-          // For now, just log
           GameLogger.info(LogCategory.game, '${enemy.name} applies status effect to ${player.name}');
           break;
         case CardType.cure:

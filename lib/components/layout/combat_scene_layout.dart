@@ -130,8 +130,8 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
     final enemy = DataController.instance.get('selectedEnemy');
     if (enemy != null) {
       turnText.text = CombatManager().isPlayerTurn ? "Player's Turn" : "${enemy.name}'s Turn";
-      // Use the first card in the enemy's deck as the next action (or random if you prefer)
-      final nextAction = CombatManager().enemy.deck.isNotEmpty ? CombatManager().enemy.deck.first : null;
+      // Use the last picked enemy action as the next action
+      final nextAction = CombatManager().lastEnemyAction ?? (CombatManager().enemy.deck.isNotEmpty ? CombatManager().enemy.deck.first : null);
       if (nextAction != null) {
         (panels[2] as EnemyCombatPanel).updateActionWithDescription(
           formatEnemyActionWithEmojis(CombatManager().enemy, nextAction),

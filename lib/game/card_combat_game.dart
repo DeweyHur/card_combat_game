@@ -12,6 +12,7 @@ import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy_action_loader.dart';
+import 'package:card_combat_app/managers/combat_manager.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -33,6 +34,8 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     enemyActionsByName.forEach((enemyName, actions) {
       enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
     });
+    // Pass enemyActionsByName to CombatManager for probability-based selection
+    CombatManager().setEnemyActionsByName(enemyActionsByName);
     // Load players and enemies
     final players = await loadCharactersFromCsv('assets/data/players.csv', decks, isEnemy: false);
     final enemies = await loadCharactersFromCsv('assets/data/enemies.csv', enemyDecks, isEnemy: true);
