@@ -25,8 +25,12 @@ abstract class CharacterBase {
     if (currentHp > maxHp) currentHp = maxHp;
   }
 
-  void addStatusEffect(StatusEffect effect, int duration) {
-    statusEffects[effect] = duration;
+  void addStatusEffect(StatusEffect effect, int amount) {
+    if (effect == StatusEffect.poison) {
+      statusEffects[StatusEffect.poison] = (statusEffects[StatusEffect.poison] ?? 0) + amount;
+    } else {
+      statusEffects[effect] = amount;
+    }
   }
 
   void removeStatusEffect(StatusEffect effect) {
@@ -43,21 +47,43 @@ abstract class CharacterBase {
 
   void updateStatusEffects() {
     final effectsToRemove = <StatusEffect>[];
-    
     for (var entry in statusEffects.entries) {
       final effect = entry.key;
-      final duration = entry.value;
-      
-      if (duration <= 1) {
-        effectsToRemove.add(effect);
+      final value = entry.value;
+      if (effect == StatusEffect.poison) {
+        if (value <= 0) effectsToRemove.add(effect);
       } else {
-        statusEffects[effect] = duration - 1;
+        statusEffects[effect] = value - 1;
+        if (statusEffects[effect]! <= 0) effectsToRemove.add(effect);
       }
     }
-    
     for (var effect in effectsToRemove) {
       statusEffects.remove(effect);
     }
+  }
+
+  void onTurnStart() {
+    final effectsToRemove = <StatusEffect>[];
+    for (var entry in statusEffects.entries) {
+      final effect = entry.key;
+      final value = entry.value;
+      switch (effect) {
+        case StatusEffect.poison:
+          if (value > 0) {
+            currentHp -= value;
+            if (currentHp < 0) currentHp = 0;
+            statusEffects[StatusEffect.poison] = value - 1;
+            if (statusEffects[StatusEffect.poison]! <= 0) effectsToRemove.add(StatusEffect.poison);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    for (var effect in effectsToRemove) {
+      statusEffects.remove(effect);
+    }
+    updateStatusEffects();
   }
 
   String getStatusText() {

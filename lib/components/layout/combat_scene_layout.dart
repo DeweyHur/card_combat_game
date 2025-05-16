@@ -13,6 +13,7 @@ import 'package:card_combat_app/components/panel/player_combat_panel.dart';
 import 'package:card_combat_app/models/game_character.dart';
 
 class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStackMixin {
+  static CombatSceneLayout? current;
   late final List<BasePanel> panels;
   late final TextComponent turnText;
   late final TextComponent gameMessageText;
@@ -20,7 +21,9 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
   late final EnemyCombatPanel enemyPanel;
   late final CardsPanel cardsPanel;
 
-  CombatSceneLayout() : super(anchor: Anchor.topLeft);
+  CombatSceneLayout() : super(anchor: Anchor.topLeft) {
+    CombatSceneLayout.current = this;
+  }
 
   @override
   Future<void> onLoad() async {

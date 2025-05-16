@@ -5,6 +5,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
 import 'package:card_combat_app/components/panel/base_enemy_panel.dart';
 import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/components/effects/game_effects.dart';
 
 class EnemyCombatPanel extends BaseEnemyPanel {
   TextComponent? actionText;
@@ -87,5 +88,14 @@ class EnemyCombatPanel extends BaseEnemyPanel {
         updateHealth();
       }
     }
+  }
+  void showDotEffect(StatusEffect effect, int value) {
+    final dot = GameEffects.createDoTEffect(
+      Vector2(size.x / 2 - 50, size.y / 2 - 50),
+      effect,
+      value,
+      onComplete: () {},
+    )..priority = 200;
+    add(dot);
   }
 } 

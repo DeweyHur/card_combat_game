@@ -3,6 +3,8 @@ import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'dart:math';
+import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
+import 'package:card_combat_app/components/panel/player_combat_panel.dart';
 
 // --- Combat Event System ---
 enum CombatEventType { damage, heal, status, cure }
@@ -180,6 +182,16 @@ class CombatManager {
       return;
     }
 
+    // Process enemy status effects (e.g., poison)
+    int? poisonValue = enemy.statusEffects[StatusEffect.poison];
+    int? burnValue = enemy.statusEffects[StatusEffect.burn];
+    if (poisonValue != null && poisonValue > 0) {
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.poison, poisonValue);
+    }
+    if (burnValue != null && burnValue > 0) {
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.burn, 3); // Burn is always 3
+    }
+    enemy.onTurnStart();
     GameLogger.info(LogCategory.game, 'Enemy turn starting');
 
     // 1. Select an action using probability if available
@@ -270,6 +282,16 @@ class CombatManager {
 
   void _startNewPlayerTurn() {
     GameLogger.info(LogCategory.game, 'Starting new player turn');
+    // Process player status effects (e.g., poison)
+    int? poisonValue = player.statusEffects[StatusEffect.poison];
+    int? burnValue = player.statusEffects[StatusEffect.burn];
+    if (poisonValue != null && poisonValue > 0) {
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.poison, poisonValue);
+    }
+    if (burnValue != null && burnValue > 0) {
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.burn, 3); // Burn is always 3
+    }
+    player.onTurnStart();
     player.currentEnergy = player.maxEnergy;
     _drawHand(player);
     // Implement any logic needed at the start of a new player turn
@@ -356,7 +378,7 @@ class CombatManager {
   void applyStatusEffectToPlayer(GameCard card) {
     if (card.statusEffectToApply != null && card.statusDuration != null) {
       player.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat, 'Player is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns');
+      GameLogger.info(LogCategory.combat, 'Player is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
       _notifyWatchers(CombatEvent(
         type: CombatEventType.status,
         target: player,
@@ -370,7 +392,7 @@ class CombatManager {
   void applyStatusEffectToEnemy(GameCard card) {
     if (card.statusEffectToApply != null && card.statusDuration != null) {
       enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat, 'Enemy is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns');
+      GameLogger.info(LogCategory.combat, 'Enemy is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
       _notifyWatchers(CombatEvent(
         type: CombatEventType.status,
         target: enemy,

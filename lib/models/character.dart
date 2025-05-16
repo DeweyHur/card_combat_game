@@ -49,10 +49,21 @@ abstract class Character {
     GameLogger.info(LogCategory.combat, '$name heals for $amount. Health: $currentHealth/$maxHealth');
   }
 
-  void addStatusEffect(StatusEffect effect, int duration) {
-    statusEffect = effect;
-    statusDuration = duration;
-    GameLogger.info(LogCategory.combat, '$name is affected by $effect for $duration turns');
+  void addStatusEffect(StatusEffect effect, int amount) {
+    if (effect == StatusEffect.poison) {
+      // Poison stacks: add to existing amount
+      if (statusEffect == StatusEffect.poison && statusDuration != null) {
+        statusDuration = statusDuration! + amount;
+      } else {
+        statusEffect = StatusEffect.poison;
+        statusDuration = amount;
+      }
+      GameLogger.info(LogCategory.combat, '[32m$name[0m is poisoned for $statusDuration');
+    } else {
+      statusEffect = effect;
+      statusDuration = amount;
+      GameLogger.info(LogCategory.combat, '[32m$name[0m is affected by $effect for $amount turns');
+    }
   }
 
   void removeStatusEffect() {
@@ -63,29 +74,43 @@ abstract class Character {
 
   void updateStatusEffects() {
     if (statusEffect != null && statusDuration != null) {
-      statusDuration = statusDuration! - 1;
-      if (statusDuration! <= 0) {
-        removeStatusEffect();
+      if (statusEffect == StatusEffect.poison) {
+        if (statusDuration! <= 0) {
+          removeStatusEffect();
+        }
+      } else {
+        statusDuration = statusDuration! - 1;
+        if (statusDuration! <= 0) {
+          removeStatusEffect();
+        }
       }
     }
   }
 
   void onTurnStart() {
-    updateStatusEffects();
     // Apply status effect damage if applicable
-    if (statusEffect != null) {
+    if (statusEffect != null && statusDuration != null) {
       switch (statusEffect!) {
         case StatusEffect.poison:
-          takeDamage(2);
-          GameLogger.info(LogCategory.combat, '$name takes 2 poison damage');
+          if (statusDuration! > 0) {
+            // Poison damage bypasses shield
+            currentHealth = (currentHealth - statusDuration!).clamp(0, maxHealth);
+            GameLogger.info(LogCategory.combat, '[32m$name[0m takes ${statusDuration!} poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
+            statusDuration = statusDuration! - 1;
+            if (statusDuration! <= 0) removeStatusEffect();
+          }
           break;
         case StatusEffect.burn:
           takeDamage(3);
-          GameLogger.info(LogCategory.combat, '$name takes 3 burn damage');
+          GameLogger.info(LogCategory.combat, '[32m$name[0m takes 3 burn damage');
+          statusDuration = statusDuration! - 1;
+          if (statusDuration! <= 0) removeStatusEffect();
           break;
         case StatusEffect.freeze:
           // Freeze effect is handled in the combat logic
-          GameLogger.info(LogCategory.combat, '$name is frozen');
+          GameLogger.info(LogCategory.combat, '[32m$name[0m is frozen');
+          statusDuration = statusDuration! - 1;
+          if (statusDuration! <= 0) removeStatusEffect();
           break;
         case StatusEffect.none:
           break;

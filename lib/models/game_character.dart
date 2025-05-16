@@ -42,10 +42,17 @@ class GameCharacter {
   }) : currentHealth = maxHealth,
        currentEnergy = maxEnergy;
 
-  void addStatusEffect(StatusEffect effect, int duration) {
+  void addStatusEffect(StatusEffect effect, int amount) {
     if (effect == StatusEffect.none) return;
-    statusEffects[effect] = duration;
-    GameLogger.info(LogCategory.combat, '[32m$name[0m is affected by $effect for $duration turns');
+    if (effect == StatusEffect.poison) {
+      // Poison stacks: add to existing amount
+      statusEffects[StatusEffect.poison] = (statusEffects[StatusEffect.poison] ?? 0) + amount;
+      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is poisoned for ${statusEffects[StatusEffect.poison]}');
+    } else {
+      // Other effects: overwrite duration
+      statusEffects[effect] = amount;
+      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is affected by $effect for $amount turns');
+    }
   }
 
   void removeStatusEffect(StatusEffect effect) {
@@ -55,9 +62,14 @@ class GameCharacter {
 
   void updateStatusEffects() {
     final expired = <StatusEffect>[];
-    statusEffects.forEach((effect, duration) {
-      statusEffects[effect] = duration - 1;
-      if (statusEffects[effect]! <= 0) expired.add(effect);
+    statusEffects.forEach((effect, value) {
+      if (effect == StatusEffect.poison) {
+        // Poison stack is reduced in onTurnStart, not here
+        if (statusEffects[effect]! <= 0) expired.add(effect);
+      } else {
+        statusEffects[effect] = value - 1;
+        if (statusEffects[effect]! <= 0) expired.add(effect);
+      }
     });
     for (final effect in expired) {
       removeStatusEffect(effect);
@@ -65,26 +77,37 @@ class GameCharacter {
   }
 
   void onTurnStart() {
-    updateStatusEffects();
     // Apply all status effects
-    statusEffects.forEach((effect, duration) {
+    final expired = <StatusEffect>[];
+    statusEffects.forEach((effect, value) {
       switch (effect) {
         case StatusEffect.poison:
-          takeDamage(2);
-          GameLogger.info(LogCategory.combat, '[32m$name[0m takes 2 poison damage');
+          if (value > 0) {
+            // Poison damage bypasses shield
+            currentHealth = (currentHealth - value).clamp(0, maxHealth);
+            GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m takes $value poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
+            // Reduce poison stack by 1
+            statusEffects[StatusEffect.poison] = value - 1;
+            if (statusEffects[StatusEffect.poison]! <= 0) expired.add(StatusEffect.poison);
+          }
           break;
         case StatusEffect.burn:
           takeDamage(3);
-          GameLogger.info(LogCategory.combat, '[32m$name[0m takes 3 burn damage');
+          GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m takes 3 burn damage');
           break;
         case StatusEffect.freeze:
           // Freeze effect is handled in the combat logic
-          GameLogger.info(LogCategory.combat, '[32m$name[0m is frozen');
+          GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is frozen');
           break;
         case StatusEffect.none:
           break;
       }
     });
+    for (final effect in expired) {
+      removeStatusEffect(effect);
+    }
+    // Update other status effects (burn, freeze, etc.)
+    updateStatusEffects();
   }
 
   void takeDamage(int damage) {

@@ -117,4 +117,14 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
       }
     }
   }
+
+  void showDotEffect(StatusEffect effect, int value) {
+    final dot = GameEffects.createDoTEffect(
+      Vector2(size.x / 2 - 50, size.y / 2 - 50),
+      effect,
+      value,
+      onComplete: () {},
+    )..priority = 200;
+    add(dot);
+  }
 } 
