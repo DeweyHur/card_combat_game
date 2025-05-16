@@ -15,6 +15,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
   late EnemyDetailPanel enemyPanel;
+  late PositionComponent backButton;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
 
@@ -54,13 +55,41 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     addToVerticalStack(detailPanel, size.y * 0.17);
     addToVerticalStack(selectionPanel, size.y * 0.2);
 
-    battleButton = PositionComponent(
-      size: Vector2(200, 50),
-      position: Vector2(size.x / 2, size.y - 40),
-      anchor: Anchor.center,
+    // Place Back and Start Battle buttons in one line at the bottom
+    final buttonY = size.y - 60;
+    backButton = PositionComponent(
+      size: Vector2(160, 48),
+      position: Vector2(20, buttonY),
+      anchor: Anchor.topLeft,
     )
       ..add(RectangleComponent(
-        size: Vector2(200, 50),
+        size: Vector2(160, 48),
+        paint: Paint()..color = Colors.grey.shade800,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Back',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(80, 24),
+        ),
+      );
+    add(backButton);
+
+    battleButton = PositionComponent(
+      size: Vector2(200, 48),
+      position: Vector2(size.x - 220, buttonY),
+      anchor: Anchor.topLeft,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 48),
         paint: Paint()..color = Colors.blue,
         anchor: Anchor.topLeft,
       ))
@@ -75,7 +104,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
             ),
           ),
           anchor: Anchor.center,
-          position: Vector2(100, 25),
+          position: Vector2(100, 24),
         ),
       );
     add(battleButton);
@@ -93,6 +122,11 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       GameLogger.debug(LogCategory.ui, 'Start Battle button pressed');
       // Just push the combat scene
       SceneManager().pushScene('combat');
+    }
+    // Handle Back button
+    if (backButton.toRect().contains(event.localPosition.toOffset())) {
+      GameLogger.debug(LogCategory.ui, 'Back button pressed');
+      SceneManager().pushScene('title');
     }
   }
 } 

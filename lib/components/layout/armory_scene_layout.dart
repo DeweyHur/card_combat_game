@@ -1,13 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/components/panel/equipment_panel.dart';
 
-class EquipmentSceneLayout extends PositionComponent {
+class ArmorySceneLayout extends PositionComponent {
   late final TextComponent _titleText;
   late final PositionComponent _backButton;
   bool _isLoaded = false;
 
-  EquipmentSceneLayout();
+  ArmorySceneLayout();
 
   @override
   Future<void> onLoad() async {
@@ -24,6 +25,12 @@ class EquipmentSceneLayout extends PositionComponent {
       anchor: Anchor.center,
     );
     add(_titleText);
+
+    // Add EquipmentPanel below the title
+    final equipmentPanel = EquipmentPanel(size: Vector2(size.x, size.y * 0.28))
+      ..position = Vector2(0, size.y * 0.32)
+      ..anchor = Anchor.topLeft;
+    add(equipmentPanel);
 
     _backButton = PositionComponent(
       size: Vector2(160, 48),

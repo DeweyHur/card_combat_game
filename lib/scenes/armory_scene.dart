@@ -1,18 +1,18 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/components/layout/equipment_scene_layout.dart';
+import 'package:card_combat_app/components/layout/armory_scene_layout.dart';
 import 'base_scene.dart';
 
-class EquipmentScene extends BaseScene with TapCallbacks {
-  late final EquipmentSceneLayout _layout;
+class ArmoryScene extends BaseScene with TapCallbacks {
+  late final ArmorySceneLayout _layout;
 
-  EquipmentScene() : super(sceneBackgroundColor: const Color(0xFF222244));
+  ArmoryScene() : super(sceneBackgroundColor: const Color(0xFF222244));
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    _layout = EquipmentSceneLayout();
+    _layout = ArmorySceneLayout();
     add(_layout);
   }
 
