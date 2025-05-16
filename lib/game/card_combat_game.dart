@@ -13,6 +13,8 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy_action_loader.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:flutter/services.dart';
+import 'package:csv/csv.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -43,6 +45,12 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     DataController.instance.set<List<GameCharacter>>('players', players);
     DataController.instance.set<List<GameCharacter>>('enemies', enemies);
     DataController.instance.set<List<GameCard>>('cards', allCards);
+    DataController.instance.set<Map<String, EquipmentData>>('equipmentData', equipmentData);
+
+    // Also store the parsed players.csv rows for equipment lookup
+    final playersCsvString = await rootBundle.loadString('assets/data/players.csv');
+    final playersCsvRows = const CsvToListConverter(eol: '\n').convert(playersCsvString, eol: '\n');
+    DataController.instance.set<List<List<dynamic>>>('playersCsv', playersCsvRows.skip(1).toList());
 
     // Initialize audio configuration
     await AudioConfig.initialize();
