@@ -9,7 +9,7 @@ class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
 
   static const List<String> mainSlots = [
-    'Head', 'Chest', 'Pants', 'Shoes', 'Weapon', 'Offhand'
+    'Head', 'Chest', 'Pants', 'Shoes', 'Weapon', 'Offhand', 'Belt'
   ];
   static const List<String> accessorySlots = [
     'Accessory 1', 'Accessory 2'
@@ -55,11 +55,14 @@ class EquipmentPanel extends BasePanel {
     // Chest (center)
     slotComponents['Chest'] = _buildSlot('Chest', Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01), Vector2(slotW, slotH));
     add(slotComponents['Chest']!);
-    // Pants (below chest)
-    slotComponents['Pants'] = _buildSlot('Pants', Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)), Vector2(slotW, slotH));
+    // Belt (above pants)
+    slotComponents['Belt'] = _buildSlot('Belt', Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)), Vector2(slotW, accH));
+    add(slotComponents['Belt']!);
+    // Pants (below belt)
+    slotComponents['Pants'] = _buildSlot('Pants', Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01), Vector2(slotW, slotH));
     add(slotComponents['Pants']!);
     // Shoes (bottom center)
-    slotComponents['Shoes'] = _buildSlot('Shoes', Vector2(centerX - slotW / 2, baseY + 3 * (slotH + h * 0.01)), Vector2(slotW, accH));
+    slotComponents['Shoes'] = _buildSlot('Shoes', Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)), Vector2(slotW, accH));
     add(slotComponents['Shoes']!);
     // Weapon (left of chest)
     slotComponents['Weapon'] = _buildSlot('Weapon', Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01), Vector2(slotW, slotH));
@@ -75,6 +78,21 @@ class EquipmentPanel extends BasePanel {
     add(slotComponents['Accessory 2']!);
   }
 
+  String getSlotEmoji(String slot) {
+    switch (slot) {
+      case 'Head': return '🪖';
+      case 'Chest': return '🦺';
+      case 'Belt': return '🪢';
+      case 'Pants': return '👖';
+      case 'Shoes': return '👢';
+      case 'Weapon': return '⚔️';
+      case 'Offhand': return '🛡️';
+      case 'Accessory 1':
+      case 'Accessory 2': return '💍';
+      default: return '❓';
+    }
+  }
+
   PositionComponent _buildSlot(String label, Vector2 position, Vector2 size) {
     final slot = PositionComponent(
       position: position,
@@ -86,6 +104,21 @@ class EquipmentPanel extends BasePanel {
       paint: Paint()..color = Colors.grey.withOpacity(0.4),
       anchor: Anchor.topLeft,
     ));
+    // Add emoji background with opacity
+    slot.add(
+      TextComponent(
+        text: getSlotEmoji(label),
+        textRenderer: TextPaint(
+          style: TextStyle(
+            fontSize: 36,
+            color: Colors.white.withOpacity(0.38),
+          ),
+        ),
+        anchor: Anchor.center,
+        position: Vector2(size.x / 2, size.y / 2),
+        priority: -1, // Render below the label
+      ),
+    );
     slot.add(
       TextComponent(
         text: label,
@@ -194,7 +227,7 @@ class EquipmentPanel extends BasePanel {
       case 'shoes':
         return 'Shoes';
       case 'belt':
-        return 'Offhand'; // If you want a separate belt slot, add it
+        return 'Belt';
       case 'weapon':
         return 'Weapon';
       case 'offhand':
