@@ -5,6 +5,7 @@ import 'package:card_combat_app/managers/sound_manager.dart';
 import 'dart:math';
 import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
 import 'package:card_combat_app/components/panel/player_combat_panel.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 // --- Combat Event System ---
 enum CombatEventType { damage, heal, status, cure }
@@ -306,6 +307,19 @@ class CombatManager {
     if (player.currentHealth <= 0) {
       return 'Defeat';
     } else if (enemy.currentHealth <= 0) {
+      // Get all enemies from DataController
+      final enemies = DataController.instance.get<List<GameCharacter>>('enemies');
+      if (enemies != null && enemies.isNotEmpty) {
+        // Find the current enemy's index
+        final currentIndex = enemies.indexWhere((e) => e.name == enemy.name);
+        if (currentIndex != -1 && currentIndex < enemies.length - 1) {
+          // Set the next enemy in sequence
+          DataController.instance.set('nextEnemy', enemies[currentIndex + 1]);
+        } else {
+          // If this was the last enemy, set the first enemy as next
+          DataController.instance.set('nextEnemy', enemies[0]);
+        }
+      }
       return 'Victory';
     }
     return null;

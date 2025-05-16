@@ -1,6 +1,6 @@
 player,card,count
-Knight,Slash,8
-Knight,Heavy Strike,4
+Knight,Slash,150
+Knight,Heavy Strike,150
 Knight,Heal,6
 Knight,Greater Heal,2
 Knight,Cleanse,2

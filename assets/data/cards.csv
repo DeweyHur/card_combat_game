@@ -1,5 +1,5 @@
 owner,name,description,type,value,cost,statusEffect,statusDuration,color
-Player,Slash,Deal 5 damage,attack,5,1,,,red
+Player,Slash,Deal 5 damage,attack,200,1,,,red
 Player,Heavy Strike,Deal 8 damage,attack,8,2,,,red
 Player,Heal,Restore 3 HP,heal,3,1,,,green
 Player,Greater Heal,Restore 5 HP,heal,5,2,,,green
