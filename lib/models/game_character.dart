@@ -24,6 +24,8 @@ class GameCharacter {
   int handSize;
   List<GameCard> discardPile = [];
 
+  int shield = 0;
+
   GameCharacter({
     required this.name,
     required this.maxHealth,

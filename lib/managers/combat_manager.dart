@@ -115,26 +115,26 @@ class CombatManager {
 
     switch (card.type) {
       case CardType.attack:
-        playerTakeDamage(card.value);
+        enemyTakeDamage(card.value);
         _notifyWatchers(CombatEvent(
           type: CombatEventType.damage,
-          target: player,
-          value: card.value,
-          description: '${enemy.name} dealt ${card.value} damage',
-          card: card,
-        ));
-        GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
-        break;
-      case CardType.heal:
-        enemyHeal(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.heal,
           target: enemy,
           value: card.value,
-          description: '${enemy.name} healed for ${card.value}',
+          description: '[32m${player.name}[0m dealt ${card.value} damage',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
+        GameLogger.info(LogCategory.game, 'Dealt [31m${card.value}[0m damage to [31m${enemy.name}[0m');
+        break;
+      case CardType.heal:
+        playerHeal(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.heal,
+          target: player,
+          value: card.value,
+          description: '[32m${player.name}[0m healed for ${card.value}',
+          card: card,
+        ));
+        GameLogger.info(LogCategory.game, 'Healed [32m${player.name}[0m for ${card.value} HP');
         break;
       case CardType.statusEffect:
         applyStatusEffectToPlayer(card);
@@ -143,8 +143,11 @@ class CombatManager {
         // Implement cure logic as needed
         break;
       case CardType.shield:
+        player.shield += card.value;
+        GameLogger.info(LogCategory.combat, '[32m${player.name}[0m gains ${card.value} shield. Shield: [36m${player.shield}[0m');
+        break;
       case CardType.shieldAttack:
-        // Implement shield logic as needed
+        // Implement shieldAttack logic as needed
         break;
     }
     // Do not end player turn automatically after playing a card
@@ -232,22 +235,55 @@ class CombatManager {
 
   // Helper methods for damage/heal (implement as needed)
   void enemyTakeDamage(int value) {
-    // Implement damage logic
+    // Apply shield before HP
+    if (enemy.shield > 0) {
+      if (enemy.shield >= value) {
+        enemy.shield -= value;
+        GameLogger.info(LogCategory.combat, '${enemy.name} loses $value shield. Shield: \\${enemy.shield}');
+        return;
+      } else {
+        int remaining = value - enemy.shield;
+        GameLogger.info(LogCategory.combat, '${enemy.name} loses \\${enemy.shield} shield. Shield: 0');
+        enemy.shield = 0;
+        enemy.currentHealth = (enemy.currentHealth - remaining).clamp(0, enemy.maxHealth);
+        GameLogger.info(LogCategory.combat, '${enemy.name} takes $remaining damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
+        return;
+      }
+    }
+    // If no shield
+    enemy.currentHealth = (enemy.currentHealth - value).clamp(0, enemy.maxHealth);
+    GameLogger.info(LogCategory.combat, '${enemy.name} takes $value damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
   }
 
   void playerHeal(int value) {
-    // Implement heal logic
+    if (player.currentHealth != null) {
+      player.currentHealth = (player.currentHealth + value).clamp(0, player.maxHealth);
+      GameLogger.info(LogCategory.combat, 'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+    } else {
+      GameLogger.info(LogCategory.combat, 'Player heals for $value');
+    }
   }
 
   // Helper methods for enemy actions
   void playerTakeDamage(int value) {
-    // Actually apply damage to the player
-    if (player.currentHealth != null) {
-      player.currentHealth = (player.currentHealth - value).clamp(0, player.maxHealth);
-      GameLogger.info(LogCategory.combat, 'Player takes $value damage. Health: ${player.currentHealth}/${player.maxHealth}');
-    } else {
-      GameLogger.info(LogCategory.combat, 'Player takes $value damage');
+    // Apply shield before HP
+    if (player.shield > 0) {
+      if (player.shield >= value) {
+        player.shield -= value;
+        GameLogger.info(LogCategory.combat, '${player.name} loses $value shield. Shield: \\${player.shield}');
+        return;
+      } else {
+        int remaining = value - player.shield;
+        GameLogger.info(LogCategory.combat, '${player.name} loses \\${player.shield} shield. Shield: 0');
+        player.shield = 0;
+        player.currentHealth = (player.currentHealth - remaining).clamp(0, player.maxHealth);
+        GameLogger.info(LogCategory.combat, '${player.name} takes $remaining damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+        return;
+      }
     }
+    // If no shield
+    player.currentHealth = (player.currentHealth - value).clamp(0, player.maxHealth);
+    GameLogger.info(LogCategory.combat, '${player.name} takes $value damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
   }
 
   void enemyHeal(int value) {

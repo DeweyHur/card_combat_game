@@ -103,7 +103,7 @@ class StatsRow extends PositionComponent {
     add(attackText);
 
     defenseEmoji = TextComponent(
-      text: '🛡️',
+      text: '🔰',
       textRenderer: TextPaint(
         style: const TextStyle(fontSize: 18),
       ),
@@ -146,14 +146,13 @@ class StatsRow extends PositionComponent {
 
   double _healthBarFill() {
     if (character.maxHealth == 0) return 0;
-    // If you add currentHealth to GameCharacter, use it here
-    return barWidth * (1.0); // Placeholder: always full
+    return barWidth * (character.currentHealth / character.maxHealth);
   }
 
   void updateUI() {
     healthBarFg.size.x = _healthBarFill();
-    hpText.text = '${character.maxHealth}/${character.maxHealth}';
-    shieldText.text = '0';
+    hpText.text = '${character.currentHealth}/${character.maxHealth}';
+    shieldText.text = character.shield.toString();
     attackText.text = '${character.attack}';
     defenseText.text = '${character.defense}';
     energyText.text = '${character.currentEnergy}/${character.maxEnergy}';
