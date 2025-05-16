@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import 'game_character.dart';
 import 'game_card.dart';
+import 'equipment_loader.dart';
 
 Future<List<GameCard>> loadAllCards(String assetPath) async {
   final csvString = await rootBundle.loadString(assetPath);
@@ -23,23 +24,55 @@ Future<List<GameCard>> loadAllCards(String assetPath) async {
   }).toList();
 }
 
-Future<Map<String, List<GameCard>>> loadDecks(String assetPath, List<GameCard> allCards) async {
+Future<List<GameCharacter>> loadCharactersFromCsv(
+  String assetPath,
+  List<GameCard> allCards,
+  Map<String, EquipmentData> equipmentData,
+  {bool isEnemy = false}
+) async {
   final csvString = await rootBundle.loadString(assetPath);
   final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
+  final header = rows.first;
   final dataRows = rows.skip(1);
-  final Map<String, List<GameCard>> decks = {};
-  for (final row in dataRows) {
-    final owner = row[0] as String;
-    final cardName = row[1] as String;
-    final count = int.parse(row[2].toString());
-    final card = allCards.firstWhere((c) => c.name == cardName);
-    decks.putIfAbsent(owner, () => []);
-    decks[owner]!.addAll(List.generate(count, (_) => card));
-  }
-  return decks;
+  return dataRows.map((row) {
+    final name = row[0] as String;
+    final equipmentStr = row.length > 10 ? row[10] as String : '';
+    final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    // Build deck from equipment
+    final List<String> cardNames = [];
+    for (final eqName in equipmentList) {
+      final eq = equipmentData[eqName];
+      if (eq != null) {
+        cardNames.addAll(eq.cards);
+      }
+    }
+    // Map card names to GameCard instances
+    final List<GameCard> deck = [];
+    for (final cardName in cardNames) {
+      final cardIndex = allCards.indexWhere((c) => c.name == cardName);
+      if (cardIndex != -1) deck.add(allCards[cardIndex]);
+    }
+    return GameCharacter(
+      name: name,
+      maxHealth: int.parse(row[1].toString()),
+      attack: int.parse(row[2].toString()),
+      defense: int.parse(row[3].toString()),
+      emoji: row[4] as String,
+      color: row[5] as String,
+      imagePath: isEnemy ? row[6] as String : '',
+      soundPath: isEnemy ? row[7] as String : '',
+      description: isEnemy ? row[8] as String : row[6] as String,
+      deck: deck,
+      maxEnergy: 3,
+      handSize: isEnemy ? 5 : int.parse(row[8].toString()),
+    );
+  }).toList();
 }
 
-Future<List<GameCharacter>> loadCharactersFromCsv(String assetPath, Map<String, List<GameCard>> decks, {bool isEnemy = false}) async {
+Future<List<GameCharacter>> loadEnemiesFromCsv(
+  String assetPath,
+  Map<String, List<GameCard>> enemyDecks,
+) async {
   final csvString = await rootBundle.loadString(assetPath);
   final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
   final header = rows.first;
@@ -53,12 +86,12 @@ Future<List<GameCharacter>> loadCharactersFromCsv(String assetPath, Map<String, 
       defense: int.parse(row[3].toString()),
       emoji: row[4] as String,
       color: row[5] as String,
-      imagePath: isEnemy ? row[6] as String : '',
-      soundPath: isEnemy ? row[7] as String : '',
-      description: isEnemy ? row[8] as String : row[6] as String,
-      deck: decks[name] ?? [],
+      imagePath: row[6] as String,
+      soundPath: row[7] as String,
+      description: row[8] as String,
+      deck: enemyDecks[name] ?? [],
       maxEnergy: 3,
-      handSize: isEnemy ? 5 : int.parse(row[8].toString()),
+      handSize: 5,
     );
   }).toList();
 } 

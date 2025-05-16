@@ -1,0 +1,43 @@
+name,type,slot,handedness,cards
+Short Sword,weapon,weapon,one,Slash|Slash|Quick Stab|Bash
+Long Sword,weapon,weapon,two,Slash|Power Strike|Heavy Strike|Bash
+Dagger,weapon,weapon,one,Quick Stab|Quick Stab|Poison|Enrage
+Bow,weapon,weapon,two,Double Shot|Slash|Poison|Lightning
+Staff,weapon,weapon,two,Slash|Burn|Greater Heal|Freeze
+Wand,weapon,weapon,one,Slash|Poison|Burn|Heal
+Mace,weapon,weapon,one,Slash|Bash|Heavy Strike|Guard
+Maul,weapon,weapon,two,Power Strike|Bash|Bash|Enrage
+Gauntlet,weapon,weapon,one,Slash|Bash|Shield Up|Enrage
+
+Small Shield,offhand,offhand,one,Shield Up|Guard|Fortify
+Tower Shield,offhand,offhand,two,Shield Up|Shield Up|Shield Bash|Fortify
+Orb,offhand,offhand,one,Poison|Burn|Regenerate
+Book,offhand,offhand,one,Heal|Cleanse|Greater Heal|Silence
+Symbol,offhand,offhand,one,Heal|Cleanse|Shield Up|Regenerate
+Arrow,offhand,offhand,one,Double Shot|Poison|Quick Stab
+
+Leather Boots,shoes,shoes,,Quick Stab
+Iron Boots,shoes,shoes,,Guard
+Sandals,shoes,shoes,,Regenerate
+
+Small Belt,belt,belt,,Guard
+Large Belt,belt,belt,,Fortify
+Magic Belt,belt,belt,,Enrage
+
+Leather Vest,armor,armor,,Guard
+Chainmail,armor,armor,,Fortify
+Linen Robe,armor,armor,,Regenerate
+
+Ring of Health,accessory,accessory1,,Heal
+Amulet of Power,accessory,accessory2,,Power Strike
+Bracelet of Speed,accessory,accessory1,,Quick Stab
+Necklace of Wisdom,accessory,accessory2,,Greater Heal
+Ring of Lightning,accessory,accessory1,,Lightning
+Amulet of Silence,accessory,accessory2,,Silence
+Bracelet of Frost,accessory,accessory1,,Freeze
+Necklace of Fire,accessory,accessory2,,Burn
+
+Iron Helmet,armor,head,,Guard
+Leather Cap,armor,head,,Guard
+Iron Greaves,armor,pants,,Fortify
+Leather Pants,armor,pants,,Guard

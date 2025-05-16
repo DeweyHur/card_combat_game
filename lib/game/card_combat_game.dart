@@ -6,13 +6,13 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'package:card_combat_app/utils/audio_config.dart';
 import 'package:card_combat_app/models/game_cards_data.dart';
-import 'package:card_combat_app/models/deck_loader.dart';
 import 'package:card_combat_app/models/game_character_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy_action_loader.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
+import 'package:card_combat_app/models/equipment_loader.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -26,8 +26,8 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     // Load all cards
     final allCards = await loadAllGameCards();
-    // Load decks
-    final decks = await loadPlayerDecksFromCsv('assets/data/decks.csv', allCards);
+    // Load equipment
+    final equipmentData = await loadEquipmentFromCsv('assets/data/equipment.csv');
     // Load enemy actions and convert to GameCards
     final enemyActionsByName = await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
     final Map<String, List<GameCard>> enemyDecks = {};
@@ -37,13 +37,12 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     // Pass enemyActionsByName to CombatManager for probability-based selection
     CombatManager().setEnemyActionsByName(enemyActionsByName);
     // Load players and enemies
-    final players = await loadCharactersFromCsv('assets/data/players.csv', decks, isEnemy: false);
-    final enemies = await loadCharactersFromCsv('assets/data/enemies.csv', enemyDecks, isEnemy: true);
+    final players = await loadCharactersFromCsv('assets/data/players.csv', allCards, equipmentData, isEnemy: false);
+    final enemies = await loadEnemiesFromCsv('assets/data/enemies.csv', enemyDecks);
     // Store in DataController
     DataController.instance.set<List<GameCharacter>>('players', players);
     DataController.instance.set<List<GameCharacter>>('enemies', enemies);
     DataController.instance.set<List<GameCard>>('cards', allCards);
-    DataController.instance.set<Map<String, List<GameCard>>>('decks', decks);
 
     // Initialize audio configuration
     await AudioConfig.initialize();
