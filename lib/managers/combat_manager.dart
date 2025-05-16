@@ -269,12 +269,16 @@ class CombatManager {
   }
 
   bool isCombatOver() {
-    // Implement combat over logic based on player/enemy health
-    return false;
+    // Combat is over if either player or enemy health is 0 or less
+    return player.currentHealth <= 0 || enemy.currentHealth <= 0;
   }
 
   String? getCombatResult() {
-    // Implement combat result logic
+    if (player.currentHealth <= 0) {
+      return 'Defeat';
+    } else if (enemy.currentHealth <= 0) {
+      return 'Victory';
+    }
     return null;
   }
 

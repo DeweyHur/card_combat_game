@@ -3,6 +3,7 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/title_scene.dart';
 import 'package:card_combat_app/scenes/player_selection_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
+import 'package:card_combat_app/scenes/game_result_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -23,6 +24,7 @@ class SceneManager {
     registerScene('title', () => TitleScene());
     registerScene('player_selection', () => PlayerSelectionScene());
     registerScene('combat', () => CombatScene());
+    registerScene('game_result', () => GameResultScene());
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 

@@ -7,6 +7,7 @@ import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'base_scene.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
 
 class CombatScene extends BaseScene with HasGameRef {
   late final CombatSceneLayout _layout;
@@ -52,7 +53,8 @@ class CombatScene extends BaseScene with HasGameRef {
     final result = CombatManager().getCombatResult();
     if (result != null) {
       GameLogger.info(LogCategory.game, 'Combat ended: $result');
-      _layout.showGameMessage(result);
+      DataController.instance.set('gameResult', result);
+      SceneManager().pushScene('game_result');
     }
   }
 
@@ -80,7 +82,8 @@ class CombatScene extends BaseScene with HasGameRef {
       _combatEnded = true;
       final result = CombatManager().getCombatResult();
       GameLogger.info(LogCategory.combat, 'Combat ended: $result');
-      // TODO: Handle combat end
+      DataController.instance.set('gameResult', result);
+      SceneManager().pushScene('game_result');
     }
   }
 } 
