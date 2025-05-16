@@ -5,6 +5,7 @@ import 'package:card_combat_app/scenes/player_selection_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'package:card_combat_app/scenes/game_result_scene.dart';
 import 'package:card_combat_app/scenes/card_upgrade_scene.dart';
+import 'package:card_combat_app/scenes/equipment_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -27,6 +28,7 @@ class SceneManager {
     registerScene('combat', () => CombatScene());
     registerScene('game_result', () => GameResultScene());
     registerScene('card_upgrade', () => CardUpgradeScene());
+    registerScene('equipment', () => EquipmentScene());
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 

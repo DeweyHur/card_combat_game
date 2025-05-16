@@ -1,0 +1,148 @@
+import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'dart:io';
+
+class TitleSceneLayout extends PositionComponent {
+  late final TextComponent _titleText;
+  late final PositionComponent _startButton;
+  late final PositionComponent _exitButton;
+  late final TextComponent _copyrightText;
+  late final PositionComponent _armoryButton;
+  bool _isLoaded = false;
+
+  TitleSceneLayout();
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    _titleText = TextComponent(
+      text: 'Card Combat',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      anchor: Anchor.center,
+    );
+    add(_titleText);
+
+    _startButton = PositionComponent(
+      size: Vector2(200, 50),
+      anchor: Anchor.center,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 50),
+        paint: Paint()..color = Colors.green,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Game Start',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(100, 25),
+        ),
+      );
+    add(_startButton);
+
+    _armoryButton = PositionComponent(
+      size: Vector2(200, 50),
+      anchor: Anchor.center,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 50),
+        paint: Paint()..color = Colors.blue,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Armory',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(100, 25),
+        ),
+      );
+    add(_armoryButton);
+
+    _exitButton = PositionComponent(
+      size: Vector2(200, 50),
+      anchor: Anchor.center,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 50),
+        paint: Paint()..color = Colors.red,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Exit',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(100, 25),
+        ),
+      );
+    add(_exitButton);
+
+    _copyrightText = TextComponent(
+      text: '© DewIn Studio',
+      textRenderer: TextPaint(
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.5),
+          fontSize: 14,
+        ),
+      ),
+      anchor: Anchor.bottomCenter,
+    );
+    add(_copyrightText);
+
+    _isLoaded = true;
+    _updatePositions(size);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    if (_isLoaded) {
+      _updatePositions(size);
+    }
+  }
+
+  void _updatePositions(Vector2 size) {
+    _titleText.position = Vector2(size.x / 2, size.y * 0.22);
+    _startButton.position = Vector2(size.x / 2, size.y * 0.42);
+    _armoryButton.position = Vector2(size.x / 2, size.y * 0.54);
+    _exitButton.position = Vector2(size.x / 2, size.y * 0.66);
+    _copyrightText.position = Vector2(size.x / 2, size.y - 10);
+  }
+
+  void handleTap(Vector2 pos) {
+    if (_startButton.toRect().contains(pos.toOffset())) {
+      SceneManager().pushScene('player_selection');
+    } else if (_armoryButton.toRect().contains(pos.toOffset())) {
+      SceneManager().pushScene('equipment');
+    } else if (_exitButton.toRect().contains(pos.toOffset())) {
+      exit(0);
+    }
+  }
+} 
