@@ -108,10 +108,12 @@ class EquipmentPanel extends BasePanel {
       size: size,
       onTap: () {
         final eqName = _getEquipmentNameForSlot(label);
+        // Enhanced logging
+        debugPrint('[EQUIP_PANEL] Slot tapped: $label, Equipment: ${eqName ?? 'empty'}');
         if (eqName != null) {
           DataController.instance.set<String>('selectedEquipmentName', eqName);
         } else {
-          DataController.instance.set<String>('selectedEquipmentName', '');
+          DataController.instance.set<String>('selectedEquipmentName', label);
         }
       },
     );
@@ -249,7 +251,9 @@ class EquipmentPanel extends BasePanel {
       case 'offhand':
         return 'Offhand';
       case 'accessory1':
+        return 'Accessory 1';
       case 'accessory2':
+        return 'Accessory 2';
       case 'accessory':
         // Find first free accessory slot
         for (final acc in accessorySlots) {
@@ -281,12 +285,31 @@ class EquipmentPanel extends BasePanel {
     if (equipmentStr == null) return null;
     final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
     if (equipmentData != null) {
-      for (final eqName in equipmentList) {
-        final eq = equipmentData![eqName];
-        if (eq != null) {
-          String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-          if (slotKey == slot) {
-            return eqName;
+      // For accessories, we need to match the correct slot (Accessory 1 or 2)
+      if (slot.startsWith('Accessory')) {
+        int accIndex = slot == 'Accessory 1' ? 0 : 1;
+        int found = 0;
+        for (final eqName in equipmentList) {
+          final eq = equipmentData![eqName];
+          if (eq != null) {
+            String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            if (slotKey.startsWith('Accessory')) {
+              if (found == accIndex) {
+                return eqName;
+              }
+              found++;
+            }
+          }
+        }
+        return null;
+      } else {
+        for (final eqName in equipmentList) {
+          final eq = equipmentData![eqName];
+          if (eq != null) {
+            String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            if (slotKey == slot) {
+              return eqName;
+            }
           }
         }
       }
