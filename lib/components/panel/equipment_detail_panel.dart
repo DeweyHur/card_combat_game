@@ -16,6 +16,8 @@ class EquipmentDetailPanel extends PositionComponent {
   final List<TextComponent> cardTexts = [];
   TextComponent? cardsLabelText;
 
+  bool isLoaded = false;
+
   EquipmentDetailPanel({
     required this.equipment,
     this.onChange,
@@ -25,6 +27,7 @@ class EquipmentDetailPanel extends PositionComponent {
   }) : super(position: position, size: size ?? Vector2(400, 220));
 
   void updateEquipment(EquipmentData newEquipment) {
+    if (!isLoaded) return;
     equipment = newEquipment;
     // Update text fields
     nameText.text = equipment.name;
@@ -188,6 +191,7 @@ class EquipmentDetailPanel extends PositionComponent {
       position: Vector2(size.x - 160, 80),
       color: Colors.redAccent,
     ));
+    isLoaded = true;
   }
 }
 
@@ -229,4 +233,4 @@ class _ButtonComponent extends PositionComponent {
   void onTapDown(TapDownEvent event) {
     onPressed?.call();
   }
-} 
+}

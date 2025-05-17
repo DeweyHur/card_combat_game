@@ -10,7 +10,8 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/game_character.dart';
 
-class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallbacks, VerticalStackMixin {
+class PlayerSelectionLayout extends PositionComponent
+    with HasGameRef, TapCallbacks, VerticalStackMixin {
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
@@ -28,32 +29,27 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Set size from gameRef
     size = gameRef.size;
 
-    // Ensure a selected player is set before constructing detailPanel
-    final players = DataController.instance.get<List<GameCharacter>>('players');
-    if (players != null && players.isNotEmpty) {
-      final selectedPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
-      if (selectedPlayer == null) {
-        DataController.instance.set<GameCharacter>('selectedPlayer', players.first);
-      }
-    }
-
     // Now it's safe to construct detailPanel
     detailPanel = PlayerDetailPanel();
     selectionPanel = PlayerSelectionPanel();
-    
-    registerVerticalStackComponent('selectText', TextComponent(
-      text: 'Select Your Character',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 32,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+
+    registerVerticalStackComponent(
+        'selectText',
+        TextComponent(
+          text: 'Select Your Character',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              fontSize: 32,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          size: Vector2(size.x, 50),
         ),
-      ),
-      size: Vector2(size.x, 50),
-    ), 50);
+        50);
     registerVerticalStackComponent('detailPanel', detailPanel, size.y * 0.17);
-    registerVerticalStackComponent('selectionPanel', selectionPanel, size.y * 0.2);
+    registerVerticalStackComponent(
+        'selectionPanel', selectionPanel, size.y * 0.2);
 
     // Place Back and Start Battle buttons in one line at the bottom
     final buttonY = size.y - 60;
@@ -112,7 +108,8 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     enemyPanel = EnemyDetailPanel();
     registerVerticalStackComponent('enemyPanel', enemyPanel, size.y * 0.45);
 
-    GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
+    GameLogger.debug(
+        LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }
 
   @override
@@ -129,4 +126,4 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       SceneManager().moveScene('title');
     }
   }
-} 
+}

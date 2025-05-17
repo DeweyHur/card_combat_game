@@ -3,8 +3,8 @@ enum CardType {
   heal,
   statusEffect,
   cure,
-  shield,        // Adds shield to the player
-  shieldAttack,  // Attacks using shield value
+  shield, // Adds shield to the player
+  shieldAttack, // Attacks using shield value
 }
 
 enum StatusEffect {
@@ -39,6 +39,35 @@ class GameCard {
 
   @override
   String toString() => name;
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'type': type.toString().split('.').last,
+        'value': value,
+        'cost': cost,
+        'statusEffectToApply': statusEffectToApply?.toString().split('.').last,
+        'statusDuration': statusDuration,
+        'color': color,
+        'target': target,
+      };
+
+  static GameCard fromJson(Map<String, dynamic> json) => GameCard(
+        name: json['name'],
+        description: json['description'],
+        type: CardType.values
+            .firstWhere((e) => e.toString().split('.').last == json['type']),
+        value: json['value'],
+        cost: json['cost'],
+        statusEffectToApply: json['statusEffectToApply'] != null &&
+                json['statusEffectToApply'] != ''
+            ? StatusEffect.values.firstWhere((e) =>
+                e.toString().split('.').last == json['statusEffectToApply'])
+            : null,
+        statusDuration: json['statusDuration'],
+        color: json['color'] ?? 'blue',
+        target: json['target'] ?? 'enemy',
+      );
 }
 
 extension GameCardClone on GameCard {
@@ -62,4 +91,4 @@ extension GameCardClone on GameCard {
       target: target ?? this.target,
     );
   }
-} 
+}

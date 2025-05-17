@@ -39,23 +39,28 @@ class GameCharacter {
     required this.deck,
     this.maxEnergy = 3,
     this.handSize = 5,
-  }) : currentHealth = maxHealth,
-       currentEnergy = maxEnergy;
+  })  : currentHealth = maxHealth,
+        currentEnergy = maxEnergy;
 
   void addStatusEffect(StatusEffect effect, int amount) {
     if (effect == StatusEffect.none) return;
     if (effect == StatusEffect.poison) {
       // Poison stacks: add to existing amount
-      statusEffects[StatusEffect.poison] = (statusEffects[StatusEffect.poison] ?? 0) + amount;
-      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is poisoned for [32m${statusEffects[StatusEffect.poison]}\x1B[0m');
+      statusEffects[StatusEffect.poison] =
+          (statusEffects[StatusEffect.poison] ?? 0) + amount;
+      GameLogger.info(LogCategory.combat,
+          '\x1B[32m$name\x1B[0m is poisoned for [32m${statusEffects[StatusEffect.poison]}\x1B[0m');
     } else if (effect == StatusEffect.burn) {
       // Burn stacks: add to existing amount
-      statusEffects[StatusEffect.burn] = (statusEffects[StatusEffect.burn] ?? 0) + amount;
-      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is burned for [31m${statusEffects[StatusEffect.burn]}\x1B[0m');
+      statusEffects[StatusEffect.burn] =
+          (statusEffects[StatusEffect.burn] ?? 0) + amount;
+      GameLogger.info(LogCategory.combat,
+          '\x1B[32m$name\x1B[0m is burned for [31m${statusEffects[StatusEffect.burn]}\x1B[0m');
     } else {
       // Other effects: overwrite duration
       statusEffects[effect] = amount;
-      GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m is affected by $effect for $amount turns');
+      GameLogger.info(LogCategory.combat,
+          '\x1B[32m$name\x1B[0m is affected by $effect for $amount turns');
     }
   }
 
@@ -89,10 +94,12 @@ class GameCharacter {
           if (value > 0) {
             // Poison damage bypasses shield
             currentHealth = (currentHealth - value).clamp(0, maxHealth);
-            GameLogger.info(LogCategory.combat, '\x1B[32m$name\x1B[0m takes $value poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
+            GameLogger.info(LogCategory.combat,
+                '\x1B[32m$name\x1B[0m takes $value poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
             // Reduce poison stack by 1
             statusEffects[StatusEffect.poison] = value - 1;
-            if (statusEffects[StatusEffect.poison]! <= 0) expired.add(StatusEffect.poison);
+            if (statusEffects[StatusEffect.poison]! <= 0)
+              expired.add(StatusEffect.poison);
           }
           break;
         case StatusEffect.burn:
@@ -102,23 +109,28 @@ class GameCharacter {
             if (shield > 0) {
               if (shield >= burnDamage) {
                 shield -= burnDamage;
-                GameLogger.info(LogCategory.combat, '$name loses $burnDamage shield from burn. Shield: $shield');
+                GameLogger.info(LogCategory.combat,
+                    '$name loses $burnDamage shield from burn. Shield: $shield');
               } else {
                 int remaining = burnDamage - shield;
-                GameLogger.info(LogCategory.combat, '$name loses $shield shield from burn. Shield: 0');
+                GameLogger.info(LogCategory.combat,
+                    '$name loses $shield shield from burn. Shield: 0');
                 shield = 0;
                 currentHealth = (currentHealth - remaining).clamp(0, maxHealth);
-                GameLogger.info(LogCategory.combat, '$name takes $remaining burn damage. Health: $currentHealth/$maxHealth');
+                GameLogger.info(LogCategory.combat,
+                    '$name takes $remaining burn damage. Health: $currentHealth/$maxHealth');
               }
             } else {
               currentHealth = (currentHealth - burnDamage).clamp(0, maxHealth);
-              GameLogger.info(LogCategory.combat, '$name takes $burnDamage burn damage. Health: $currentHealth/$maxHealth');
+              GameLogger.info(LogCategory.combat,
+                  '$name takes $burnDamage burn damage. Health: $currentHealth/$maxHealth');
             }
             // Halve the burn stack (rounded down)
             int newBurn = (value / 2).floor();
             if (newBurn > 0) {
               statusEffects[StatusEffect.burn] = newBurn;
-              GameLogger.info(LogCategory.combat, '$name burn stack is now $newBurn');
+              GameLogger.info(
+                  LogCategory.combat, '$name burn stack is now $newBurn');
             } else {
               expired.add(StatusEffect.burn);
             }
@@ -141,6 +153,37 @@ class GameCharacter {
 
   void takeDamage(int damage) {
     currentHealth = (currentHealth - damage).clamp(0, maxHealth);
-    GameLogger.info(LogCategory.combat, '[32m$name[0m takes $damage damage. Health: $currentHealth/$maxHealth');
+    GameLogger.info(LogCategory.combat,
+        '[32m$name[0m takes $damage damage. Health: $currentHealth/$maxHealth');
   }
-} 
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'maxHealth': maxHealth,
+        'attack': attack,
+        'defense': defense,
+        'emoji': emoji,
+        'color': color,
+        'imagePath': imagePath,
+        'soundPath': soundPath,
+        'description': description,
+        'deck': deck.map((c) => c.toJson()).toList(),
+        'maxEnergy': maxEnergy,
+        'handSize': handSize,
+      };
+
+  static GameCharacter fromJson(Map<String, dynamic> json) => GameCharacter(
+        name: json['name'],
+        maxHealth: json['maxHealth'],
+        attack: json['attack'],
+        defense: json['defense'],
+        emoji: json['emoji'],
+        color: json['color'],
+        imagePath: json['imagePath'],
+        soundPath: json['soundPath'],
+        description: json['description'],
+        deck: (json['deck'] as List).map((c) => GameCard.fromJson(c)).toList(),
+        maxEnergy: json['maxEnergy'] ?? 3,
+        handSize: json['handSize'] ?? 5,
+      );
+}

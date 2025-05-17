@@ -11,19 +11,29 @@ class PlayerSelectionScene extends BaseScene {
   late final PlayerSelectionLayout layout;
   late GameCharacter selectedEnemy;
 
-  PlayerSelectionScene() : super(
-    sceneBackgroundColor: const Color(0xFF2C3E50),
-  ) {
+  PlayerSelectionScene()
+      : super(
+          sceneBackgroundColor: const Color(0xFF2C3E50),
+        ) {
     players = DataController.instance.get<List<GameCharacter>>('players') ?? [];
     enemies = DataController.instance.get<List<GameCharacter>>('enemies') ?? [];
-    // Set default selected player to first player
-    if (players.isNotEmpty) {
-      DataController.instance.set('selectedPlayer', players.first);
-    }
     // Randomly select an enemy
-    final random = DateTime.now().millisecondsSinceEpoch % (enemies.isNotEmpty ? enemies.length : 1);
-    selectedEnemy = enemies.isNotEmpty ? enemies[random] : GameCharacter(
-      name: 'Unknown', maxHealth: 1, attack: 1, defense: 1, emoji: '?', color: 'grey', imagePath: '', soundPath: '', description: '', deck: [], maxEnergy: 3);
+    final random = DateTime.now().millisecondsSinceEpoch %
+        (enemies.isNotEmpty ? enemies.length : 1);
+    selectedEnemy = enemies.isNotEmpty
+        ? enemies[random]
+        : GameCharacter(
+            name: 'Unknown',
+            maxHealth: 1,
+            attack: 1,
+            defense: 1,
+            emoji: '?',
+            color: 'grey',
+            imagePath: '',
+            soundPath: '',
+            description: '',
+            deck: [],
+            maxEnergy: 3);
     DataController.instance.set('selectedEnemy', selectedEnemy);
   }
 
@@ -35,4 +45,4 @@ class PlayerSelectionScene extends BaseScene {
     add(layout);
     GameLogger.info(LogCategory.game, 'Player selection started');
   }
-} 
+}

@@ -3,6 +3,7 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   final int index;
@@ -20,15 +21,16 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     required Vector2 size,
     required this.index,
   }) : super(
-    position: position,
-    size: size,
-    anchor: Anchor.topLeft,
-  ) {
+          position: position,
+          size: size,
+          anchor: Anchor.topLeft,
+        ) {
     players = DataController.instance.get<List<GameCharacter>>('players') ?? [];
   }
 
   bool get isSelectedPlayer {
-    final selectedPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
+    final selectedPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
     return selectedPlayer?.name == getPlayer().name;
   }
 
@@ -105,16 +107,21 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   }
 
   @override
-  void onTapDown(TapDownEvent event) {
+  void onTapDown(TapDownEvent event) async {
     super.onTapDown(event);
     // Set selectedPlayer in DataController
     DataController.instance.set<GameCharacter>('selectedPlayer', getPlayer());
+    // Persist selected player to local storage
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('selectedPlayerName', getPlayer().name);
   }
 
   void updateAppearance() {
     background.paint = Paint()
-      ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3);
-    }
+      ..color = isSelected
+          ? Colors.blue.withOpacity(0.3)
+          : Colors.black.withOpacity(0.3);
+  }
 
   @override
   void onHoverEnter() {
@@ -135,16 +142,18 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   @override
   bool containsPoint(Vector2 point) {
     return point.x >= position.x &&
-           point.x <= position.x + size.x &&
-           point.y >= position.y &&
-           point.y <= position.y + size.y;
+        point.x <= position.x + size.x &&
+        point.y >= position.y &&
+        point.y <= position.y + size.y;
   }
 
   @override
   void render(Canvas canvas) {
     // Draw box background
     final paint = Paint()
-      ..color = isSelected ? Colors.blue.withOpacity(0.3) : Colors.black.withOpacity(0.3)
+      ..color = isSelected
+          ? Colors.blue.withOpacity(0.3)
+          : Colors.black.withOpacity(0.3)
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
@@ -189,4 +198,4 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
       anchor: Anchor.center,
     );
   }
-} 
+}

@@ -8,11 +8,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/game.dart';
-import 'package:card_combat_app/card_combat_game.dart';
+import 'package:card_combat_app/game/card_combat_game.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: GameWidget(game: CardCombatGame()))));
+    await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: GameWidget(game: CardCombatGame()))));
     expect(find.byType(GameWidget), findsOneWidget);
   });
 }
