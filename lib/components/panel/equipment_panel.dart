@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:flame/events.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -42,11 +44,11 @@ class EquipmentPanel extends BasePanel {
     children.clear();
     final double w = size.x;
     final double h = size.y;
-    // Slot sizes
-    final double slotW = w * 0.16;
-    final double slotH = h * 0.28;
-    final double accW = w * 0.14;
-    final double accH = h * 0.18;
+    // Slot sizes (smaller proportions)
+    final double slotW = w * 0.13;
+    final double slotH = h * 0.18;
+    final double accW = w * 0.10;
+    final double accH = h * 0.12;
     final double centerX = w / 2;
     final double baseY = h * 0.005;
     // Head (top center)
@@ -94,10 +96,18 @@ class EquipmentPanel extends BasePanel {
   }
 
   PositionComponent _buildSlot(String label, Vector2 position, Vector2 size) {
-    final slot = PositionComponent(
+    final slot = _TappableSlot(
+      label: label,
       position: position,
       size: size,
-      anchor: Anchor.topLeft,
+      onTap: () {
+        final eqName = _getEquipmentNameForSlot(label);
+        if (eqName != null) {
+          DataController.instance.set<String>('selectedEquipmentName', eqName);
+        } else {
+          DataController.instance.set<String>('selectedEquipmentName', '');
+        }
+      },
     );
     slot.add(RectangleComponent(
       size: size,
@@ -245,5 +255,53 @@ class EquipmentPanel extends BasePanel {
       default:
         return slot;
     }
+  }
+
+  String? _getEquipmentNameForSlot(String slot) {
+    // Find the equipment name for the given slot
+    if (currentPlayer == null) return null;
+    final playerCsv = DataController.instance.get<List<List<dynamic>>>('playersCsv');
+    String? equipmentStr;
+    if (playerCsv != null) {
+      for (final row in playerCsv) {
+        if (row.isNotEmpty && row[0] == currentPlayer!.name) {
+          if (row.length > 10) {
+            equipmentStr = row[10] as String;
+          }
+          break;
+        }
+      }
+    }
+    if (equipmentStr == null) return null;
+    final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    if (equipmentData != null) {
+      for (final eqName in equipmentList) {
+        final eq = equipmentData![eqName];
+        if (eq != null) {
+          String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+          if (slotKey == slot) {
+            return eqName;
+          }
+        }
+      }
+    }
+    return null;
+  }
+}
+
+class _TappableSlot extends PositionComponent with TapCallbacks {
+  final String label;
+  final VoidCallback onTap;
+
+  _TappableSlot({
+    required this.label,
+    required Vector2 position,
+    required Vector2 size,
+    required this.onTap,
+  }) : super(position: position, size: size, anchor: Anchor.topLeft);
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    onTap();
   }
 } 
