@@ -8,6 +8,14 @@ class EquipmentDetailPanel extends PositionComponent {
   final VoidCallback? onChange;
   final VoidCallback? onUnequip;
 
+  // Add references to text components
+  late TextComponent nameText;
+  late TextComponent typeText;
+  late TextComponent slotText;
+  late TextComponent handednessText;
+  final List<TextComponent> cardTexts = [];
+  TextComponent? cardsLabelText;
+
   EquipmentDetailPanel({
     required this.equipment,
     this.onChange,
@@ -18,8 +26,52 @@ class EquipmentDetailPanel extends PositionComponent {
 
   void updateEquipment(EquipmentData newEquipment) {
     equipment = newEquipment;
-    // Optionally, trigger a UI update if needed
-    // (e.g., remove all children and call onLoad again, or update text components)
+    // Update text fields
+    nameText.text = equipment.name;
+    typeText.text = 'Type: ${equipment.type}';
+    slotText.text = 'Slot: ${getSlotDisplayName(equipment.slot)}';
+    handednessText.text = 'Handedness: ${equipment.handedness}';
+    // Remove old card texts
+    for (final t in cardTexts) {
+      t.removeFromParent();
+    }
+    cardTexts.clear();
+    cardsLabelText?.removeFromParent();
+    cardsLabelText = null;
+    // Add new card texts if any
+    if (equipment.cards.isNotEmpty) {
+      double y = 120;
+      cardsLabelText = TextComponent(
+        text: 'Cards:',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.lightBlueAccent,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        anchor: Anchor.topLeft,
+        position: Vector2(16, y),
+      );
+      add(cardsLabelText!);
+      y += 22;
+      for (final card in equipment.cards) {
+        final cardText = TextComponent(
+          text: card,
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.lightBlueAccent,
+              fontSize: 14,
+            ),
+          ),
+          anchor: Anchor.topLeft,
+          position: Vector2(32, y),
+        );
+        add(cardText);
+        cardTexts.add(cardText);
+        y += 20;
+      }
+    }
   }
 
   String getSlotDisplayName(String slot) {
@@ -38,7 +90,7 @@ class EquipmentDetailPanel extends PositionComponent {
       anchor: Anchor.topLeft,
     ));
     // Equipment name
-    add(TextComponent(
+    nameText = TextComponent(
       text: equipment.name,
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -49,9 +101,10 @@ class EquipmentDetailPanel extends PositionComponent {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(16, 16),
-    ));
+    );
+    add(nameText);
     // Equipment type
-    add(TextComponent(
+    typeText = TextComponent(
       text: 'Type: ${equipment.type}',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -61,9 +114,10 @@ class EquipmentDetailPanel extends PositionComponent {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(16, 48),
-    ));
+    );
+    add(typeText);
     // Equipment slot
-    add(TextComponent(
+    slotText = TextComponent(
       text: 'Slot: ${getSlotDisplayName(equipment.slot)}',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -73,9 +127,10 @@ class EquipmentDetailPanel extends PositionComponent {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(16, 72),
-    ));
+    );
+    add(slotText);
     // Handedness
-    add(TextComponent(
+    handednessText = TextComponent(
       text: 'Handedness: ${equipment.handedness}',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -85,11 +140,12 @@ class EquipmentDetailPanel extends PositionComponent {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(16, 96),
-    ));
+    );
+    add(handednessText);
     // Cards (if any)
     if (equipment.cards.isNotEmpty) {
       double y = 120;
-      add(TextComponent(
+      cardsLabelText = TextComponent(
         text: 'Cards:',
         textRenderer: TextPaint(
           style: const TextStyle(
@@ -100,10 +156,11 @@ class EquipmentDetailPanel extends PositionComponent {
         ),
         anchor: Anchor.topLeft,
         position: Vector2(16, y),
-      ));
+      );
+      add(cardsLabelText!);
       y += 22;
       for (final card in equipment.cards) {
-        add(TextComponent(
+        final cardText = TextComponent(
           text: card,
           textRenderer: TextPaint(
             style: const TextStyle(
@@ -113,7 +170,9 @@ class EquipmentDetailPanel extends PositionComponent {
           ),
           anchor: Anchor.topLeft,
           position: Vector2(32, y),
-        ));
+        );
+        add(cardText);
+        cardTexts.add(cardText);
         y += 20;
       }
     }
