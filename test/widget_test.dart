@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
             body: GameWidget(
-                key: Key('main_game_widget'), game: CardCombatGame()))));
-    expect(find.byKey(Key('main_game_widget')), findsOneWidget);
+                key: const Key('main_game_widget'), game: CardCombatGame()))));
+    expect(find.byKey(const Key('main_game_widget')), findsOneWidget);
   });
 }

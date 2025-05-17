@@ -140,6 +140,4 @@ class GameEffects {
       enabled: isPlayerTurn,
     );
   }
-
-  static const double someConstValue = 42.0;
 }

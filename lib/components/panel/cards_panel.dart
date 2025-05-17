@@ -7,7 +7,6 @@ import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:flame/input.dart';
-import 'package:flame/components.dart' show HasVisibility;
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;

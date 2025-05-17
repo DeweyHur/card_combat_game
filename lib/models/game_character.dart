@@ -98,8 +98,9 @@ class GameCharacter {
                 '\x1B[32m$name\x1B[0m takes $value poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
             // Reduce poison stack by 1
             statusEffects[StatusEffect.poison] = value - 1;
-            if (statusEffects[StatusEffect.poison]! <= 0)
+            if (statusEffects[StatusEffect.poison]! <= 0) {
               expired.add(StatusEffect.poison);
+            }
           }
           break;
         case StatusEffect.burn:

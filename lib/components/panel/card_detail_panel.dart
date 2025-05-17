@@ -1,7 +1,6 @@
-import 'package:flame/components.dart';
-import 'package:flame/components.dart' show HasVisibility;
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_card.dart';
+import 'package:flame/components.dart';
 
 class CardDetailPanel extends PositionComponent with HasVisibility {
   late TextComponent nameText;
@@ -10,6 +9,14 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
   late TextComponent valueText;
   late TextComponent costText;
   late RectangleComponent background;
+  bool _isVisible = true;
+  @override
+  bool get isVisible => _isVisible;
+  @override
+  set isVisible(bool value) {
+    _isVisible = value;
+    priority = value ? 0 : -1;
+  }
 
   CardDetailPanel({Vector2? position, Vector2? size})
       : super(

@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
@@ -33,16 +32,6 @@ class CombatScene extends BaseScene with HasGameReference {
     CombatManager().startCombat();
     GameLogger.info(LogCategory.game,
         'Combat started: \x1B[32m${player.name}\x1B[0m vs \x1B[31m${enemy.name}\x1B[0m');
-  }
-
-  void _handleCardPlayed(GameCard card) {
-    if (!CombatManager().isPlayerTurn) return;
-    CombatManager().playCard(card);
-    _layout.updateUI();
-    if (CombatManager().isCombatOver()) {
-      handleCombatEnd();
-      return;
-    }
   }
 
   void handleCombatEnd() {

@@ -19,25 +19,13 @@ class BaseScene extends FlameGame {
   }
 
   @override
-  void onMount() {
-    super.onMount();
-    GameLogger.debug(LogCategory.game, 'Scene mounted: $runtimeType');
-  }
-
-  @override
   void onRemove() {
+    super.onRemove();
     // Remove all components from the scene
     for (final component in children.toList()) {
       component.removeFromParent();
     }
     GameLogger.debug(LogCategory.game, 'Scene removed: $runtimeType');
-    super.onRemove();
-  }
-
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    // ... existing code ...
   }
 
   @override
