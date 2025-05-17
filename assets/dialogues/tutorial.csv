@@ -1,0 +1,10 @@
+id,character,message,next_id
+1,Old Sage,Welcome to the Indonesian Archipelago, young card master! I am the Guardian of the Ancient Temples.,2
+2,Old Sage,Long ago, the Card Masters of Borobudur protected these islands with their magical cards.,3
+3,Old Sage,But the Shadow Cards emerged from Mount Bromo, corrupting the hearts of many duelists.,4
+4,Old Sage,You must journey through our sacred landmarks to restore balance to the islands.,5
+5,Old Sage,First, visit the Borobudur Temple to learn the ancient card arts.,6
+6,Old Sage,Then, climb Mount Bromo to face your first challenge.,7
+7,Old Sage,The beaches of Bali will test your wisdom, and Komodo Island your courage.,8
+8,Old Sage,Use the arrow keys to move. The glowing crystal marks your next destination.,9
+9,Old Sage,May the spirits of the islands guide your path to becoming a true Card Master!,end 

@@ -6,6 +6,9 @@ class SoundManager {
   factory SoundManager() => _instance;
   SoundManager._internal();
 
+  bool _isInitialized = false;
+  static const String _textSoundPath = 'sounds/text_sound.mp3';
+
   // Map of card types to their corresponding sound files
   final Map<CardType, String> _cardTypeToSound = {
     CardType.attack: 'swordattack.mp3',
@@ -24,17 +27,23 @@ class SoundManager {
     StatusEffect.none: 'card_play.mp3',
   };
 
-  // Initialize audio files
   Future<void> initialize() async {
-    // Preload all sound files
-    await FlameAudio.audioCache.loadAll([
-      'swordattack.mp3',
-      'healing.mp3',
-      'poison.mp3',
-      'card_play.mp3',
-      'heavystrike.mp3',
-      'damage.mp3',
-    ]);
+    if (_isInitialized) return;
+
+    try {
+      await FlameAudio.audioCache.loadAll([
+        'swordattack.mp3',
+        'healing.mp3',
+        'poison.mp3',
+        'card_play.mp3',
+        'heavystrike.mp3',
+        'damage.mp3',
+      ]);
+      await FlameAudio.audioCache.load(_textSoundPath);
+      _isInitialized = true;
+    } catch (e) {
+      print('Error initializing sound: $e');
+    }
   }
 
   // Play sound for a card type
@@ -56,5 +65,15 @@ class SoundManager {
   // Play a specific sound file
   void playSound(String soundFile) {
     FlameAudio.play(soundFile);
+  }
+
+  void playTextSound() {
+    if (!_isInitialized) return;
+    
+    try {
+      FlameAudio.play(_textSoundPath, volume: 0.5);
+    } catch (e) {
+      print('Error playing text sound: $e');
+    }
   }
 } 
