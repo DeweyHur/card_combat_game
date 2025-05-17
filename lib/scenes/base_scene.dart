@@ -30,6 +30,7 @@ class BaseScene extends FlameGame {
 
   @override
   void render(Canvas canvas) {
+    super.render(canvas);
     canvas.drawColor(sceneBackgroundColor, BlendMode.src);
   }
 

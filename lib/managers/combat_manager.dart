@@ -380,14 +380,10 @@ class CombatManager {
   }
 
   void playerHeal(int value) {
-    if (player.currentHealth != null) {
-      player.currentHealth =
-          (player.currentHealth + value).clamp(0, player.maxHealth);
-      GameLogger.info(LogCategory.combat,
-          'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
-    } else {
-      GameLogger.info(LogCategory.combat, 'Player heals for $value');
-    }
+    player.currentHealth =
+        (player.currentHealth + value).clamp(0, player.maxHealth);
+    GameLogger.info(LogCategory.combat,
+        'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
   }
 
   // Helper methods for enemy actions
@@ -419,15 +415,10 @@ class CombatManager {
   }
 
   void enemyHeal(int value) {
-    // Actually heal the enemy
-    if (enemy.currentHealth != null) {
-      enemy.currentHealth =
-          (enemy.currentHealth + value).clamp(0, enemy.maxHealth);
-      GameLogger.info(LogCategory.combat,
-          'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
-    } else {
-      GameLogger.info(LogCategory.combat, 'Enemy heals for $value');
-    }
+    enemy.currentHealth =
+        (enemy.currentHealth + value).clamp(0, enemy.maxHealth);
+    GameLogger.info(LogCategory.combat,
+        'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
   }
 
   // Optionally, implement status effect application for statusEffect cards

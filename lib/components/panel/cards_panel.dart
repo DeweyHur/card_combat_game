@@ -22,6 +22,7 @@ class CardsPanel extends BasePanel {
   void Function()? onEndTurn;
 
   final double buttonHeight = 120.0;
+  static const double cardPanelPadding = 16.0;
 
   CardsPanel({
     required this.player,

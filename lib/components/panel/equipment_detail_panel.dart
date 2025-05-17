@@ -198,7 +198,7 @@ class EquipmentDetailPanel extends PositionComponent {
   }
 }
 
-class _ButtonComponent extends PositionComponent {
+class _ButtonComponent extends PositionComponent with TapCallbacks {
   final String label;
   final VoidCallback? onPressed;
   final Color color;

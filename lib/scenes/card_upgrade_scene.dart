@@ -42,11 +42,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     final size = this.size;
 
     // Render title
-    final titleText = 'Choose an Upgrade';
+    const titleText = 'Choose an Upgrade';
     final titlePainter = TextPainter(
-      text: TextSpan(
+      text: const TextSpan(
         text: titleText,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -61,10 +61,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Render upgrade options
     final upgradeTypes = UpgradeType.values;
-    final optionWidth = 200.0;
-    final optionHeight = 150.0;
-    final spacing = 20.0;
-    final startX = (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
+    const optionWidth = 200.0;
+    const optionHeight = 150.0;
+    const spacing = 20.0;
+    final startX =
+        (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
     final startY = size.y * 0.15;
 
     for (var i = 0; i < upgradeTypes.length; i++) {
@@ -128,10 +129,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Render cards if card upgrade is selected
     if (selectedUpgradeType == UpgradeType.card && availableCards != null) {
-      final cardWidth = 200.0;
-      final cardHeight = 300.0;
-      final cardSpacing = 20.0;
-      final cardStartX = (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
+      const cardWidth = 200.0;
+      const cardHeight = 300.0;
+      const cardSpacing = 20.0;
+      final cardStartX =
+          (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
       final cardStartY = size.y * 0.35;
 
       for (var i = 0; i < availableCards!.length; i++) {
@@ -215,13 +217,13 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     }
 
     // Render upgrade button
-    if (selectedUpgradeType != null && 
+    if (selectedUpgradeType != null &&
         (selectedUpgradeType != UpgradeType.card || selectedCard != null)) {
-      final upgradeText = 'Apply Upgrade';
+      const upgradeText = 'Apply Upgrade';
       final upgradePainter = TextPainter(
-        text: TextSpan(
+        text: const TextSpan(
           text: upgradeText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             color: Colors.white,
           ),
@@ -255,10 +257,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Check upgrade type selection
     final upgradeTypes = UpgradeType.values;
-    final optionWidth = 200.0;
-    final optionHeight = 150.0;
-    final spacing = 20.0;
-    final startX = (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
+    const optionWidth = 200.0;
+    const optionHeight = 150.0;
+    const spacing = 20.0;
+    final startX =
+        (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
     final startY = size.y * 0.15;
 
     for (var i = 0; i < upgradeTypes.length; i++) {
@@ -277,10 +280,11 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Check card selection if card upgrade is selected
     if (selectedUpgradeType == UpgradeType.card && availableCards != null) {
-      final cardWidth = 200.0;
-      final cardHeight = 300.0;
-      final cardSpacing = 20.0;
-      final cardStartX = (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
+      const cardWidth = 200.0;
+      const cardHeight = 300.0;
+      const cardSpacing = 20.0;
+      final cardStartX =
+          (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
       final cardStartY = size.y * 0.35;
 
       for (var i = 0; i < availableCards!.length; i++) {
@@ -298,13 +302,13 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     }
 
     // Check upgrade button
-    if (selectedUpgradeType != null && 
+    if (selectedUpgradeType != null &&
         (selectedUpgradeType != UpgradeType.card || selectedCard != null)) {
-      final upgradeText = 'Apply Upgrade';
+      const upgradeText = 'Apply Upgrade';
       final upgradePainter = TextPainter(
-        text: TextSpan(
+        text: const TextSpan(
           text: upgradeText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             color: Colors.white,
           ),
@@ -328,14 +332,16 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     if (player == null) return;
 
     // Get current upgrade history
-    List<Map<String, dynamic>> upgradeHistory = 
-        DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
+    List<Map<String, dynamic>> upgradeHistory = DataController.instance
+            .get<List<Map<String, dynamic>>>('upgradeHistory') ??
+        [];
 
     switch (selectedUpgradeType) {
       case UpgradeType.card:
         if (selectedCard != null) {
           // Create a new card with increased value
-          final upgradedCard = selectedCard!.copyWith(value: selectedCard!.value + 2);
+          final upgradedCard =
+              selectedCard!.copyWith(value: selectedCard!.value + 2);
           // Replace the old card in the deck
           final cardIndex = player.deck.indexOf(selectedCard!);
           if (cardIndex != -1) {
@@ -343,7 +349,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
             // Add to upgrade history
             upgradeHistory.add({
               'type': 'Card Upgrade',
-              'description': '${selectedCard!.name} value increased to ${upgradedCard.value}',
+              'description':
+                  '${selectedCard!.name} value increased to ${upgradedCard.value}',
             });
           }
         }
@@ -416,7 +423,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         // Add to upgrade history
         upgradeHistory.add({
           'type': 'Shield Upgrade',
-          'description': 'Starting shield increased to ${upgradedPlayer.shield}',
+          'description':
+              'Starting shield increased to ${upgradedPlayer.shield}',
         });
         break;
       default:
@@ -429,4 +437,4 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     // Return to player selection scene
     SceneManager().pushScene('player_selection');
   }
-} 
+}

@@ -20,7 +20,9 @@ class GameResultScene extends BaseScene with TapCallbacks {
       // Get the next enemy from DataController
       nextEnemy = DataController.instance.get<GameCharacter>('nextEnemy');
       // Get upgrade history
-      upgradeHistory = DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
+      upgradeHistory = DataController.instance
+              .get<List<Map<String, dynamic>>>('upgradeHistory') ??
+          [];
     }
   }
 
@@ -28,7 +30,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
     final size = this.size;
-    
+
     // Render result text
     final textPainter = TextPainter(
       text: TextSpan(
@@ -128,7 +130,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
     // Render buttons
     final buttonY = result == 'Victory' ? 0.7 : 0.6;
-    
+
     // Continue button (only show for victory)
     if (result == 'Victory') {
       final continueText = 'Continue';
@@ -243,4 +245,4 @@ class GameResultScene extends BaseScene with TapCallbacks {
       SceneManager().moveScene('title');
     }
   }
-} 
+}
