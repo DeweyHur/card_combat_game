@@ -62,7 +62,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     // Initialize scene manager and load initial scene
     SceneManager().initialize(this);
-    SceneManager().pushScene('title');
+    SceneManager().moveScene('title');
   }
 
   @override

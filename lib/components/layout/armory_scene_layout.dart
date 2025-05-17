@@ -109,7 +109,7 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
 
   void handleTap(Vector2 pos) {
     if (_backButton.toRect().contains(pos.toOffset())) {
-      SceneManager().pushScene('title');
+      SceneManager().moveScene('title');
     }
   }
 
@@ -121,7 +121,21 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
     }
     if (_equipmentData == null) return;
     final eqData = _equipmentData![equipmentName];
-    if (eqData == null) return;
+    if (eqData == null) {
+      // If equipmentName is a slot label, show empty slot detail
+      if (EquipmentPanel.mainSlots.contains(equipmentName) || EquipmentPanel.accessorySlots.contains(equipmentName)) {
+        _detailPanel!.updateEquipment(EquipmentData(
+          name: 'Empty Slot',
+          type: '',
+          slot: equipmentName,
+          handedness: '',
+          cards: const [],
+        ));
+        showVerticalStackComponent('detailPanel');
+        _lastEquipmentName = equipmentName;
+      }
+      return;
+    }
     _detailPanel!.updateEquipment(eqData);
     showVerticalStackComponent('detailPanel');
     _lastEquipmentName = equipmentName;

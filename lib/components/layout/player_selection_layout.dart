@@ -126,7 +126,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     // Handle Back button
     if (backButton.toRect().contains(event.localPosition.toOffset())) {
       GameLogger.debug(LogCategory.ui, 'Back button pressed');
-      SceneManager().pushScene('title');
+      SceneManager().moveScene('title');
     }
   }
 } 

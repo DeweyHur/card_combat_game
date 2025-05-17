@@ -240,7 +240,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
       height: 60,
     );
     if (menuRect.contains(pos)) {
-      SceneManager().pushScene('title');
+      SceneManager().moveScene('title');
     }
   }
 } 
