@@ -102,7 +102,6 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
           .set<GameCharacter>('selectedPlayer', selectedPlayer);
       prefs.setString('selectedPlayerName', selectedPlayer.name);
     }
-    // TODO: Persist selectedPlayer changes elsewhere in the app when user selects a new player.
 
     // Also store the parsed players.csv rows for equipment lookup
     final playersCsvString =
