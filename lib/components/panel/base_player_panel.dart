@@ -2,8 +2,6 @@ import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 import 'package:card_combat_app/components/panel/stats_row.dart';
-import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 
 abstract class BasePlayerPanel extends BasePanel {
   late GameCharacter player;
@@ -33,4 +31,4 @@ abstract class BasePlayerPanel extends BasePanel {
   void updateUI() {
     statsRow.updateUI();
   }
-} 
+}

@@ -7,7 +7,6 @@ class HealEffect extends PositionComponent {
   final int value;
   final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
-  static const double _fadeSpeed = 2.0;
 
   HealEffect({
     required Vector2 position,
@@ -20,7 +19,7 @@ class HealEffect extends PositionComponent {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Heal effect created: $value HP');
-    
+
     _textComponent = FadingTextComponent(
       '+$value',
       Vector2(size.x / 2, size.y / 2),
@@ -48,4 +47,4 @@ class HealEffect extends PositionComponent {
     GameLogger.debug(LogCategory.game, 'Heal effect faded out and removed.');
     super.onRemove();
   }
-} 
+}

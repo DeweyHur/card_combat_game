@@ -8,24 +8,9 @@ import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:flutter/material.dart' hide Card;
 
 class GameEffects {
-  static Color _getEffectColor(CardType type) {
-    switch (type) {
-      case CardType.attack:
-        return Colors.red;
-      case CardType.heal:
-        return Colors.green;
-      case CardType.statusEffect:
-        return Colors.purple;
-      case CardType.cure:
-        return Colors.blue;
-      case CardType.shield:
-        return Colors.blueAccent;
-      case CardType.shieldAttack:
-        return Colors.orange;
-    }
-  }
-
-  static Component createCardEffect(CardType type, Vector2 position, Vector2 size, {VoidCallback? onComplete, Color? color, String? emoji, int value = 5}) {
+  static Component createCardEffect(
+      CardType type, Vector2 position, Vector2 size,
+      {VoidCallback? onComplete, Color? color, String? emoji, int value = 5}) {
     switch (type) {
       case CardType.attack:
         return DamageEffect(
@@ -78,7 +63,9 @@ class GameEffects {
     }
   }
 
-  static Component createDamageEffect(Vector2 position, int value, bool isPlayer, {VoidCallback? onComplete, Color? color, String? emoji}) {
+  static Component createDamageEffect(
+      Vector2 position, int value, bool isPlayer,
+      {VoidCallback? onComplete, Color? color, String? emoji}) {
     return DamageEffect(
       position: position,
       size: Vector2(100, 100),
@@ -90,7 +77,8 @@ class GameEffects {
     );
   }
 
-  static Component createHealEffect(Vector2 position, int value, {VoidCallback? onComplete}) {
+  static Component createHealEffect(Vector2 position, int value,
+      {VoidCallback? onComplete}) {
     return HealEffect(
       position: position,
       size: Vector2(100, 100),
@@ -99,7 +87,9 @@ class GameEffects {
     );
   }
 
-  static Component createDoTEffect(Vector2 position, StatusEffect effect, int value, {VoidCallback? onComplete}) {
+  static Component createDoTEffect(
+      Vector2 position, StatusEffect effect, int value,
+      {VoidCallback? onComplete}) {
     return DoTEffect(
       position: position,
       size: Vector2(100, 100),
@@ -109,7 +99,9 @@ class GameEffects {
     );
   }
 
-  static Component createStatusEffect(Vector2 position, StatusEffect effectType, bool isPlayer, {VoidCallback? onComplete}) {
+  static Component createStatusEffect(
+      Vector2 position, StatusEffect effectType, bool isPlayer,
+      {VoidCallback? onComplete}) {
     return StatusEffectComponent(
       position: position,
       size: Vector2(100, 100),
@@ -126,21 +118,28 @@ class GameEffects {
     Function(GameCard) onCardPlayed,
     bool isPlayerTurn,
   ) {
-    final totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + 
+    final totalWidth = (CardVisualComponent.maxCards *
+            CardVisualComponent.cardWidth) +
         ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = cardAreaPosition.x + (cardAreaSize.x - totalWidth) / 2;
 
     final position = Vector2(
-      startX + (index * (CardVisualComponent.cardWidth + CardVisualComponent.cardSpacing)),
+      startX +
+          (index *
+              (CardVisualComponent.cardWidth +
+                  CardVisualComponent.cardSpacing)),
       cardAreaPosition.y + CardVisualComponent.cardTopMargin,
     );
 
     return CardVisualComponent(
       cardData,
       position: position,
-      size: Vector2(CardVisualComponent.cardWidth, CardVisualComponent.cardHeight),
+      size: Vector2(
+          CardVisualComponent.cardWidth, CardVisualComponent.cardHeight),
       onCardPlayed: onCardPlayed,
       enabled: isPlayerTurn,
     );
   }
-} 
+
+  static const double someConstValue = 42.0;
+}

@@ -9,7 +9,6 @@ class DoTEffect extends PositionComponent {
   final int value;
   final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
-  static const double _fadeSpeed = 2.0;
 
   DoTEffect({
     required Vector2 position,
@@ -22,8 +21,9 @@ class DoTEffect extends PositionComponent {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    GameLogger.debug(LogCategory.game, 'DoT effect created: $effect for $value damage');
-    
+    GameLogger.debug(
+        LogCategory.game, 'DoT effect created: $effect for $value damage');
+
     _textComponent = FadingTextComponent(
       '-$value',
       Vector2(size.x / 2, size.y / 2),
@@ -51,4 +51,4 @@ class DoTEffect extends PositionComponent {
     GameLogger.debug(LogCategory.game, 'DoT effect faded out and removed.');
     super.onRemove();
   }
-} 
+}

@@ -16,7 +16,7 @@ class EquipmentDetailPanel extends PositionComponent {
   final List<TextComponent> cardTexts = [];
   TextComponent? cardsLabelText;
 
-  bool isLoaded = false;
+  bool _isLoaded = false;
 
   EquipmentDetailPanel({
     required this.equipment,
@@ -25,6 +25,9 @@ class EquipmentDetailPanel extends PositionComponent {
     Vector2? position,
     Vector2? size,
   }) : super(position: position, size: size ?? Vector2(400, 220));
+
+  @override
+  bool get isLoaded => _isLoaded;
 
   void updateEquipment(EquipmentData newEquipment) {
     if (!isLoaded) return;
@@ -89,7 +92,7 @@ class EquipmentDetailPanel extends PositionComponent {
     // Add a background
     add(RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.black.withOpacity(0.85),
+      paint: Paint()..color = Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
     ));
     // Equipment name
@@ -191,7 +194,7 @@ class EquipmentDetailPanel extends PositionComponent {
       position: Vector2(size.x - 160, 80),
       color: Colors.redAccent,
     ));
-    isLoaded = true;
+    _isLoaded = true;
   }
 }
 
@@ -212,7 +215,7 @@ class _ButtonComponent extends PositionComponent {
     await super.onLoad();
     add(RectangleComponent(
       size: size,
-      paint: Paint()..color = color.withOpacity(0.85),
+      paint: Paint()..color = color.withAlpha(217),
       anchor: Anchor.topLeft,
     ));
     add(TextComponent(

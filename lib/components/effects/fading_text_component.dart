@@ -13,15 +13,15 @@ class FadingTextComponent extends PositionComponent {
     this.text,
     Vector2 position, {
     TextStyle? style,
-  }) : _baseStyle = style ?? const TextStyle(color: Colors.white),
-       super(position: position) {
+  })  : _baseStyle = style ?? const TextStyle(color: Colors.white),
+        super(position: position) {
     _updateTextPaint();
   }
 
   void _updateTextPaint() {
     _textComponent = TextPaint(
       style: _baseStyle.copyWith(
-        color: _baseStyle.color?.withOpacity(_opacity),
+        color: _baseStyle.color?.withAlpha((_opacity * 255).toInt()),
       ),
     );
   }
@@ -47,4 +47,4 @@ class FadingTextComponent extends PositionComponent {
   }
 
   bool get isFinished => _isFinished;
-} 
+}

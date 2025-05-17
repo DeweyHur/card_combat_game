@@ -7,37 +7,50 @@ import 'equipment_loader.dart';
 
 Future<List<GameCard>> loadAllCards(String assetPath) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
-  final header = rows.first;
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
   final dataRows = rows.skip(1);
   return dataRows.map((row) {
     return GameCard(
       name: row[0] as String,
       description: row[1] as String,
-      type: CardType.values.firstWhere((e) => e.toString().split('.').last == row[2]),
+      type: CardType.values
+          .firstWhere((e) => e.toString().split('.').last == row[2]),
       value: int.parse(row[3].toString()),
-      cost: row.length > 4 && row[4] != null && row[4].toString().isNotEmpty ? int.parse(row[4].toString()) : 1,
-      statusEffectToApply: row.length > 5 && row[5] != null && row[5].toString().isNotEmpty ? StatusEffect.values.firstWhere((e) => e.toString().split('.').last == row[5]) : null,
-      statusDuration: row.length > 6 && row[6] != null && row[6].toString().isNotEmpty ? int.parse(row[6].toString()) : null,
-      color: row.length > 7 && row[7] != null && row[7].toString().isNotEmpty ? row[7] as String : 'blue',
+      cost: row.length > 4 && row[4] != null && row[4].toString().isNotEmpty
+          ? int.parse(row[4].toString())
+          : 1,
+      statusEffectToApply:
+          row.length > 5 && row[5] != null && row[5].toString().isNotEmpty
+              ? StatusEffect.values
+                  .firstWhere((e) => e.toString().split('.').last == row[5])
+              : null,
+      statusDuration:
+          row.length > 6 && row[6] != null && row[6].toString().isNotEmpty
+              ? int.parse(row[6].toString())
+              : null,
+      color: row.length > 7 && row[7] != null && row[7].toString().isNotEmpty
+          ? row[7] as String
+          : 'blue',
     );
   }).toList();
 }
 
-Future<List<GameCharacter>> loadCharactersFromCsv(
-  String assetPath,
-  List<GameCard> allCards,
-  Map<String, EquipmentData> equipmentData,
-  {bool isEnemy = false}
-) async {
+Future<List<GameCharacter>> loadCharactersFromCsv(String assetPath,
+    List<GameCard> allCards, Map<String, EquipmentData> equipmentData,
+    {bool isEnemy = false}) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
-  final header = rows.first;
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
   final dataRows = rows.skip(1);
   return dataRows.map((row) {
     final name = row[0] as String;
     final equipmentStr = row.length > 10 ? row[10] as String : '';
-    final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final equipmentList = equipmentStr
+        .split('|')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     // Build deck from equipment
     final List<String> cardNames = [];
     for (final eqName in equipmentList) {
@@ -74,8 +87,8 @@ Future<List<GameCharacter>> loadEnemiesFromCsv(
   Map<String, List<GameCard>> enemyDecks,
 ) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
-  final header = rows.first;
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
   final dataRows = rows.skip(1);
   return dataRows.map((row) {
     final name = row[0] as String;
@@ -94,4 +107,4 @@ Future<List<GameCharacter>> loadEnemiesFromCsv(
       handSize: 5,
     );
   }).toList();
-} 
+}

@@ -9,8 +9,9 @@ import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/utils/color_utils.dart';
 
-class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin implements CombatWatcher {
-
+class PlayerCombatPanel extends BasePlayerPanel
+    with AreaFillerMixin, ShakeMixin
+    implements CombatWatcher {
   late CombatManager combatManager;
   bool _isLoaded = false;
   late TextComponent statusEffectText;
@@ -24,7 +25,8 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     statusEffectText = TextComponent(
       text: '',
       textRenderer: TextPaint(
-        style: const TextStyle(color: Colors.purple, fontSize: 16, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+            color: Colors.purple, fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
     registerVerticalStackComponent('statusEffectText', statusEffectText, 24);
@@ -60,7 +62,6 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
             emoji = '❄️';
             break;
           case StatusEffect.none:
-          default:
             emoji = '';
             break;
         }
@@ -77,7 +78,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     super.render(canvas);
     drawAreaFiller(
       canvas,
-      colorFromString(player.color).withOpacity(0.3),
+      colorFromString(player.color).withAlpha(77),
       borderColor: colorFromString(player.color),
       borderWidth: 2.0,
     );
@@ -100,7 +101,8 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
         )..priority = 100;
         add(effect);
         shakeForType(event.card.type);
-      } else if (event.type == CombatEventType.heal || event.type == CombatEventType.status) {
+      } else if (event.type == CombatEventType.heal ||
+          event.type == CombatEventType.status) {
         final effect = GameEffects.createCardEffect(
           event.card.type,
           Vector2(size.x / 2 - 50, size.y / 2 - 50),
@@ -127,4 +129,4 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
     )..priority = 200;
     add(dot);
   }
-} 
+}

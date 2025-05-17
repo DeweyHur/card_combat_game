@@ -12,8 +12,10 @@ import 'package:card_combat_app/game/card_combat_game.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: GameWidget(game: CardCombatGame()))));
-    expect(find.byType(GameWidget), findsOneWidget);
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: GameWidget(
+                key: Key('main_game_widget'), game: CardCombatGame()))));
+    expect(find.byKey(Key('main_game_widget')), findsOneWidget);
   });
 }

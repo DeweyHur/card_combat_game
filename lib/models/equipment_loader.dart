@@ -17,14 +17,17 @@ class EquipmentData {
   });
 }
 
-Future<Map<String, EquipmentData>> loadEquipmentFromCsv(String assetPath) async {
+Future<Map<String, EquipmentData>> loadEquipmentFromCsv(
+    String assetPath) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
-  final header = rows.first;
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
   final dataRows = rows.skip(1);
   final Map<String, EquipmentData> equipment = {};
   for (final row in dataRows) {
-    if (row.length < 5 || row[0] == null || row[0].toString().trim().isEmpty) continue;
+    if (row.length < 5 || row[0] == null || row[0].toString().trim().isEmpty) {
+      continue;
+    }
     final name = row[0] as String;
     final type = row[1] as String;
     final slot = row[2] as String;
@@ -40,4 +43,4 @@ Future<Map<String, EquipmentData>> loadEquipmentFromCsv(String assetPath) async 
     );
   }
   return equipment;
-} 
+}

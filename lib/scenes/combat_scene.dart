@@ -9,15 +9,16 @@ import 'package:card_combat_app/managers/combat_manager.dart';
 import 'base_scene.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 
-class CombatScene extends BaseScene with HasGameRef {
+class CombatScene extends BaseScene with HasGameReference {
   late final CombatSceneLayout _layout;
   late final GameCharacter player;
   late final GameCharacter enemy;
   bool _combatEnded = false;
 
-  CombatScene() : super(
-    sceneBackgroundColor: const Color(0xFF1A1A2E),
-  );
+  CombatScene()
+      : super(
+          sceneBackgroundColor: const Color(0xFF1A1A2E),
+        );
 
   @override
   Future<void> onLoad() async {
@@ -26,15 +27,12 @@ class CombatScene extends BaseScene with HasGameRef {
 
     player = DataController.instance.get<GameCharacter>('selectedPlayer')!;
     enemy = DataController.instance.get<GameCharacter>('selectedEnemy')!;
-    if (player == null || enemy == null) {
-      GameLogger.error(LogCategory.game, 'CombatScene: player or enemy not set in DataController');
-      return;
-    }
     CombatManager().initialize(player: player, enemy: enemy);
     _layout = CombatSceneLayout();
     add(_layout);
     CombatManager().startCombat();
-    GameLogger.info(LogCategory.game, 'Combat started: \x1B[32m${player.name}\x1B[0m vs \x1B[31m${enemy.name}\x1B[0m');
+    GameLogger.info(LogCategory.game,
+        'Combat started: \x1B[32m${player.name}\x1B[0m vs \x1B[31m${enemy.name}\x1B[0m');
   }
 
   void _handleCardPlayed(GameCard card) {
@@ -86,4 +84,4 @@ class CombatScene extends BaseScene with HasGameRef {
       SceneManager().pushScene('game_result');
     }
   }
-} 
+}

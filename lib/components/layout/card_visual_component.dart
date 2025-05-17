@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
-import 'package:flame/components.dart' show HasVisibility;
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:card_combat_app/models/game_card.dart';
 
-class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRef, HasVisibility {
+class CardVisualComponent extends PositionComponent
+    with TapCallbacks, HasGameReference, HasVisibility {
   final GameCard cardData;
   final bool enabled;
   final Function(GameCard) onCardPlayed;
@@ -21,9 +21,9 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
     required this.onCardPlayed,
     this.enabled = true,
   }) : super(
-    position: position,
-    size: size,
-  );
+          position: position,
+          size: size,
+        );
 
   @override
   Future<void> onLoad() async {
@@ -84,7 +84,9 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
     add(emojiText);
 
     // Card value (bottom right)
-    if (cardData.type == CardType.attack || cardData.type == CardType.heal || cardData.type == CardType.shield) {
+    if (cardData.type == CardType.attack ||
+        cardData.type == CardType.heal ||
+        cardData.type == CardType.shield) {
       final valueText = TextComponent(
         text: cardData.value.toString(),
         textRenderer: TextPaint(
@@ -142,4 +144,4 @@ class CardVisualComponent extends PositionComponent with TapCallbacks, HasGameRe
       onCardPlayed(cardData);
     }
   }
-} 
+}

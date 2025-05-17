@@ -10,7 +10,6 @@ class MultilineTextComponent extends PositionComponent {
   double _lineHeight = 0;
   String _text;
 
-  @override
   String get text => _text;
   set text(String value) {
     _text = value;
@@ -27,7 +26,10 @@ class MultilineTextComponent extends PositionComponent {
     Vector2? size,
     Anchor anchor = Anchor.topLeft,
   })  : _text = text,
-        super(position: position ?? Vector2.zero(), size: size ?? Vector2.zero(), anchor: anchor) {
+        super(
+            position: position ?? Vector2.zero(),
+            size: size ?? Vector2.zero(),
+            anchor: anchor) {
     _textPaint = TextPaint(style: style);
     _lines = _splitTextToLines(_text, style, maxWidth);
     _lineHeight = _calculateLineHeight(style);
@@ -45,7 +47,8 @@ class MultilineTextComponent extends PositionComponent {
     return tp.height;
   }
 
-  List<String> _splitTextToLines(String text, TextStyle style, double maxWidth) {
+  List<String> _splitTextToLines(
+      String text, TextStyle style, double maxWidth) {
     final words = text.split(' ');
     final lines = <String>[];
     var currentLine = '';
@@ -77,4 +80,4 @@ class MultilineTextComponent extends PositionComponent {
       y += _lineHeight;
     }
   }
-} 
+}

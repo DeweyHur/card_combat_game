@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:flame/events.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
 
   static const List<String> mainSlots = [
-    'Head', 'Chest', 'Pants', 'Shoes', 'Weapon', 'Offhand', 'Belt'
+    'Head',
+    'Chest',
+    'Pants',
+    'Shoes',
+    'Weapon',
+    'Offhand',
+    'Belt'
   ];
-  static const List<String> accessorySlots = [
-    'Accessory 1', 'Accessory 2'
-  ];
+  static const List<String> accessorySlots = ['Accessory 1', 'Accessory 2'];
 
   Map<String, PositionComponent> slotComponents = {};
   GameCharacter? currentPlayer;
@@ -25,7 +28,8 @@ class EquipmentPanel extends BasePanel {
   Future<void> onLoad() async {
     await super.onLoad();
     // Get equipment data from DataController
-    equipmentData = DataController.instance.get<Map<String, EquipmentData>>('equipmentData');
+    equipmentData = DataController.instance
+        .get<Map<String, EquipmentData>>('equipmentData');
     // Listen for player changes
     DataController.instance.watch('selectedPlayer', (value) {
       if (value is GameCharacter) {
@@ -34,7 +38,8 @@ class EquipmentPanel extends BasePanel {
       }
     });
     // Set initial player
-    currentPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
+    currentPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
     _buildSlots();
     updateUI();
   }
@@ -52,46 +57,81 @@ class EquipmentPanel extends BasePanel {
     final double centerX = w / 2;
     final double baseY = h * 0.005;
     // Head (top center)
-    slotComponents['Head'] = _buildSlot('Head', Vector2(centerX - slotW / 2, baseY), Vector2(slotW, slotH));
+    slotComponents['Head'] = _buildSlot(
+        'Head', Vector2(centerX - slotW / 2, baseY), Vector2(slotW, slotH));
     add(slotComponents['Head']!);
     // Chest (center)
-    slotComponents['Chest'] = _buildSlot('Chest', Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01), Vector2(slotW, slotH));
+    slotComponents['Chest'] = _buildSlot(
+        'Chest',
+        Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01),
+        Vector2(slotW, slotH));
     add(slotComponents['Chest']!);
     // Belt (above pants)
-    slotComponents['Belt'] = _buildSlot('Belt', Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)), Vector2(slotW, accH));
+    slotComponents['Belt'] = _buildSlot(
+        'Belt',
+        Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)),
+        Vector2(slotW, accH));
     add(slotComponents['Belt']!);
     // Pants (below belt)
-    slotComponents['Pants'] = _buildSlot('Pants', Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01), Vector2(slotW, slotH));
+    slotComponents['Pants'] = _buildSlot(
+        'Pants',
+        Vector2(centerX - slotW / 2,
+            baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01),
+        Vector2(slotW, slotH));
     add(slotComponents['Pants']!);
     // Shoes (bottom center)
-    slotComponents['Shoes'] = _buildSlot('Shoes', Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)), Vector2(slotW, accH));
+    slotComponents['Shoes'] = _buildSlot(
+        'Shoes',
+        Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)),
+        Vector2(slotW, accH));
     add(slotComponents['Shoes']!);
     // Weapon (left of chest)
-    slotComponents['Weapon'] = _buildSlot('Weapon', Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01), Vector2(slotW, slotH));
+    slotComponents['Weapon'] = _buildSlot(
+        'Weapon',
+        Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01),
+        Vector2(slotW, slotH));
     add(slotComponents['Weapon']!);
     // Offhand (right of chest)
-    slotComponents['Offhand'] = _buildSlot('Offhand', Vector2(centerX + w * 0.08, baseY + slotH + h * 0.01), Vector2(slotW, slotH));
+    slotComponents['Offhand'] = _buildSlot(
+        'Offhand',
+        Vector2(centerX + w * 0.08, baseY + slotH + h * 0.01),
+        Vector2(slotW, slotH));
     add(slotComponents['Offhand']!);
     // Accessory 1 (left of pants)
-    slotComponents['Accessory 1'] = _buildSlot('Accessory 1', Vector2(centerX - slotW - w * 0.08, baseY + 2 * (slotH + h * 0.01)), Vector2(accW, accH));
+    slotComponents['Accessory 1'] = _buildSlot(
+        'Accessory 1',
+        Vector2(centerX - slotW - w * 0.08, baseY + 2 * (slotH + h * 0.01)),
+        Vector2(accW, accH));
     add(slotComponents['Accessory 1']!);
     // Accessory 2 (right of pants)
-    slotComponents['Accessory 2'] = _buildSlot('Accessory 2', Vector2(centerX + w * 0.08, baseY + 2 * (slotH + h * 0.01)), Vector2(accW, accH));
+    slotComponents['Accessory 2'] = _buildSlot(
+        'Accessory 2',
+        Vector2(centerX + w * 0.08, baseY + 2 * (slotH + h * 0.01)),
+        Vector2(accW, accH));
     add(slotComponents['Accessory 2']!);
   }
 
   String getSlotEmoji(String slot) {
     switch (slot) {
-      case 'Head': return '🪖';
-      case 'Chest': return '🦺';
-      case 'Belt': return '🪢';
-      case 'Pants': return '👖';
-      case 'Shoes': return '👢';
-      case 'Weapon': return '⚔️';
-      case 'Offhand': return '🛡️';
+      case 'Head':
+        return '🪖';
+      case 'Chest':
+        return '🦺';
+      case 'Belt':
+        return '🪢';
+      case 'Pants':
+        return '👖';
+      case 'Shoes':
+        return '👢';
+      case 'Weapon':
+        return '⚔️';
+      case 'Offhand':
+        return '🛡️';
       case 'Accessory 1':
-      case 'Accessory 2': return '💍';
-      default: return '❓';
+      case 'Accessory 2':
+        return '💍';
+      default:
+        return '❓';
     }
   }
 
@@ -109,7 +149,8 @@ class EquipmentPanel extends BasePanel {
       onTap: () {
         final eqName = _getEquipmentNameForSlot(label);
         // Enhanced logging
-        debugPrint('[EQUIP_PANEL] Slot tapped: $label, Equipment: ${eqName ?? 'empty'}');
+        debugPrint(
+            '[EQUIP_PANEL] Slot tapped: $label, Equipment: ${eqName ?? 'empty'}');
         if (eqName != null) {
           DataController.instance.set<String>('selectedEquipmentName', eqName);
         } else {
@@ -119,7 +160,7 @@ class EquipmentPanel extends BasePanel {
     );
     slot.add(RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.grey.withOpacity(0.4),
+      paint: Paint()..color = Colors.grey.withAlpha(102),
       anchor: Anchor.topLeft,
     ));
     // Add emoji background with opacity
@@ -129,7 +170,7 @@ class EquipmentPanel extends BasePanel {
         textRenderer: TextPaint(
           style: TextStyle(
             fontSize: 36,
-            color: Colors.white.withOpacity(0.38),
+            color: Colors.white.withAlpha(97),
           ),
         ),
         anchor: Anchor.center,
@@ -162,12 +203,13 @@ class EquipmentPanel extends BasePanel {
       // Reset background color
       final bg = slot.children.whereType<RectangleComponent>().firstOrNull;
       if (bg != null) {
-        bg.paint.color = Colors.grey.withOpacity(0.4);
+        bg.paint.color = Colors.grey.withAlpha(102);
       }
     }
     if (currentPlayer == null) return;
     // Get equipment list from player (parse from description or add a field if needed)
-    final playerCsv = DataController.instance.get<List<List<dynamic>>>('playersCsv');
+    final playerCsv =
+        DataController.instance.get<List<List<dynamic>>>('playersCsv');
     String? equipmentStr;
     if (playerCsv != null) {
       for (final row in playerCsv) {
@@ -180,14 +222,19 @@ class EquipmentPanel extends BasePanel {
       }
     }
     if (equipmentStr == null) return;
-    final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final equipmentList = equipmentStr
+        .split('|')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     // Map slot name to equipment
     final Map<String, String> slotToEquipment = {};
     if (equipmentData != null) {
       for (final eqName in equipmentList) {
         final eq = equipmentData![eqName];
         if (eq != null) {
-          String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+          String slotKey =
+              _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
           if (slotToEquipment.containsKey(slotKey)) {
             if (slotKey.startsWith('Accessory')) {
               for (final acc in accessorySlots) {
@@ -208,9 +255,10 @@ class EquipmentPanel extends BasePanel {
       final slotComp = slotComponents[slot];
       if (slotComp != null) {
         // Highlight background
-        final bg = slotComp.children.whereType<RectangleComponent>().firstOrNull;
+        final bg =
+            slotComp.children.whereType<RectangleComponent>().firstOrNull;
         if (bg != null) {
-          bg.paint.color = Colors.amber.withOpacity(0.5);
+          bg.paint.color = Colors.amber.withAlpha(128);
         }
         slotComp.add(
           TextComponent(
@@ -270,7 +318,8 @@ class EquipmentPanel extends BasePanel {
   String? _getEquipmentNameForSlot(String slot) {
     // Find the equipment name for the given slot
     if (currentPlayer == null) return null;
-    final playerCsv = DataController.instance.get<List<List<dynamic>>>('playersCsv');
+    final playerCsv =
+        DataController.instance.get<List<List<dynamic>>>('playersCsv');
     String? equipmentStr;
     if (playerCsv != null) {
       for (final row in playerCsv) {
@@ -283,7 +332,11 @@ class EquipmentPanel extends BasePanel {
       }
     }
     if (equipmentStr == null) return null;
-    final equipmentList = equipmentStr.split('|').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final equipmentList = equipmentStr
+        .split('|')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     if (equipmentData != null) {
       // For accessories, we need to match the correct slot (Accessory 1 or 2)
       if (slot.startsWith('Accessory')) {
@@ -292,7 +345,8 @@ class EquipmentPanel extends BasePanel {
         for (final eqName in equipmentList) {
           final eq = equipmentData![eqName];
           if (eq != null) {
-            String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            String slotKey =
+                _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
             if (slotKey.startsWith('Accessory')) {
               if (found == accIndex) {
                 return eqName;
@@ -306,7 +360,8 @@ class EquipmentPanel extends BasePanel {
         for (final eqName in equipmentList) {
           final eq = equipmentData![eqName];
           if (eq != null) {
-            String slotKey = _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            String slotKey =
+                _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
             if (slotKey == slot) {
               return eqName;
             }
@@ -333,4 +388,4 @@ class _TappableSlot extends PositionComponent with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     onTap();
   }
-} 
+}

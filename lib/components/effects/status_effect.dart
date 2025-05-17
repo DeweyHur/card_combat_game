@@ -8,7 +8,6 @@ class StatusEffectComponent extends PositionComponent {
   final StatusEffect effect;
   final VoidCallback? onComplete;
   late FadingTextComponent _textComponent;
-  static const double _fadeSpeed = 2.0;
 
   StatusEffectComponent({
     required Vector2 position,
@@ -21,7 +20,7 @@ class StatusEffectComponent extends PositionComponent {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Status effect created: $effect');
-    
+
     _textComponent = FadingTextComponent(
       _getEffectText(),
       Vector2(size.x / 2, size.y / 2),
@@ -40,7 +39,8 @@ class StatusEffectComponent extends PositionComponent {
     if (_textComponent.isFinished) {
       onComplete?.call();
       removeFromParent();
-      GameLogger.debug(LogCategory.game, 'Status effect faded out and removed.');
+      GameLogger.debug(
+          LogCategory.game, 'Status effect faded out and removed.');
     }
   }
 
@@ -75,4 +75,4 @@ class StatusEffectComponent extends PositionComponent {
     GameLogger.debug(LogCategory.game, 'Status effect faded out and removed.');
     super.onRemove();
   }
-} 
+}

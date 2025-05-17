@@ -7,11 +7,9 @@ import 'package:card_combat_app/components/panel/enemy_detail_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
-import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/models/game_character.dart';
 
 class PlayerSelectionLayout extends PositionComponent
-    with HasGameRef, TapCallbacks, VerticalStackMixin {
+    with HasGameReference, TapCallbacks, VerticalStackMixin {
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
@@ -27,7 +25,7 @@ class PlayerSelectionLayout extends PositionComponent
     GameLogger.debug(LogCategory.ui, 'PlayerSelectionLayout loading...');
 
     // Set size from gameRef
-    size = gameRef.size;
+    size = findGame()!.size;
 
     // Now it's safe to construct detailPanel
     detailPanel = PlayerDetailPanel();

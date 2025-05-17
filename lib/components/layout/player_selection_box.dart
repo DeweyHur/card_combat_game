@@ -56,7 +56,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     // Create background
     background = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.black.withOpacity(0.3),
+      paint: Paint()..color = Colors.black.withAlpha(77),
     );
     add(background);
 
@@ -64,7 +64,7 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
     final border = RectangleComponent(
       size: size,
       paint: Paint()
-        ..color = Colors.white.withOpacity(0.3)
+        ..color = Colors.white.withAlpha(77)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0,
     );
@@ -118,24 +118,21 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
 
   void updateAppearance() {
     background.paint = Paint()
-      ..color = isSelected
-          ? Colors.blue.withOpacity(0.3)
-          : Colors.black.withOpacity(0.3);
+      ..color =
+          isSelected ? Colors.blue.withAlpha(77) : Colors.black.withAlpha(77);
   }
 
-  @override
   void onHoverEnter() {
     isHovered = true;
     if (!isSelected) {
-      background.paint.color = Colors.grey.withOpacity(0.5);
+      background.paint.color = Colors.grey.withAlpha(128);
     }
   }
 
-  @override
   void onHoverExit() {
     isHovered = false;
     if (!isSelected) {
-      background.paint.color = Colors.black.withOpacity(0.3);
+      background.paint.color = Colors.black.withAlpha(77);
     }
   }
 
@@ -151,9 +148,8 @@ class PlayerSelectionBox extends PositionComponent with TapCallbacks {
   void render(Canvas canvas) {
     // Draw box background
     final paint = Paint()
-      ..color = isSelected
-          ? Colors.blue.withOpacity(0.3)
-          : Colors.black.withOpacity(0.3)
+      ..color =
+          isSelected ? Colors.blue.withAlpha(77) : Colors.black.withAlpha(77)
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),

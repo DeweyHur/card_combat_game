@@ -25,7 +25,9 @@ class StatsRow extends PositionComponent {
   static const double barHeight = 16;
 
   StatsRow({required this.character, Vector2? position, Vector2? size})
-      : super(position: position ?? Vector2.zero(), size: size ?? Vector2(260, 32));
+      : super(
+            position: position ?? Vector2.zero(),
+            size: size ?? Vector2(260, 32));
 
   @override
   Future<void> onLoad() async {
@@ -42,7 +44,7 @@ class StatsRow extends PositionComponent {
 
     healthBarBg = RectangleComponent(
       size: Vector2(barWidth, barHeight),
-      paint: Paint()..color = Colors.grey.withOpacity(0.3),
+      paint: Paint()..color = Colors.grey.withAlpha(77),
       position: Vector2(28, 0),
       anchor: Anchor.centerLeft,
     );
@@ -188,8 +190,10 @@ class StatsRow extends PositionComponent {
 
   void _updateBonusTexts() {
     // Get upgrade history from DataController
-    final upgradeHistory = DataController.instance.get<List<Map<String, dynamic>>>('upgradeHistory') ?? [];
-    
+    final upgradeHistory = DataController.instance
+            .get<List<Map<String, dynamic>>>('upgradeHistory') ??
+        [];
+
     // Calculate bonuses
     int healthBonus = 0;
     int energyBonus = 0;
@@ -231,4 +235,4 @@ class StatsRow extends PositionComponent {
       updateUI();
     }
   }
-} 
+}

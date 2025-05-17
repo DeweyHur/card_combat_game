@@ -11,12 +11,9 @@ import 'package:card_combat_app/models/equipment_loader.dart';
 class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   late final TextComponent _titleText;
   late final PositionComponent _backButton;
-  bool _isLoaded = false;
   EquipmentDetailPanel? _detailPanel;
   EquipmentPanel? _equipmentPanel;
   Map<String, EquipmentData>? _equipmentData;
-  String? _lastEquipmentName;
-  String? _lastPlayerName;
 
   ArmorySceneLayout();
 
@@ -43,18 +40,23 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
     // Player Selection Panel
     final playerSelectionPanel = PlayerSelectionPanel()
       ..size = Vector2(size.x, size.y * 0.18);
-    registerVerticalStackComponent('playerSelectionPanel', playerSelectionPanel, size.y * 0.18);
+    registerVerticalStackComponent(
+        'playerSelectionPanel', playerSelectionPanel, size.y * 0.18);
 
     // Equipment Panel - fill the rest of the space except for detail and back button (60px)
-    _equipmentData = DataController.instance.get<Map<String, EquipmentData>>('equipmentData');
-    final equipmentPanelHeight = size.y - 50 - (size.y * 0.18) - 60 - (size.y * 0.3);
-    _equipmentPanel = EquipmentPanel(size: Vector2(size.x, equipmentPanelHeight));
-    registerVerticalStackComponent('equipmentPanel', _equipmentPanel!, equipmentPanelHeight);
+    _equipmentData = DataController.instance
+        .get<Map<String, EquipmentData>>('equipmentData');
+    final equipmentPanelHeight =
+        size.y - 50 - (size.y * 0.18) - 60 - (size.y * 0.3);
+    _equipmentPanel =
+        EquipmentPanel(size: Vector2(size.x, equipmentPanelHeight));
+    registerVerticalStackComponent(
+        'equipmentPanel', _equipmentPanel!, equipmentPanelHeight);
 
     // Equipment Detail Panel (initially hidden)
     _detailPanel = EquipmentDetailPanel(
       equipment: EquipmentData(
-        name: '', type: '', slot: '', handedness: '', cards: const []),
+          name: '', type: '', slot: '', handedness: '', cards: const []),
       position: Vector2(0, 0),
       size: Vector2(size.x, size.y * 0.3),
     );
@@ -96,8 +98,6 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
     DataController.instance.watch('selectedPlayer', (value) {
       _handlePlayerSelection(value);
     });
-
-    _isLoaded = true;
   }
 
   @override
@@ -116,14 +116,14 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   void _handleEquipmentSelection(String? equipmentName) {
     if (equipmentName == null || equipmentName.isEmpty) {
       hideVerticalStackComponent('detailPanel');
-      _lastEquipmentName = null;
       return;
     }
     if (_equipmentData == null) return;
     final eqData = _equipmentData![equipmentName];
     if (eqData == null) {
       // If equipmentName is a slot label, show empty slot detail
-      if (EquipmentPanel.mainSlots.contains(equipmentName) || EquipmentPanel.accessorySlots.contains(equipmentName)) {
+      if (EquipmentPanel.mainSlots.contains(equipmentName) ||
+          EquipmentPanel.accessorySlots.contains(equipmentName)) {
         _detailPanel!.updateEquipment(EquipmentData(
           name: 'Empty Slot',
           type: '',
@@ -132,19 +132,15 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
           cards: const [],
         ));
         showVerticalStackComponent('detailPanel');
-        _lastEquipmentName = equipmentName;
       }
       return;
     }
     _detailPanel!.updateEquipment(eqData);
     showVerticalStackComponent('detailPanel');
-    _lastEquipmentName = equipmentName;
   }
 
   void _handlePlayerSelection(dynamic player) {
     // Hide the detail panel if the player changes
     hideVerticalStackComponent('detailPanel');
-    _lastEquipmentName = null;
-    _lastPlayerName = player?.name;
   }
-} 
+}

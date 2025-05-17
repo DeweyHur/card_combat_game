@@ -1,4 +1,3 @@
-import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_player_panel.dart';
@@ -10,7 +9,10 @@ class PlayerDetailPanel extends BasePlayerPanel {
   late MultilineTextComponent descriptionText;
 
   PlayerDetailPanel()
-      : super(player: DataController.instance.get<GameCharacter>('selectedPlayer') ?? _emptyPlayer());
+      : super(
+            player:
+                DataController.instance.get<GameCharacter>('selectedPlayer') ??
+                    _emptyPlayer());
 
   @override
   Future<void> onLoad() async {
@@ -30,7 +32,8 @@ class PlayerDetailPanel extends BasePlayerPanel {
   void onMount() {
     super.onMount();
     updateUI();
-    final selectedPlayer = DataController.instance.get<GameCharacter>('selectedPlayer');
+    final selectedPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
     if (selectedPlayer != null) {
       player = selectedPlayer;
     }
@@ -59,15 +62,15 @@ class PlayerDetailPanel extends BasePlayerPanel {
 }
 
 GameCharacter _emptyPlayer() => GameCharacter(
-  name: 'Unknown',
-  maxHealth: 1,
-  attack: 0,
-  defense: 0,
-  emoji: '?',
-  color: 'grey',
-  imagePath: '',
-  soundPath: '',
-  description: 'No player selected',
-  deck: [],
-  maxEnergy: 3,
-); 
+      name: 'Unknown',
+      maxHealth: 1,
+      attack: 0,
+      defense: 0,
+      emoji: '?',
+      color: 'grey',
+      imagePath: '',
+      soundPath: '',
+      description: 'No player selected',
+      deck: [],
+      maxEnergy: 3,
+    );

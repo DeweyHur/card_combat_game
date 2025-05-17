@@ -6,7 +6,6 @@ import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
-import 'package:flame/events.dart';
 import 'package:flame/input.dart';
 import 'package:flame/components.dart' show HasVisibility;
 
@@ -22,23 +21,22 @@ class CardsPanel extends BasePanel {
   CardDetailPanel? cardDetailPanel;
   ButtonComponent? endTurnButton;
   void Function()? onEndTurn;
-  
+
   final double buttonHeight = 120.0;
 
   CardsPanel({
     required this.player,
-  }) : 
-    cardAreaText = TextComponent(
-      text: 'Your Hand',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      position: Vector2(0, 0), // Will be set in onLoad
-    );
+  }) : cardAreaText = TextComponent(
+          text: 'Your Hand',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          position: Vector2(0, 0), // Will be set in onLoad
+        );
 
   @override
   Future<void> onLoad() async {
@@ -73,14 +71,16 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
-        print('[PlayButton] Pressed. selectedCard: \\${selectedCard?.name}');
+        debugPrint(
+            '[PlayButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onCardPlayed != null && selectedCard != null) {
           onCardPlayed!(selectedCard!);
           selectedCard = null;
           _hidePlayButton();
           _showEndTurnButton();
           if (cardDetailPanel != null) {
-            cardDetailPanel!.showDeckAndDiscardInfo(player.deck.length, player.discardPile.length);
+            cardDetailPanel!.showDeckAndDiscardInfo(
+                player.deck.length, player.discardPile.length);
             cardDetailPanel!.isVisible = true;
           }
         }
@@ -112,7 +112,8 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
-        print('[EndTurnButton] Pressed. selectedCard: \\${selectedCard?.name}');
+        debugPrint(
+            '[EndTurnButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onEndTurn != null) {
           onEndTurn!();
         }
@@ -168,17 +169,23 @@ class CardsPanel extends BasePanel {
 
     // Show deck/discard info if no card is selected
     if (cardDetailPanel != null && selectedCard == null) {
-      cardDetailPanel!.showDeckAndDiscardInfo(player.deck.length, player.discardPile.length);
+      cardDetailPanel!.showDeckAndDiscardInfo(
+          player.deck.length, player.discardPile.length);
       cardDetailPanel!.isVisible = true;
     }
   }
 
   Vector2 calculateCardPosition(int index) {
-    final totalWidth = (CardVisualComponent.maxCards * CardVisualComponent.cardWidth) + ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
+    final totalWidth = (CardVisualComponent.maxCards *
+            CardVisualComponent.cardWidth) +
+        ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = (size.x - totalWidth) / 2;
 
     final pos = Vector2(
-      startX + (index * (CardVisualComponent.cardWidth + CardVisualComponent.cardSpacing)),
+      startX +
+          (index *
+              (CardVisualComponent.cardWidth +
+                  CardVisualComponent.cardSpacing)),
       CardVisualComponent.cardTopMargin,
     );
 
@@ -219,4 +226,4 @@ class CardsPanel extends BasePanel {
       endTurnButton!.removeFromParent();
     }
   }
-} 
+}

@@ -12,7 +12,9 @@ import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/name_emoji_component.dart';
 
-abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin, ShakeMixin implements CombatWatcher {
+abstract class BaseEnemyPanel extends BasePanel
+    with HasGameReference, AreaFillerMixin, ShakeMixin
+    implements CombatWatcher {
   late GameCharacter enemy;
   RectangleComponent? separatorLine;
   SpriteComponent? enemySprite;
@@ -26,7 +28,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     await super.onLoad();
     enemy = DataController.instance.get<GameCharacter>('selectedEnemy')!;
     try {
-      final image = await gameRef.images.load(enemy.imagePath);
+      final image = await findGame()!.images.load(enemy.imagePath);
       final sprite = Sprite(image);
       enemySprite = SpriteComponent(
         sprite: sprite,
@@ -54,34 +56,39 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     }
     separatorLine = RectangleComponent(
       size: Vector2(280, 2),
-      paint: Paint()..color = Colors.white.withOpacity(0.5),
+      paint: Paint()..color = Colors.white.withAlpha(128),
     );
     registerVerticalStackComponent('separatorLine', separatorLine!, 2);
     _isLoaded = true;
     GameLogger.debug(LogCategory.ui, 'BaseEnemyPanel loaded successfully');
   }
+
   void updateHealth() {
     if (_isLoaded) {
       statsRow.updateUI();
     }
   }
+
   @override
   void updateUI() {
     if (!_isLoaded) return;
     updateHealth();
     statsRow.updateUI();
   }
+
   void updateEnemy(GameCharacter newEnemy) {
     enemy = newEnemy;
     nameEmojiComponent.updateCharacter(enemy);
     statsRow.setCharacter(enemy);
   }
+
   @override
   void onRemove() {
     audioPlayer?.stop();
     audioPlayer?.dispose();
     super.onRemove();
   }
+
   void showEffectForCard(dynamic card, VoidCallback onComplete) {
     final effect = GameEffects.createCardEffect(
       card.type,
@@ -91,6 +98,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     )..priority = 100;
     add(effect);
   }
+
   List<String> splitTextToLines(String text, TextStyle style, double maxWidth) {
     final words = text.split(' ');
     final lines = <String>[];
@@ -113,4 +121,4 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
     if (currentLine.isNotEmpty) lines.add(currentLine);
     return lines;
   }
-} 
+}

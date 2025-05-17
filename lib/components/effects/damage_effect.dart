@@ -10,7 +10,6 @@ class DamageEffect extends PositionComponent {
   final Color color;
   final String emoji;
   late FadingTextComponent _textComponent;
-  static const double _fadeSpeed = 2.0;
 
   DamageEffect({
     required Vector2 position,
@@ -26,7 +25,7 @@ class DamageEffect extends PositionComponent {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Damage effect created: $value damage');
-    
+
     _textComponent = FadingTextComponent(
       '$emoji -$value',
       Vector2(size.x / 2, size.y / 2),
@@ -45,7 +44,8 @@ class DamageEffect extends PositionComponent {
     if (_textComponent.isFinished) {
       onComplete?.call();
       removeFromParent();
-      GameLogger.debug(LogCategory.game, 'Damage effect faded out and removed.');
+      GameLogger.debug(
+          LogCategory.game, 'Damage effect faded out and removed.');
     }
   }
 
@@ -54,4 +54,4 @@ class DamageEffect extends PositionComponent {
     GameLogger.debug(LogCategory.game, 'Damage effect faded out and removed.');
     super.onRemove();
   }
-} 
+}

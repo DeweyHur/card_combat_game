@@ -34,6 +34,11 @@ class BaseScene extends FlameGame {
     super.onRemove();
   }
 
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    // ... existing code ...
+  }
 
   @override
   void render(Canvas canvas) {
@@ -45,6 +50,7 @@ class BaseScene extends FlameGame {
   }
 
   void initialize(Map<String, dynamic> params) {
-    GameLogger.debug(LogCategory.game, 'Scene initialized with params: $params');
+    GameLogger.debug(
+        LogCategory.game, 'Scene initialized with params: $params');
   }
-} 
+}

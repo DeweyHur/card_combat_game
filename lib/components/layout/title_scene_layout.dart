@@ -108,7 +108,7 @@ class TitleSceneLayout extends PositionComponent {
       text: '© DewIn Studio',
       textRenderer: TextPaint(
         style: TextStyle(
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withAlpha(128),
           fontSize: 14,
         ),
       ),
@@ -145,4 +145,4 @@ class TitleSceneLayout extends PositionComponent {
       exit(0);
     }
   }
-} 
+}

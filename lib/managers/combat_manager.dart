@@ -51,7 +51,8 @@ class CombatManager {
   // Store the last picked enemy action for UI
   GameCard? lastEnemyAction;
 
-  void initialize({required GameCharacter player, required GameCharacter enemy}) {
+  void initialize(
+      {required GameCharacter player, required GameCharacter enemy}) {
     this.player = player;
     this.enemy = enemy;
     isPlayerTurn = true;
@@ -61,7 +62,8 @@ class CombatManager {
   }
 
   void startCombat() {
-    GameLogger.info(LogCategory.game, 'Starting combat: ${player.name} vs ${enemy.name}');
+    GameLogger.info(
+        LogCategory.game, 'Starting combat: ${player.name} vs ${enemy.name}');
     _initializePlayerDeck();
     _discardHand(player);
     _drawHand(player);
@@ -113,11 +115,13 @@ class CombatManager {
       return;
     }
     if (player.currentEnergy < card.cost) {
-      GameLogger.warning(LogCategory.game, 'Not enough energy to play this card');
+      GameLogger.warning(
+          LogCategory.game, 'Not enough energy to play this card');
       return;
     }
     player.currentEnergy -= card.cost;
-    GameLogger.info(LogCategory.game, 'Playing card: \'${card.name}\' (cost: ${card.cost}, remaining energy: ${player.currentEnergy})');
+    GameLogger.info(LogCategory.game,
+        'Playing card: \'${card.name}\' (cost: ${card.cost}, remaining energy: ${player.currentEnergy})');
     _soundManager.playCardSound(card.type);
 
     // Always move the card from hand to discard pile if present
@@ -133,10 +137,12 @@ class CombatManager {
           type: CombatEventType.damage,
           target: enemy,
           value: card.value,
-          description: '\u001b[32m${player.name}\u001b[0m dealt ${card.value} damage',
+          description:
+              '\u001b[32m${player.name}\u001b[0m dealt ${card.value} damage',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Dealt \u001b[31m${card.value}\u001b[0m damage to \u001b[31m${enemy.name}\u001b[0m');
+        GameLogger.info(LogCategory.game,
+            'Dealt \u001b[31m${card.value}\u001b[0m damage to \u001b[31m${enemy.name}\u001b[0m');
         break;
       case CardType.heal:
         playerHeal(card.value);
@@ -144,10 +150,12 @@ class CombatManager {
           type: CombatEventType.heal,
           target: player,
           value: card.value,
-          description: '\u001b[32m${player.name}\u001b[0m healed for ${card.value}',
+          description:
+              '\u001b[32m${player.name}\u001b[0m healed for ${card.value}',
           card: card,
         ));
-        GameLogger.info(LogCategory.game, 'Healed \u001b[32m${player.name}\u001b[0m for ${card.value} HP');
+        GameLogger.info(LogCategory.game,
+            'Healed \u001b[32m${player.name}\u001b[0m for ${card.value} HP');
         break;
       case CardType.statusEffect:
         if (card.target == "enemy") {
@@ -161,7 +169,8 @@ class CombatManager {
         break;
       case CardType.shield:
         player.shield += card.value;
-        GameLogger.info(LogCategory.combat, '\u001b[32m${player.name}\u001b[0m gains ${card.value} shield. Shield: \u001b[36m${player.shield}\u001b[0m');
+        GameLogger.info(LogCategory.combat,
+            '\u001b[32m${player.name}\u001b[0m gains ${card.value} shield. Shield: \u001b[36m${player.shield}\u001b[0m');
         break;
       case CardType.shieldAttack:
         // Implement shieldAttack logic as needed
@@ -179,7 +188,8 @@ class CombatManager {
 
   void executeEnemyTurn() {
     if (isPlayerTurn) {
-      GameLogger.warning(LogCategory.game, 'Cannot execute enemy turn during player turn');
+      GameLogger.warning(
+          LogCategory.game, 'Cannot execute enemy turn during player turn');
       return;
     }
 
@@ -187,10 +197,12 @@ class CombatManager {
     int? poisonValue = enemy.statusEffects[StatusEffect.poison];
     int? burnValue = enemy.statusEffects[StatusEffect.burn];
     if (poisonValue != null && poisonValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.poison, poisonValue);
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
+          .showDotEffect(StatusEffect.poison, poisonValue);
     }
     if (burnValue != null && burnValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.burn, 3); // Burn is always 3
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
+          .showDotEffect(StatusEffect.burn, 3); // Burn is always 3
     }
     enemy.onTurnStart();
     GameLogger.info(LogCategory.game, 'Enemy turn starting');
@@ -200,26 +212,33 @@ class CombatManager {
       final enemyName = enemy.name;
       GameCard? card;
       dynamic pickedAction;
-      if (_enemyActionsByName != null && _enemyActionsByName![enemyName] != null) {
+      if (_enemyActionsByName != null &&
+          _enemyActionsByName![enemyName] != null) {
         final actions = _enemyActionsByName![enemyName]!;
         // Log all possible actions and their probabilities
         for (final a in actions) {
-          GameLogger.info(LogCategory.game, 'Enemy action option: ${a.actionName} (probability: ${a.probability})');
+          GameLogger.info(LogCategory.game,
+              'Enemy action option: ${a.actionName} (probability: ${a.probability})');
         }
         // Weighted random selection
-        final totalProb = actions.fold<double>(0, (sum, a) => sum + (a.probability ?? 0));
+        final totalProb =
+            actions.fold<double>(0, (sum, a) => sum + (a.probability ?? 0));
         if (totalProb > 0) {
           final random = Random();
           final rand = random.nextDouble() * totalProb;
-          GameLogger.info(LogCategory.game, 'Random value for selection: $rand (totalProb: $totalProb)');
+          GameLogger.info(LogCategory.game,
+              'Random value for selection: $rand (totalProb: $totalProb)');
           double cumulative = 0;
           for (int i = 0; i < actions.length; i++) {
             cumulative += actions[i].probability;
-            GameLogger.info(LogCategory.game, 'Cumulative probability after ${actions[i].actionName}: $cumulative');
+            GameLogger.info(LogCategory.game,
+                'Cumulative probability after ${actions[i].actionName}: $cumulative');
             if (rand <= cumulative) {
               pickedAction = actions[i];
               // Find the corresponding GameCard in the deck by name
-              card = enemy.deck.firstWhere((c) => c.name == actions[i].actionName, orElse: () => enemy.deck.first);
+              card = enemy.deck.firstWhere(
+                  (c) => c.name == actions[i].actionName,
+                  orElse: () => enemy.deck.first);
               break;
             }
           }
@@ -228,9 +247,11 @@ class CombatManager {
       // Fallback: uniform random
       card ??= (enemy.deck..shuffle()).first;
       if (pickedAction != null) {
-        GameLogger.info(LogCategory.game, 'Enemy picked action: ${pickedAction.actionName} (probability: ${pickedAction.probability})');
+        GameLogger.info(LogCategory.game,
+            'Enemy picked action: ${pickedAction.actionName} (probability: ${pickedAction.probability})');
       } else {
-        GameLogger.info(LogCategory.game, 'Enemy picked action (fallback): ${card.name}');
+        GameLogger.info(
+            LogCategory.game, 'Enemy picked action (fallback): ${card.name}');
       }
 
       // Store the picked action for UI
@@ -247,7 +268,8 @@ class CombatManager {
             description: '${enemy.name} dealt ${card.value} damage',
             card: card,
           ));
-          GameLogger.info(LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
+          GameLogger.info(
+              LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
           break;
         case CardType.heal:
           enemyHeal(card.value);
@@ -258,7 +280,8 @@ class CombatManager {
             description: '${enemy.name} healed for ${card.value}',
             card: card,
           ));
-          GameLogger.info(LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
+          GameLogger.info(
+              LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
           break;
         case CardType.statusEffect:
           if (card.target == "enemy" || card.target == "self") {
@@ -287,10 +310,12 @@ class CombatManager {
     int? poisonValue = player.statusEffects[StatusEffect.poison];
     int? burnValue = player.statusEffects[StatusEffect.burn];
     if (poisonValue != null && poisonValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.poison, poisonValue);
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
+          .showDotEffect(StatusEffect.poison, poisonValue);
     }
     if (burnValue != null && burnValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel).showDotEffect(StatusEffect.burn, 3); // Burn is always 3
+      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
+          .showDotEffect(StatusEffect.burn, 3); // Burn is always 3
     }
     player.onTurnStart();
     player.currentEnergy = player.maxEnergy;
@@ -308,7 +333,8 @@ class CombatManager {
       return 'Defeat';
     } else if (enemy.currentHealth <= 0) {
       // Get all enemies from DataController
-      final enemies = DataController.instance.get<List<GameCharacter>>('enemies');
+      final enemies =
+          DataController.instance.get<List<GameCharacter>>('enemies');
       if (enemies != null && enemies.isNotEmpty) {
         // Find the current enemy's index
         final currentIndex = enemies.indexWhere((e) => e.name == enemy.name);
@@ -331,26 +357,34 @@ class CombatManager {
     if (enemy.shield > 0) {
       if (enemy.shield >= value) {
         enemy.shield -= value;
-        GameLogger.info(LogCategory.combat, '${enemy.name} loses $value shield. Shield: \\${enemy.shield}');
+        GameLogger.info(LogCategory.combat,
+            '${enemy.name} loses $value shield. Shield: \\${enemy.shield}');
         return;
       } else {
         int remaining = value - enemy.shield;
-        GameLogger.info(LogCategory.combat, '${enemy.name} loses \\${enemy.shield} shield. Shield: 0');
+        GameLogger.info(LogCategory.combat,
+            '${enemy.name} loses \\${enemy.shield} shield. Shield: 0');
         enemy.shield = 0;
-        enemy.currentHealth = (enemy.currentHealth - remaining).clamp(0, enemy.maxHealth);
-        GameLogger.info(LogCategory.combat, '${enemy.name} takes $remaining damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
+        enemy.currentHealth =
+            (enemy.currentHealth - remaining).clamp(0, enemy.maxHealth);
+        GameLogger.info(LogCategory.combat,
+            '${enemy.name} takes $remaining damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
         return;
       }
     }
     // If no shield
-    enemy.currentHealth = (enemy.currentHealth - value).clamp(0, enemy.maxHealth);
-    GameLogger.info(LogCategory.combat, '${enemy.name} takes $value damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
+    enemy.currentHealth =
+        (enemy.currentHealth - value).clamp(0, enemy.maxHealth);
+    GameLogger.info(LogCategory.combat,
+        '${enemy.name} takes $value damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
   }
 
   void playerHeal(int value) {
     if (player.currentHealth != null) {
-      player.currentHealth = (player.currentHealth + value).clamp(0, player.maxHealth);
-      GameLogger.info(LogCategory.combat, 'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+      player.currentHealth =
+          (player.currentHealth + value).clamp(0, player.maxHealth);
+      GameLogger.info(LogCategory.combat,
+          'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
     } else {
       GameLogger.info(LogCategory.combat, 'Player heals for $value');
     }
@@ -362,27 +396,35 @@ class CombatManager {
     if (player.shield > 0) {
       if (player.shield >= value) {
         player.shield -= value;
-        GameLogger.info(LogCategory.combat, '${player.name} loses $value shield. Shield: \\${player.shield}');
+        GameLogger.info(LogCategory.combat,
+            '${player.name} loses $value shield. Shield: \\${player.shield}');
         return;
       } else {
         int remaining = value - player.shield;
-        GameLogger.info(LogCategory.combat, '${player.name} loses \\${player.shield} shield. Shield: 0');
+        GameLogger.info(LogCategory.combat,
+            '${player.name} loses \\${player.shield} shield. Shield: 0');
         player.shield = 0;
-        player.currentHealth = (player.currentHealth - remaining).clamp(0, player.maxHealth);
-        GameLogger.info(LogCategory.combat, '${player.name} takes $remaining damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+        player.currentHealth =
+            (player.currentHealth - remaining).clamp(0, player.maxHealth);
+        GameLogger.info(LogCategory.combat,
+            '${player.name} takes $remaining damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
         return;
       }
     }
     // If no shield
-    player.currentHealth = (player.currentHealth - value).clamp(0, player.maxHealth);
-    GameLogger.info(LogCategory.combat, '${player.name} takes $value damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+    player.currentHealth =
+        (player.currentHealth - value).clamp(0, player.maxHealth);
+    GameLogger.info(LogCategory.combat,
+        '${player.name} takes $value damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
   }
 
   void enemyHeal(int value) {
     // Actually heal the enemy
     if (enemy.currentHealth != null) {
-      enemy.currentHealth = (enemy.currentHealth + value).clamp(0, enemy.maxHealth);
-      GameLogger.info(LogCategory.combat, 'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
+      enemy.currentHealth =
+          (enemy.currentHealth + value).clamp(0, enemy.maxHealth);
+      GameLogger.info(LogCategory.combat,
+          'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
     } else {
       GameLogger.info(LogCategory.combat, 'Enemy heals for $value');
     }
@@ -392,12 +434,14 @@ class CombatManager {
   void applyStatusEffectToPlayer(GameCard card) {
     if (card.statusEffectToApply != null && card.statusDuration != null) {
       player.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat, 'Player is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
+      GameLogger.info(LogCategory.combat,
+          'Player is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
       _notifyWatchers(CombatEvent(
         type: CombatEventType.status,
         target: player,
         value: 0,
-        description: '${enemy.name} applied ${card.statusEffectToApply} to ${player.name} (x${card.statusDuration})',
+        description:
+            '${enemy.name} applied ${card.statusEffectToApply} to ${player.name} (x${card.statusDuration})',
         card: card,
       ));
     }
@@ -406,14 +450,16 @@ class CombatManager {
   void applyStatusEffectToEnemy(GameCard card) {
     if (card.statusEffectToApply != null && card.statusDuration != null) {
       enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat, 'Enemy is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
+      GameLogger.info(LogCategory.combat,
+          'Enemy is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
       _notifyWatchers(CombatEvent(
         type: CombatEventType.status,
         target: enemy,
         value: 0,
-        description: '${enemy.name} applied ${card.statusEffectToApply} to self (x${card.statusDuration})',
+        description:
+            '${enemy.name} applied ${card.statusEffectToApply} to self (x${card.statusDuration})',
         card: card,
       ));
     }
   }
-} 
+}

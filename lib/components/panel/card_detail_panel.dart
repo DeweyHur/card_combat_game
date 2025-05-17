@@ -11,20 +11,24 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
   late TextComponent costText;
   late RectangleComponent background;
 
-  CardDetailPanel({Vector2? position, Vector2? size}) : super(position: position ?? Vector2.zero(), size: size ?? Vector2(180, 120));
+  CardDetailPanel({Vector2? position, Vector2? size})
+      : super(
+            position: position ?? Vector2.zero(),
+            size: size ?? Vector2(180, 120));
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     background = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.black.withOpacity(0.85),
+      paint: Paint()..color = Colors.black.withAlpha(217),
     );
     add(background);
     nameText = TextComponent(
       text: '',
       textRenderer: TextPaint(
-        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+            color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
       ),
       position: Vector2(10, 10),
       anchor: Anchor.topLeft,
@@ -42,7 +46,8 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
     costText = TextComponent(
       text: '',
       textRenderer: TextPaint(
-        style: const TextStyle(color: Colors.orange, fontSize: 14, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+            color: Colors.orange, fontSize: 14, fontWeight: FontWeight.bold),
       ),
       position: Vector2(120, 10),
       anchor: Anchor.topRight,
@@ -83,4 +88,4 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
     valueText.text = '';
     descText.text = 'Deck: $deckCount  |  Discard: $discardCount';
   }
-} 
+}

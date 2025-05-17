@@ -4,12 +4,13 @@ import 'game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 
 /// Loads all cards from CSV and returns a map: owner name -> List<GameCard>
-Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(String assetPath) async {
+Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
+    String assetPath) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
 
   // Assume header: owner,name,description,type,value,cost,statusEffect,statusDuration,color
-  final header = rows.first;
   final dataRows = rows.skip(1);
 
   final Map<String, List<GameCard>> ownerCards = {};
@@ -17,7 +18,8 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(String assetPath) as
   for (final row in dataRows) {
     try {
       if (row.length < 9) {
-        GameLogger.warning(LogCategory.data, 'Skipping malformed card row: $row');
+        GameLogger.warning(
+            LogCategory.data, 'Skipping malformed card row: $row');
         continue;
       }
       final owner = row[0] as String;
@@ -27,7 +29,8 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(String assetPath) as
           (e) => e.toString().split('.').last == row[3],
         );
       } catch (e) {
-        GameLogger.warning(LogCategory.data, 'Unknown card type: \'${row[3]}\' in row: $row');
+        GameLogger.warning(
+            LogCategory.data, 'Unknown card type: \'${row[3]}\' in row: $row');
         continue;
       }
       StatusEffect? statusEffect;
@@ -37,7 +40,8 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(String assetPath) as
             (e) => e.toString().split('.').last == row[6],
           );
         } catch (e) {
-          GameLogger.warning(LogCategory.data, 'Unknown status effect: \'${row[6]}\' in row: $row');
+          GameLogger.warning(LogCategory.data,
+              'Unknown status effect: \'${row[6]}\' in row: $row');
           statusEffect = null;
         }
       }
@@ -48,17 +52,19 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(String assetPath) as
         value: int.tryParse(row[4].toString()) ?? 0,
         cost: int.tryParse(row[5].toString()) ?? 0,
         statusEffectToApply: statusEffect,
-        statusDuration: row[7] != null && row[7].toString().isNotEmpty && row[7] != 'null'
-          ? int.tryParse(row[7].toString())
-          : null,
+        statusDuration:
+            row[7] != null && row[7].toString().isNotEmpty && row[7] != 'null'
+                ? int.tryParse(row[7].toString())
+                : null,
         color: row[8] as String,
       );
       ownerCards.putIfAbsent(owner, () => []);
       ownerCards[owner]!.add(card);
     } catch (e) {
-      GameLogger.warning(LogCategory.data, 'Error parsing card row: $row, error: $e');
+      GameLogger.warning(
+          LogCategory.data, 'Error parsing card row: $row, error: $e');
       continue;
     }
   }
   return ownerCards;
-} 
+}
