@@ -15,6 +15,8 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   EquipmentDetailPanel? _detailPanel;
   EquipmentPanel? _equipmentPanel;
   Map<String, EquipmentData>? _equipmentData;
+  String? _lastEquipmentName;
+  String? _lastPlayerName;
 
   ArmorySceneLayout();
 
@@ -36,22 +38,28 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
       anchor: Anchor.topCenter,
       size: Vector2(size.x, 50),
     );
-    addToVerticalStack(_titleText, 50);
+    registerVerticalStackComponent('titleText', _titleText, 50);
 
     // Player Selection Panel
     final playerSelectionPanel = PlayerSelectionPanel()
       ..size = Vector2(size.x, size.y * 0.18);
-    addToVerticalStack(playerSelectionPanel, size.y * 0.18);
+    registerVerticalStackComponent('playerSelectionPanel', playerSelectionPanel, size.y * 0.18);
 
     // Equipment Panel - fill the rest of the space except for detail and back button (60px)
     _equipmentData = DataController.instance.get<Map<String, EquipmentData>>('equipmentData');
     final equipmentPanelHeight = size.y - 50 - (size.y * 0.18) - 60 - (size.y * 0.3);
     _equipmentPanel = EquipmentPanel(size: Vector2(size.x, equipmentPanelHeight));
-    addToVerticalStack(_equipmentPanel!, equipmentPanelHeight);
+    registerVerticalStackComponent('equipmentPanel', _equipmentPanel!, equipmentPanelHeight);
 
     // Equipment Detail Panel (initially hidden)
-    _detailPanel = null;
-    // Do not add a placeholder; detail panel will be added dynamically
+    _detailPanel = EquipmentDetailPanel(
+      equipment: EquipmentData(
+        name: '', type: '', slot: '', handedness: '', cards: const []),
+      position: Vector2(0, 0),
+      size: Vector2(size.x, size.y * 0.3),
+    );
+    registerVerticalStackComponent('detailPanel', _detailPanel!, size.y * 0.3);
+    hideVerticalStackComponent('detailPanel');
 
     // Back Button
     _backButton = PositionComponent(
@@ -77,11 +85,16 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
           position: Vector2(80, 24),
         ),
       );
-    addToVerticalStack(_backButton, 60);
+    registerVerticalStackComponent('backButton', _backButton, 60);
 
     // Listen for equipment selection changes
     DataController.instance.watch('selectedEquipmentName', (value) {
-      _showDetailPanel(value as String?);
+      _handleEquipmentSelection(value as String?);
+    });
+
+    // Listen for player selection changes
+    DataController.instance.watch('selectedPlayer', (value) {
+      _handlePlayerSelection(value);
     });
 
     _isLoaded = true;
@@ -100,24 +113,24 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
     }
   }
 
-  void _showDetailPanel(String? equipmentName) {
-    // Remove previous detail panel
-    if (_detailPanel != null) {
-      _detailPanel!.removeFromParent();
-      _detailPanel = null;
-    }
-    if (equipmentName == null || equipmentName.isEmpty || _equipmentData == null) {
+  void _handleEquipmentSelection(String? equipmentName) {
+    if (equipmentName == null || equipmentName.isEmpty) {
+      hideVerticalStackComponent('detailPanel');
+      _lastEquipmentName = null;
       return;
     }
+    if (_equipmentData == null) return;
     final eqData = _equipmentData![equipmentName];
     if (eqData == null) return;
-    _detailPanel = EquipmentDetailPanel(
-      equipment: eqData,
-      position: Vector2(0, 0),
-      size: Vector2(size.x, size.y * 0.3),
-      onChange: () {},
-      onUnequip: () {},
-    );
-    addToVerticalStack(_detailPanel!, size.y * 0.3);
+    _detailPanel!.updateEquipment(eqData);
+    showVerticalStackComponent('detailPanel');
+    _lastEquipmentName = equipmentName;
+  }
+
+  void _handlePlayerSelection(dynamic player) {
+    // Hide the detail panel if the player changes
+    hideVerticalStackComponent('detailPanel');
+    _lastEquipmentName = null;
+    _lastPlayerName = player?.name;
   }
 } 

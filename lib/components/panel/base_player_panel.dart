@@ -17,9 +17,9 @@ abstract class BasePlayerPanel extends BasePanel {
     await super.onLoad();
     nameEmojiComponent = NameEmojiComponent(character: player);
     resetVerticalStack();
-    addToVerticalStack(nameEmojiComponent, 60);
+    registerVerticalStackComponent('nameEmoji', nameEmojiComponent, 60);
     statsRow = StatsRow(character: player);
-    addToVerticalStack(statsRow, 20);
+    registerVerticalStackComponent('statsRow', statsRow, 20);
   }
 
   void updatePlayer(GameCharacter newPlayer) {

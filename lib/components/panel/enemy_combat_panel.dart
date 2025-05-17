@@ -18,7 +18,7 @@ class EnemyCombatPanel extends BaseEnemyPanel {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    addToVerticalStack(statusEffectText, 24);
+    registerVerticalStackComponent('statusEffectText', statusEffectText, 24);
     
     // You may want to implement a getNextAction method for GameCharacter
     final action = enemy.deck.isNotEmpty ? enemy.deck.first : null;
@@ -32,7 +32,7 @@ class EnemyCombatPanel extends BaseEnemyPanel {
         ),
       ),
     );
-    addToVerticalStack(actionText!, 20);
+    registerVerticalStackComponent('actionText', actionText!, 20);
   }
   void updateActionWithDescription(String action, String description) {
     if (isLoaded && actionText != null) {

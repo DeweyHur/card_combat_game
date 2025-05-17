@@ -17,7 +17,7 @@ class EnemyDetailPanel extends BaseEnemyPanel {
       style: textStyle,
       maxWidth: size.x,
     );
-    addToVerticalStack(descriptionComponent!, 20);
+    registerVerticalStackComponent('descriptionComponent', descriptionComponent!, 20);
   }
 
   @override

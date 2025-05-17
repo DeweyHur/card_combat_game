@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 
 class EquipmentDetailPanel extends PositionComponent {
-  final EquipmentData equipment;
+  EquipmentData equipment;
   final VoidCallback? onChange;
   final VoidCallback? onUnequip;
 
@@ -15,6 +15,18 @@ class EquipmentDetailPanel extends PositionComponent {
     Vector2? position,
     Vector2? size,
   }) : super(position: position, size: size ?? Vector2(400, 220));
+
+  void updateEquipment(EquipmentData newEquipment) {
+    equipment = newEquipment;
+    // Optionally, trigger a UI update if needed
+    // (e.g., remove all children and call onLoad again, or update text components)
+  }
+
+  String getSlotDisplayName(String slot) {
+    if (slot == 'Accessory 1') return 'Acc 1';
+    if (slot == 'Accessory 2') return 'Acc 2';
+    return slot;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -52,7 +64,7 @@ class EquipmentDetailPanel extends PositionComponent {
     ));
     // Equipment slot
     add(TextComponent(
-      text: 'Slot: ${equipment.slot}',
+      text: 'Slot: ${getSlotDisplayName(equipment.slot)}',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white70,

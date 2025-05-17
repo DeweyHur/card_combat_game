@@ -20,7 +20,7 @@ class PlayerDetailPanel extends BasePlayerPanel {
       style: const TextStyle(color: Colors.white, fontSize: 16),
       maxWidth: size.x,
     );
-    addToVerticalStack(descriptionText, 0);
+    registerVerticalStackComponent('descriptionText', descriptionText, 0);
 
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loading...');
     GameLogger.debug(LogCategory.ui, 'PlayerDetailPanel loaded successfully');

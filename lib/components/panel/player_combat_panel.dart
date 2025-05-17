@@ -27,7 +27,7 @@ class PlayerCombatPanel extends BasePlayerPanel with AreaFillerMixin, ShakeMixin
         style: const TextStyle(color: Colors.purple, fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
-    addToVerticalStack(statusEffectText, 24);
+    registerVerticalStackComponent('statusEffectText', statusEffectText, 24);
     _isLoaded = true;
   }
 

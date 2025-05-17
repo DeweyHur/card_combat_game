@@ -41,7 +41,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     detailPanel = PlayerDetailPanel();
     selectionPanel = PlayerSelectionPanel();
     
-    addToVerticalStack(TextComponent(
+    registerVerticalStackComponent('selectText', TextComponent(
       text: 'Select Your Character',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -52,8 +52,8 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
       ),
       size: Vector2(size.x, 50),
     ), 50);
-    addToVerticalStack(detailPanel, size.y * 0.17);
-    addToVerticalStack(selectionPanel, size.y * 0.2);
+    registerVerticalStackComponent('detailPanel', detailPanel, size.y * 0.17);
+    registerVerticalStackComponent('selectionPanel', selectionPanel, size.y * 0.2);
 
     // Place Back and Start Battle buttons in one line at the bottom
     final buttonY = size.y - 60;
@@ -110,7 +110,7 @@ class PlayerSelectionLayout extends PositionComponent with HasGameRef, TapCallba
     add(battleButton);
 
     enemyPanel = EnemyDetailPanel();
-    addToVerticalStack(enemyPanel, size.y * 0.45);
+    registerVerticalStackComponent('enemyPanel', enemyPanel, size.y * 0.45);
 
     GameLogger.debug(LogCategory.game, 'PlayerSelectionLayout loaded successfully');
   }

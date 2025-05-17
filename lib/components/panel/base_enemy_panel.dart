@@ -31,14 +31,14 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
       enemySprite = SpriteComponent(
         sprite: sprite,
       );
-      addToVerticalStack(enemySprite!, 200);
+      registerVerticalStackComponent('enemySprite', enemySprite!, 200);
     } catch (e) {
       GameLogger.error(LogCategory.ui, 'Failed to load enemy sprite: $e');
     }
     nameEmojiComponent = NameEmojiComponent(character: enemy);
-    addToVerticalStack(nameEmojiComponent, 60);
+    registerVerticalStackComponent('nameEmoji', nameEmojiComponent, 60);
     statsRow = StatsRow(character: enemy);
-    addToVerticalStack(statsRow, 20);
+    registerVerticalStackComponent('statsRow', statsRow, 20);
     DataController.instance.watch('selectedEnemy', (value) {
       if (value is GameCharacter) {
         updateEnemy(value);
@@ -56,7 +56,7 @@ abstract class BaseEnemyPanel extends BasePanel with HasGameRef, AreaFillerMixin
       size: Vector2(280, 2),
       paint: Paint()..color = Colors.white.withOpacity(0.5),
     );
-    addToVerticalStack(separatorLine!, 2);
+    registerVerticalStackComponent('separatorLine', separatorLine!, 2);
     _isLoaded = true;
     GameLogger.debug(LogCategory.ui, 'BaseEnemyPanel loaded successfully');
   }

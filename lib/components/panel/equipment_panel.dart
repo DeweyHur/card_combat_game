@@ -95,6 +95,12 @@ class EquipmentPanel extends BasePanel {
     }
   }
 
+  String getSlotDisplayName(String slot) {
+    if (slot == 'Accessory 1') return 'Acc 1';
+    if (slot == 'Accessory 2') return 'Acc 2';
+    return slot;
+  }
+
   PositionComponent _buildSlot(String label, Vector2 position, Vector2 size) {
     final slot = _TappableSlot(
       label: label,
@@ -131,7 +137,7 @@ class EquipmentPanel extends BasePanel {
     );
     slot.add(
       TextComponent(
-        text: label,
+        text: getSlotDisplayName(label),
         textRenderer: TextPaint(
           style: const TextStyle(
             color: Colors.white,

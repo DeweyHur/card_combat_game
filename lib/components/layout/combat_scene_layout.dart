@@ -99,11 +99,11 @@ class CombatSceneLayout extends PositionComponent with HasGameRef, VerticalStack
 
     // Add panels to the scene using vertical stack
     resetVerticalStack();
-    addToVerticalStack(panels[2], size.y * 0.4); // Enemy panel (top)
-    addToVerticalStack(turnText, 40);
-    addToVerticalStack(panels[0], size.y * 0.3); // Cards panel (middle)
-    addToVerticalStack(gameMessageText, 40);
-    addToVerticalStack(panels[1], size.y * 0.15); // Player panel (bottom)
+    registerVerticalStackComponent('enemyPanel', panels[2], size.y * 0.4); // Enemy panel (top)
+    registerVerticalStackComponent('turnText', turnText, 40);
+    registerVerticalStackComponent('cardsPanel', panels[0], size.y * 0.3); // Cards panel (middle)
+    registerVerticalStackComponent('gameMessageText', gameMessageText, 40);
+    registerVerticalStackComponent('playerPanel', panels[1], size.y * 0.15); // Player panel (bottom)
 
     // Add text components
 

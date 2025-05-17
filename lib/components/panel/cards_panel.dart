@@ -45,7 +45,7 @@ class CardsPanel extends BasePanel {
     await super.onLoad();
     // Add text components using vertical stack
     resetVerticalStack();
-    addToVerticalStack(cardAreaText, 40);
+    registerVerticalStackComponent('cardAreaText', cardAreaText, 40);
     // Show the player's hand as cards
     _showHand();
     // Add Play button (not attached by default)
