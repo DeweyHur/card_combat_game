@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
+import 'dart:async';
 import '../managers/dialogue_manager.dart';
 import '../managers/sound_manager.dart';
 import '../components/nintendo_message_box.dart';
@@ -23,11 +24,19 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
   double _playerX = 150;
   double _playerY = 150;
   final double _playerSize = 32;
-  final double _moveSpeed = 5;
+  final double _moveSpeed = 3.0;
   
-  // Map boundaries
-  final double _mapWidth = 800;
-  final double _mapHeight = 500;
+  // Map boundaries - adjusted for mobile
+  late double _mapWidth;
+  late double _mapHeight;
+  
+  // Movement control
+  bool _isMovingUp = false;
+  bool _isMovingDown = false;
+  bool _isMovingLeft = false;
+  bool _isMovingRight = false;
+  Timer? _movementTimer;
+  bool _showMovementControls = false;
   
   // Landmarks
   final List<MapLandmark> _landmarks = [
@@ -35,42 +44,42 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
       name: "Borobudur Temple",
       x: 200,
       y: 150,
-      icon: Icons.church,
+      type: LandmarkType.temple,
       color: Colors.brown,
     ),
     MapLandmark(
       name: "Mount Bromo",
       x: 300,
       y: 180,
-      icon: Icons.landscape,
+      type: LandmarkType.mountain,
       color: Colors.grey,
     ),
     MapLandmark(
       name: "Bali Beach",
       x: 400,
       y: 250,
-      icon: Icons.beach_access,
+      type: LandmarkType.beach,
       color: Colors.blue,
     ),
     MapLandmark(
       name: "Komodo Island",
       x: 500,
       y: 280,
-      icon: Icons.pets,
+      type: LandmarkType.island,
       color: Colors.green,
     ),
     MapLandmark(
       name: "Raja Ampat",
       x: 600,
       y: 150,
-      icon: Icons.water,
+      type: LandmarkType.beach,
       color: Colors.cyan,
     ),
   ];
   
-  // Battle crystal position
-  final double _crystalX = 700;
-  final double _crystalY = 400;
+  // Battle crystal position - now relative to player
+  late double _crystalX;
+  late double _crystalY;
   final double _crystalSize = 40;
   
   // Animation
@@ -83,13 +92,51 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeGame();
+    _startMovementTimer();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _isAnimating = false;
+    _movementTimer?.cancel();
     super.dispose();
+  }
+
+  void _startMovementTimer() {
+    _movementTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (_isMovingUp || _isMovingDown || _isMovingLeft || _isMovingRight) {
+        _updatePlayerPosition();
+      }
+    });
+  }
+
+  void _updatePlayerPosition() {
+    setState(() {
+      if (_isMovingLeft) {
+        _playerX = (_playerX - _moveSpeed).clamp(0, _mapWidth - _playerSize);
+      }
+      if (_isMovingRight) {
+        _playerX = (_playerX + _moveSpeed).clamp(0, _mapWidth - _playerSize);
+      }
+      if (_isMovingUp) {
+        _playerY = (_playerY - _moveSpeed).clamp(0, _mapHeight - _playerSize);
+      }
+      if (_isMovingDown) {
+        _playerY = (_playerY + _moveSpeed).clamp(0, _mapHeight - _playerSize);
+      }
+
+      // Check if player reached the crystal
+      if (_showBattleArea) {
+        final double dx = _playerX - _crystalX;
+        final double dy = _playerY - _crystalY;
+        final double distance = sqrt(dx * dx + dy * dy);
+        
+        if (distance < (_playerSize + _crystalSize) / 2) {
+          Navigator.pushReplacementNamed(context, '/battle');
+        }
+      }
+    });
   }
 
   @override
@@ -159,44 +206,315 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
       setState(() {
         _showDialogue = false;
         _showBattleArea = true;
+        // Position crystal near player when dialogue ends
+        _crystalX = _playerX + 100;
+        _crystalY = _playerY;
       });
     }
   }
 
-  void _handleKeyPress(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      setState(() {
-        switch (event.logicalKey) {
-          case LogicalKeyboardKey.arrowLeft:
-            _playerX = (_playerX - _moveSpeed).clamp(0, _mapWidth - _playerSize);
-            break;
-          case LogicalKeyboardKey.arrowRight:
-            _playerX = (_playerX + _moveSpeed).clamp(0, _mapWidth - _playerSize);
-            break;
-          case LogicalKeyboardKey.arrowUp:
-            _playerY = (_playerY - _moveSpeed).clamp(0, _mapHeight - _playerSize);
-            break;
-          case LogicalKeyboardKey.arrowDown:
-            _playerY = (_playerY + _moveSpeed).clamp(0, _mapHeight - _playerSize);
-            break;
-        }
-        
-        // Check if player reached the crystal
-        if (_showBattleArea) {
-          final double dx = _playerX - _crystalX;
-          final double dy = _playerY - _crystalY;
-          final double distance = sqrt(dx * dx + dy * dy);
-          
-          if (distance < (_playerSize + _crystalSize) / 2) {
-            Navigator.pushReplacementNamed(context, '/battle');
-          }
-        }
-      });
-    }
+  Widget _buildDirectionalPad() {
+    final buttonSize = 60.0;
+    final padSize = 180.0;
+    final buttonSpacing = (padSize - buttonSize * 2) / 3;
+
+    return Positioned(
+      left: 20,
+      bottom: 20,
+      child: Container(
+        width: padSize,
+        height: padSize,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(padSize / 2),
+        ),
+        child: Stack(
+          children: [
+            // Up button
+            Positioned(
+              top: buttonSpacing,
+              left: buttonSize + buttonSpacing,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingUp = true),
+                onTapUp: (_) => setState(() => _isMovingUp = false),
+                onTapCancel: () => setState(() => _isMovingUp = false),
+                child: Container(
+                  width: buttonSize,
+                  height: buttonSize,
+                  decoration: BoxDecoration(
+                    color: _isMovingUp ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_upward, color: Colors.white, size: 30),
+                ),
+              ),
+            ),
+            // Down button
+            Positioned(
+              bottom: buttonSpacing,
+              left: buttonSize + buttonSpacing,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingDown = true),
+                onTapUp: (_) => setState(() => _isMovingDown = false),
+                onTapCancel: () => setState(() => _isMovingDown = false),
+                child: Container(
+                  width: buttonSize,
+                  height: buttonSize,
+                  decoration: BoxDecoration(
+                    color: _isMovingDown ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_downward, color: Colors.white, size: 30),
+                ),
+              ),
+            ),
+            // Left button
+            Positioned(
+              left: buttonSpacing,
+              top: buttonSize + buttonSpacing,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingLeft = true),
+                onTapUp: (_) => setState(() => _isMovingLeft = false),
+                onTapCancel: () => setState(() => _isMovingLeft = false),
+                child: Container(
+                  width: buttonSize,
+                  height: buttonSize,
+                  decoration: BoxDecoration(
+                    color: _isMovingLeft ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                ),
+              ),
+            ),
+            // Right button
+            Positioned(
+              right: buttonSpacing,
+              top: buttonSize + buttonSpacing,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingRight = true),
+                onTapUp: (_) => setState(() => _isMovingRight = false),
+                onTapCancel: () => setState(() => _isMovingRight = false),
+                child: Container(
+                  width: buttonSize,
+                  height: buttonSize,
+                  decoration: BoxDecoration(
+                    color: _isMovingRight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_forward, color: Colors.white, size: 30),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLandmark(MapLandmark landmark) {
+    return CustomPaint(
+      size: const Size(32, 32),
+      painter: LandmarkPainter(
+        type: landmark.type,
+        color: landmark.color,
+      ),
+    );
+  }
+
+  Widget _buildMovementButton() {
+    return Positioned(
+      right: 20,
+      bottom: 20,
+      child: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _showMovementControls = !_showMovementControls;
+          });
+        },
+        backgroundColor: Colors.black.withOpacity(0.7),
+        child: Icon(
+          _showMovementControls ? Icons.close : Icons.directions,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBattleIndicator() {
+    if (!_showBattleArea) return const SizedBox.shrink();
+
+    final double dx = _playerX - _crystalX;
+    final double dy = _playerY - _crystalY;
+    final double distance = sqrt(dx * dx + dy * dy);
+    final bool isNear = distance < 200; // Show indicator when within 200 pixels
+
+    if (!isNear) return const SizedBox.shrink();
+
+    return Positioned(
+      left: _crystalX - 20,
+      top: _crystalY - 40,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.warning, color: Colors.white, size: 16),
+            SizedBox(width: 4),
+            Text(
+              'Battle!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontFamily: 'PressStart2P',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMovementControls() {
+    if (!_showMovementControls) return const SizedBox.shrink();
+
+    return Positioned(
+      right: 20,
+      bottom: 100,
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(60),
+        ),
+        child: Stack(
+          children: [
+            // Up button
+            Positioned(
+              top: 0,
+              left: 40,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingUp = true),
+                onTapUp: (_) => setState(() => _isMovingUp = false),
+                onTapCancel: () => setState(() => _isMovingUp = false),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isMovingUp ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_upward, color: Colors.white),
+                ),
+              ),
+            ),
+            // Down button
+            Positioned(
+              bottom: 0,
+              left: 40,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingDown = true),
+                onTapUp: (_) => setState(() => _isMovingDown = false),
+                onTapCancel: () => setState(() => _isMovingDown = false),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isMovingDown ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_downward, color: Colors.white),
+                ),
+              ),
+            ),
+            // Left button
+            Positioned(
+              left: 0,
+              top: 40,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingLeft = true),
+                onTapUp: (_) => setState(() => _isMovingLeft = false),
+                onTapCancel: () => setState(() => _isMovingLeft = false),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isMovingLeft ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      bottomLeft: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+              ),
+            ),
+            // Right button
+            Positioned(
+              right: 0,
+              top: 40,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (_) => setState(() => _isMovingRight = true),
+                onTapUp: (_) => setState(() => _isMovingRight = false),
+                onTapCancel: () => setState(() => _isMovingRight = false),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _isMovingRight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_forward, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get screen size for mobile layout
+    final screenSize = MediaQuery.of(context).size;
+    _mapWidth = screenSize.width;
+    _mapHeight = screenSize.height;
+
     if (!_isInitialized) {
       return const Scaffold(
         body: Center(
@@ -205,230 +523,203 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
       );
     }
 
-    return RawKeyboardListener(
-      focusNode: FocusNode(),
-      autofocus: true,
-      onKey: _handleKeyPress,
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            color: Colors.lightBlue,
-          ),
-          child: Stack(
-            children: [
-              // Map background
-              Center(
-                child: Container(
-                  width: _mapWidth,
-                  height: _mapHeight,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade700,
-                    border: Border.all(color: Colors.brown, width: 4),
-                    borderRadius: BorderRadius.circular(8),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.lightBlue,
+        ),
+        child: Stack(
+          children: [
+            // Map background
+            Container(
+              width: _mapWidth,
+              height: _mapHeight,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade700,
+                border: Border.all(color: Colors.brown, width: 4),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  // Sumatra Island
+                  Positioned(
+                    left: _mapWidth * 0.1,
+                    top: _mapHeight * 0.2,
+                    child: CustomPaint(
+                      size: Size(_mapWidth * 0.3, _mapHeight * 0.6),
+                      painter: IslandPainter(
+                        color: Colors.green.shade800,
+                        points: [
+                          Offset(0, _mapHeight * 0.2),
+                          Offset(_mapWidth * 0.1, _mapHeight * 0.1),
+                          Offset(_mapWidth * 0.25, _mapHeight * 0.05),
+                          Offset(_mapWidth * 0.3, _mapHeight * 0.15),
+                          Offset(_mapWidth * 0.25, _mapHeight * 0.4),
+                          Offset(_mapWidth * 0.15, _mapHeight * 0.5),
+                          Offset(_mapWidth * 0.05, _mapHeight * 0.4),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      // Sumatra Island
-                      Positioned(
-                        left: 50,
-                        top: 100,
-                        child: CustomPaint(
-                          size: const Size(200, 300),
-                          painter: IslandPainter(
-                            color: Colors.green.shade800,
-                            points: [
-                              const Offset(0, 100),
-                              const Offset(50, 50),
-                              const Offset(150, 30),
-                              const Offset(200, 80),
-                              const Offset(180, 200),
-                              const Offset(100, 250),
-                              const Offset(20, 200),
-                            ],
-                          ),
-                        ),
+                  // Java Island
+                  Positioned(
+                    left: _mapWidth * 0.4,
+                    top: _mapHeight * 0.3,
+                    child: CustomPaint(
+                      size: Size(_mapWidth * 0.25, _mapHeight * 0.2),
+                      painter: IslandPainter(
+                        color: Colors.green.shade800,
+                        points: [
+                          Offset(0, _mapHeight * 0.1),
+                          Offset(_mapWidth * 0.1, _mapHeight * 0.05),
+                          Offset(_mapWidth * 0.25, _mapHeight * 0.1),
+                          Offset(_mapWidth * 0.2, _mapHeight * 0.2),
+                          Offset(_mapWidth * 0.15, _mapHeight * 0.25),
+                          Offset(_mapWidth * 0.05, _mapHeight * 0.2),
+                        ],
                       ),
-                      // Java Island
-                      Positioned(
-                        left: 250,
-                        top: 150,
-                        child: CustomPaint(
-                          size: const Size(150, 100),
-                          painter: IslandPainter(
-                            color: Colors.green.shade800,
-                            points: [
-                              const Offset(0, 50),
-                              const Offset(50, 20),
-                              const Offset(150, 40),
-                              const Offset(140, 80),
-                              const Offset(80, 100),
-                              const Offset(20, 80),
-                            ],
-                          ),
-                        ),
+                    ),
+                  ),
+                  // Bali and Nusa Tenggara
+                  Positioned(
+                    left: _mapWidth * 0.6,
+                    top: _mapHeight * 0.4,
+                    child: CustomPaint(
+                      size: Size(_mapWidth * 0.2, _mapHeight * 0.3),
+                      painter: IslandPainter(
+                        color: Colors.green.shade800,
+                        points: [
+                          Offset(0, _mapHeight * 0.1),
+                          Offset(_mapWidth * 0.05, _mapHeight * 0.05),
+                          Offset(_mapWidth * 0.15, _mapHeight * 0.05),
+                          Offset(_mapWidth * 0.2, _mapHeight * 0.15),
+                          Offset(_mapWidth * 0.15, _mapHeight * 0.3),
+                          Offset(_mapWidth * 0.05, _mapHeight * 0.25),
+                        ],
                       ),
-                      // Bali and Nusa Tenggara
-                      Positioned(
-                        left: 400,
-                        top: 200,
-                        child: CustomPaint(
-                          size: const Size(100, 150),
-                          painter: IslandPainter(
-                            color: Colors.green.shade800,
-                            points: [
-                              const Offset(0, 50),
-                              const Offset(30, 20),
-                              const Offset(80, 30),
-                              const Offset(100, 80),
-                              const Offset(70, 150),
-                              const Offset(20, 120),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Sulawesi
-                      Positioned(
-                        left: 500,
-                        top: 100,
-                        child: CustomPaint(
-                          size: const Size(200, 200),
-                          painter: IslandPainter(
-                            color: Colors.green.shade800,
-                            points: [
-                              const Offset(50, 0),
-                              const Offset(100, 50),
-                              const Offset(150, 30),
-                              const Offset(200, 80),
-                              const Offset(180, 150),
-                              const Offset(100, 200),
-                              const Offset(50, 150),
-                              const Offset(0, 100),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Papua
-                      Positioned(
-                        left: 650,
-                        top: 50,
-                        child: CustomPaint(
-                          size: const Size(100, 300),
-                          painter: IslandPainter(
-                            color: Colors.green.shade800,
-                            points: [
-                              const Offset(0, 50),
-                              const Offset(50, 0),
-                              const Offset(100, 50),
-                              const Offset(90, 200),
-                              const Offset(50, 300),
-                              const Offset(10, 250),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Draw landmarks
-                      ..._landmarks.map((landmark) => Positioned(
-                        left: landmark.x - 20,
-                        top: landmark.y - 20,
-                        child: Container(
-                          width: 40,
-                          height: 40,
+                    ),
+                  ),
+                  // Draw landmarks
+                  ..._landmarks.map((landmark) => Positioned(
+                    left: landmark.x * (_mapWidth / 800),
+                    top: landmark.y * (_mapHeight / 500),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildLandmark(landmark),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: landmark.color.withOpacity(0.8),
-                            border: Border.all(color: Colors.white, width: 2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              landmark.icon,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      )),
-                      // Battle crystal
-                      if (_showBattleArea)
-                        Positioned(
-                          left: _crystalX - _crystalSize / 2,
-                          top: _crystalY - _crystalSize / 2,
-                          child: Container(
-                            width: _crystalSize,
-                            height: _crystalSize,
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withOpacity(0.7 + _crystalGlow * 0.3),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.8 + _crystalGlow * 0.2),
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.diamond,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                      // Player
-                      Positioned(
-                        left: _playerX - _playerSize / 2,
-                        top: _playerY - _playerSize / 2,
-                        child: Container(
-                          width: _playerSize,
-                          height: _playerSize,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            border: Border.all(color: Colors.white, width: 2),
+                            color: Colors.black.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.person,
+                          child: Text(
+                            landmark.name,
+                            style: const TextStyle(
                               color: Colors.white,
-                              size: 20,
+                              fontSize: 12,
+                              fontFamily: 'PressStart2P',
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  )),
+                  // Battle crystal
+                  if (_showBattleArea)
+                    Positioned(
+                      left: _crystalX - _crystalSize / 2,
+                      top: _crystalY - _crystalSize / 2,
+                      child: Container(
+                        width: _crystalSize,
+                        height: _crystalSize,
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.7 + _crystalGlow * 0.3),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.8 + _crystalGlow * 0.2),
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.diamond,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                       ),
-                    ],
+                    ),
+                  // Player
+                  Positioned(
+                    left: _playerX - _playerSize / 2,
+                    top: _playerY - _playerSize / 2,
+                    child: Container(
+                      width: _playerSize,
+                      height: _playerSize,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        border: Border.all(color: Colors.white, width: 2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
+                  // Battle indicator
+                  _buildBattleIndicator(),
+                ],
+              ),
+            ),
+            // Movement controls
+            if (!_showDialogue) ...[
+              _buildMovementButton(),
+              _buildMovementControls(),
+            ],
+            // Dialogue box
+            if (_showDialogue)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: NintendoMessageBox(
+                  character: _dialogueManager.getCurrentEntry()?.character ?? '',
+                  message: _dialogueManager.getCurrentEntry()?.message ?? '',
+                  onNext: _handleNextDialogue,
                 ),
               ),
-              // Dialogue box
-              if (_showDialogue)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: NintendoMessageBox(
-                    character: _dialogueManager.getCurrentEntry()?.character ?? '',
-                    message: _dialogueManager.getCurrentEntry()?.message ?? '',
-                    onNext: _handleNextDialogue,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
+enum LandmarkType {
+  temple,
+  mountain,
+  beach,
+  island,
+}
+
 class MapLandmark {
   final String name;
   final double x;
   final double y;
-  final IconData icon;
+  final LandmarkType type;
   final Color color;
 
   MapLandmark({
     required this.name,
     required this.x,
     required this.y,
-    required this.icon,
+    required this.type,
     required this.color,
   });
 }
@@ -472,6 +763,152 @@ class IslandPainter extends CustomPainter {
       ..strokeWidth = 2;
     
     canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class LandmarkPainter extends CustomPainter {
+  final LandmarkType type;
+  final Color color;
+
+  LandmarkPainter({
+    required this.type,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    switch (type) {
+      case LandmarkType.temple:
+        _drawTemple(canvas, size, paint, borderPaint);
+        break;
+      case LandmarkType.mountain:
+        _drawMountain(canvas, size, paint, borderPaint);
+        break;
+      case LandmarkType.beach:
+        _drawBeach(canvas, size, paint, borderPaint);
+        break;
+      case LandmarkType.island:
+        _drawIsland(canvas, size, paint, borderPaint);
+        break;
+    }
+  }
+
+  void _drawTemple(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
+    // Base
+    canvas.drawRect(
+      Rect.fromLTWH(8, 24, 16, 8),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(8, 24, 16, 8),
+      borderPaint,
+    );
+
+    // Middle
+    canvas.drawRect(
+      Rect.fromLTWH(12, 16, 8, 8),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(12, 16, 8, 8),
+      borderPaint,
+    );
+
+    // Top
+    canvas.drawRect(
+      Rect.fromLTWH(14, 8, 4, 8),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(14, 8, 4, 8),
+      borderPaint,
+    );
+  }
+
+  void _drawMountain(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
+    final path = Path();
+    path.moveTo(16, 8);  // Top
+    path.lineTo(8, 24);  // Bottom left
+    path.lineTo(24, 24); // Bottom right
+    path.close();
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
+  }
+
+  void _drawBeach(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
+    // Water
+    canvas.drawRect(
+      Rect.fromLTWH(8, 8, 16, 16),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(8, 8, 16, 16),
+      borderPaint,
+    );
+
+    // Sand
+    final sandPaint = Paint()
+      ..color = Colors.yellow.shade700
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawRect(
+      Rect.fromLTWH(8, 20, 16, 12),
+      sandPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(8, 20, 16, 12),
+      borderPaint,
+    );
+  }
+
+  void _drawIsland(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
+    // Island base
+    canvas.drawRect(
+      Rect.fromLTWH(8, 16, 16, 16),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(8, 16, 16, 16),
+      borderPaint,
+    );
+
+    // Palm tree
+    final treePaint = Paint()
+      ..color = Colors.green.shade800
+      ..style = PaintingStyle.fill;
+
+    // Trunk
+    canvas.drawRect(
+      Rect.fromLTWH(14, 8, 4, 8),
+      treePaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(14, 8, 4, 8),
+      borderPaint,
+    );
+
+    // Leaves
+    canvas.drawRect(
+      Rect.fromLTWH(10, 4, 12, 4),
+      treePaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(10, 4, 12, 4),
+      borderPaint,
+    );
   }
 
   @override
