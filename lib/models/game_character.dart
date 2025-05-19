@@ -4,7 +4,6 @@ import 'package:card_combat_app/utils/game_logger.dart';
 class GameCharacter {
   final String name;
   final int maxHealth;
-  int currentHealth;
   final int attack;
   final int defense;
   final String emoji;
@@ -13,18 +12,68 @@ class GameCharacter {
   final String soundPath;
   final String description;
   final List<GameCard> deck;
-
   final int maxEnergy;
-  int currentEnergy;
+  int handSize;
+
+  // --- Property Watchers ---
+  final Map<String, List<Function(dynamic)>> _propertyWatchers = {};
+
+  // --- Property Getters/Setters with Notification ---
+  int _currentHealth;
+  int get currentHealth => _currentHealth;
+  set currentHealth(int value) {
+    if (_currentHealth != value) {
+      _currentHealth = value;
+      _notify('currentHealth', value);
+    }
+  }
+
+  int _currentEnergy;
+  int get currentEnergy => _currentEnergy;
+  set currentEnergy(int value) {
+    if (_currentEnergy != value) {
+      _currentEnergy = value;
+      _notify('currentEnergy', value);
+    }
+  }
+
+  int _shield = 0;
+  int get shield => _shield;
+  set shield(int value) {
+    if (_shield != value) {
+      _shield = value;
+      _notify('shield', value);
+    }
+  }
+
+  // --- Equipment (reactive) ---
+  Map<String, String> _equipment = {};
+  Map<String, String> get equipment => Map.unmodifiable(_equipment);
+  set equipment(Map<String, String> value) {
+    _equipment = Map.from(value);
+    _notify('equipment', equipment);
+  }
+
+  /// Equip an item to a slot (notifies both 'equipment' and 'equipment:<slot>')
+  void equip(String slot, String itemName) {
+    _equipment[slot] = itemName;
+    _notify('equipment', equipment);
+    _notify('equipment:$slot', itemName);
+  }
+
+  /// Unequip an item from a slot (notifies both 'equipment' and 'equipment:<slot>')
+  void unequip(String slot) {
+    if (_equipment.containsKey(slot)) {
+      _equipment.remove(slot);
+      _notify('equipment', equipment);
+      _notify('equipment:$slot', null);
+    }
+  }
 
   // Mutable combat state
   Map<StatusEffect, int> statusEffects = {};
-
   List<GameCard> hand = [];
-  int handSize;
   List<GameCard> discardPile = [];
-
-  int shield = 0;
 
   GameCharacter({
     required this.name,
@@ -39,8 +88,25 @@ class GameCharacter {
     required this.deck,
     this.maxEnergy = 3,
     this.handSize = 5,
-  })  : currentHealth = maxHealth,
-        currentEnergy = maxEnergy;
+  })  : _currentHealth = maxHealth,
+        _currentEnergy = maxEnergy;
+
+  // --- Watch/Unwatch/Notify ---
+  void watch(String property, Function(dynamic) callback) {
+    _propertyWatchers.putIfAbsent(property, () => []).add(callback);
+  }
+
+  void unwatch(String property, Function(dynamic) callback) {
+    _propertyWatchers[property]?.remove(callback);
+  }
+
+  void _notify(String property, dynamic value) {
+    if (_propertyWatchers.containsKey(property)) {
+      for (final cb in _propertyWatchers[property]!) {
+        cb(value);
+      }
+    }
+  }
 
   void addStatusEffect(StatusEffect effect, int amount) {
     if (effect == StatusEffect.none) return;
@@ -171,6 +237,7 @@ class GameCharacter {
         'deck': deck.map((c) => c.toJson()).toList(),
         'maxEnergy': maxEnergy,
         'handSize': handSize,
+        'equipment': _equipment,
       };
 
   static GameCharacter fromJson(Map<String, dynamic> json) => GameCharacter(
@@ -186,5 +253,7 @@ class GameCharacter {
         deck: (json['deck'] as List).map((c) => GameCard.fromJson(c)).toList(),
         maxEnergy: json['maxEnergy'] ?? 3,
         handSize: json['handSize'] ?? 5,
-      );
+      )..equipment = (json['equipment'] != null)
+          ? Map<String, String>.from(json['equipment'])
+          : {};
 }

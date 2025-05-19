@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/equipment_loader.dart';
 
 class DataController {
   static final DataController instance = DataController._();
@@ -18,7 +21,7 @@ class DataController {
   void set<T>(String key, T value) {
     final oldValue = _data[key];
     _data[key] = value;
-    
+
     // Notify watchers
     if (_watchers.containsKey(key)) {
       for (final watcher in _watchers[key]!) {
@@ -31,7 +34,29 @@ class DataController {
       _streamControllers[key]!.add(value);
     }
 
-    GameLogger.debug(LogCategory.data, 'Data updated: $key = $value (was: $oldValue)');
+    String serialize(dynamic v) {
+      if (v == null) return 'null';
+      if (v is List) {
+        return jsonEncode(v.map((e) {
+          if (e is GameCharacter) return e.toJson();
+          if (e is EquipmentData) return e.toJson();
+          return e;
+        }).toList());
+      }
+      if (v is Map) {
+        return jsonEncode(v.map((key, value) {
+          if (value is GameCharacter) return MapEntry(key, value.toJson());
+          if (value is EquipmentData) return MapEntry(key, value.toJson());
+          return MapEntry(key, value);
+        }));
+      }
+      if (v is GameCharacter) return v.toJson().toString();
+      if (v is EquipmentData) return v.toJson().toString();
+      return v.toString();
+    }
+
+    GameLogger.debug(LogCategory.data,
+        'Data updated: $key = ${serialize(value)} (was: ${serialize(oldValue)})');
   }
 
   // Watch a key for changes
@@ -40,7 +65,7 @@ class DataController {
       _watchers[key] = [];
     }
     _watchers[key]!.add(callback);
-    
+
     // Immediately call with current value if it exists
     if (_data.containsKey(key)) {
       callback(_data[key]);
@@ -100,4 +125,16 @@ class DataController {
   void dispose() {
     clear();
   }
-} 
+
+  void updatePlayersCsvField(int rowIndex, int colIndex, dynamic value) {
+    final playersCsv = get<List<List<dynamic>>>('playersCsv');
+    if (playersCsv == null || rowIndex < 0 || rowIndex >= playersCsv.length) {
+      return;
+    }
+    final oldValue = playersCsv[rowIndex][colIndex];
+    playersCsv[rowIndex][colIndex] = value;
+    set<List<List<dynamic>>>('playersCsv', playersCsv);
+    GameLogger.debug(LogCategory.data,
+        'playersCsv[[38;5;214m$rowIndex[0m][[38;5;214m$colIndex[0m] updated: $oldValue -> $value');
+  }
+}

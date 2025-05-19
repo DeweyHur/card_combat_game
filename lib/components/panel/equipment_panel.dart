@@ -5,6 +5,7 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:flame/events.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -22,24 +23,36 @@ class EquipmentPanel extends BasePanel {
 
   Map<String, PositionComponent> slotComponents = {};
   GameCharacter? currentPlayer;
+  VoidCallback? _equipmentUnwatch;
   Map<String, EquipmentData>? equipmentData;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Get equipment data from DataController
     equipmentData = DataController.instance
         .get<Map<String, EquipmentData>>('equipmentData');
     // Listen for player changes
     DataController.instance.watch('selectedPlayer', (value) {
       if (value is GameCharacter) {
+        // Unwatch previous player
+        _equipmentUnwatch?.call();
         currentPlayer = value;
+        // Watch new player's equipment
+        currentPlayer!.watch('equipment', (_) => updateUI());
+        // Store unwatch callback
+        _equipmentUnwatch =
+            () => currentPlayer!.unwatch('equipment', (_) => updateUI());
         updateUI();
       }
     });
     // Set initial player
     currentPlayer =
         DataController.instance.get<GameCharacter>('selectedPlayer');
+    if (currentPlayer != null) {
+      currentPlayer!.watch('equipment', (_) => updateUI());
+      _equipmentUnwatch =
+          () => currentPlayer!.unwatch('equipment', (_) => updateUI());
+    }
     _buildSlots();
     updateUI();
   }
@@ -149,7 +162,7 @@ class EquipmentPanel extends BasePanel {
       onTap: () {
         final eqName = _getEquipmentNameForSlot(label);
         // Enhanced logging
-        debugPrint(
+        GameLogger.info(LogCategory.ui,
             '[EQUIP_PANEL] Slot tapped: $label, Equipment: ${eqName ?? 'empty'}');
         if (eqName != null) {
           DataController.instance.set<String>('selectedEquipmentName', eqName);
@@ -200,61 +213,17 @@ class EquipmentPanel extends BasePanel {
     // Clear all slot labels and reset backgrounds
     for (final slot in slotComponents.values) {
       slot.children.removeWhere((c) => c is TextComponent && c.priority == 1);
-      // Reset background color
       final bg = slot.children.whereType<RectangleComponent>().firstOrNull;
       if (bg != null) {
         bg.paint.color = Colors.grey.withAlpha(102);
       }
     }
     if (currentPlayer == null) return;
-    // Get equipment list from player (parse from description or add a field if needed)
-    final playerCsv =
-        DataController.instance.get<List<List<dynamic>>>('playersCsv');
-    String? equipmentStr;
-    if (playerCsv != null) {
-      for (final row in playerCsv) {
-        if (row.isNotEmpty && row[0] == currentPlayer!.name) {
-          if (row.length > 10) {
-            equipmentStr = row[10] as String;
-          }
-          break;
-        }
-      }
-    }
-    if (equipmentStr == null) return;
-    final equipmentList = equipmentStr
-        .split('|')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-    // Map slot name to equipment
-    final Map<String, String> slotToEquipment = {};
-    if (equipmentData != null) {
-      for (final eqName in equipmentList) {
-        final eq = equipmentData![eqName];
-        if (eq != null) {
-          String slotKey =
-              _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-          if (slotToEquipment.containsKey(slotKey)) {
-            if (slotKey.startsWith('Accessory')) {
-              for (final acc in accessorySlots) {
-                if (!slotToEquipment.containsKey(acc)) {
-                  slotToEquipment[acc] = eqName;
-                  break;
-                }
-              }
-            }
-            continue;
-          }
-          slotToEquipment[slotKey] = eqName;
-        }
-      }
-    }
+    final slotToEquipment = currentPlayer!.equipment;
     // Add equipment names to slots and highlight
     slotToEquipment.forEach((slot, eqName) {
       final slotComp = slotComponents[slot];
       if (slotComp != null) {
-        // Highlight background
         final bg =
             slotComp.children.whereType<RectangleComponent>().firstOrNull;
         if (bg != null) {
@@ -272,104 +241,16 @@ class EquipmentPanel extends BasePanel {
             ),
             anchor: Anchor.center,
             position: Vector2(slotComp.size.x / 2, slotComp.size.y / 2 + 18),
-            priority: 1, // So we can remove it later
+            priority: 1,
           ),
         );
       }
     });
   }
 
-  String _mapEquipmentSlotToPanelSlot(String slot, String type, String name) {
-    // Map equipment slot/type to UI slot names
-    switch (slot) {
-      case 'head':
-        return 'Head';
-      case 'armor':
-        if (name.contains('Pants')) return 'Pants';
-        if (name.contains('Helmet') || name.contains('Cap')) return 'Head';
-        return 'Chest';
-      case 'pants':
-        return 'Pants';
-      case 'shoes':
-        return 'Shoes';
-      case 'belt':
-        return 'Belt';
-      case 'weapon':
-        return 'Weapon';
-      case 'offhand':
-        return 'Offhand';
-      case 'accessory1':
-        return 'Accessory 1';
-      case 'accessory2':
-        return 'Accessory 2';
-      case 'accessory':
-        // Find first free accessory slot
-        for (final acc in accessorySlots) {
-          if (!slotComponents.containsKey(acc)) {
-            return acc;
-          }
-        }
-        return 'Accessory 1';
-      default:
-        return slot;
-    }
-  }
-
   String? _getEquipmentNameForSlot(String slot) {
-    // Find the equipment name for the given slot
     if (currentPlayer == null) return null;
-    final playerCsv =
-        DataController.instance.get<List<List<dynamic>>>('playersCsv');
-    String? equipmentStr;
-    if (playerCsv != null) {
-      for (final row in playerCsv) {
-        if (row.isNotEmpty && row[0] == currentPlayer!.name) {
-          if (row.length > 10) {
-            equipmentStr = row[10] as String;
-          }
-          break;
-        }
-      }
-    }
-    if (equipmentStr == null) return null;
-    final equipmentList = equipmentStr
-        .split('|')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-    if (equipmentData != null) {
-      // For accessories, we need to match the correct slot (Accessory 1 or 2)
-      if (slot.startsWith('Accessory')) {
-        int accIndex = slot == 'Accessory 1' ? 0 : 1;
-        int found = 0;
-        for (final eqName in equipmentList) {
-          final eq = equipmentData![eqName];
-          if (eq != null) {
-            String slotKey =
-                _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-            if (slotKey.startsWith('Accessory')) {
-              if (found == accIndex) {
-                return eqName;
-              }
-              found++;
-            }
-          }
-        }
-        return null;
-      } else {
-        for (final eqName in equipmentList) {
-          final eq = equipmentData![eqName];
-          if (eq != null) {
-            String slotKey =
-                _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-            if (slotKey == slot) {
-              return eqName;
-            }
-          }
-        }
-      }
-    }
-    return null;
+    return currentPlayer!.equipment[slot];
   }
 }
 

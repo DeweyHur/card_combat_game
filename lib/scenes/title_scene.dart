@@ -7,7 +7,8 @@ import 'package:card_combat_app/components/layout/title_scene_layout.dart';
 class TitleScene extends BaseScene with TapCallbacks {
   late final TitleSceneLayout _layout;
 
-  TitleScene() : super(sceneBackgroundColor: const Color(0xFF1A1A2E));
+  TitleScene({Map<String, dynamic>? options})
+      : super(sceneBackgroundColor: const Color(0xFF1A1A2E), options: options);
 
   @override
   Future<void> onLoad() async {

@@ -4,9 +4,11 @@ import 'package:card_combat_app/utils/game_logger.dart';
 
 class BaseScene extends FlameGame {
   final Color sceneBackgroundColor;
+  final Map<String, dynamic>? options;
 
   BaseScene({
     required this.sceneBackgroundColor,
+    this.options,
   });
 
   @override
@@ -16,6 +18,9 @@ class BaseScene extends FlameGame {
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'Scene loaded: $runtimeType');
+    if (options != null) {
+      initialize(options!);
+    }
   }
 
   @override

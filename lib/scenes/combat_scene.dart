@@ -14,9 +14,10 @@ class CombatScene extends BaseScene with HasGameReference {
   late final GameCharacter enemy;
   bool _combatEnded = false;
 
-  CombatScene()
+  CombatScene({Map<String, dynamic>? options})
       : super(
           sceneBackgroundColor: const Color(0xFF1A1A2E),
+          options: options,
         );
 
   @override

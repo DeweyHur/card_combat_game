@@ -7,7 +7,8 @@ import 'base_scene.dart';
 class ArmoryScene extends BaseScene with TapCallbacks {
   late final ArmorySceneLayout _layout;
 
-  ArmoryScene() : super(sceneBackgroundColor: const Color(0xFF222244));
+  ArmoryScene({Map<String, dynamic>? options})
+      : super(sceneBackgroundColor: const Color(0xFF222244), options: options);
 
   @override
   Future<void> onLoad() async {
@@ -27,4 +28,4 @@ class ArmoryScene extends BaseScene with TapCallbacks {
     super.onTapDown(event);
     _layout.handleTap(event.canvasPosition);
   }
-} 
+}

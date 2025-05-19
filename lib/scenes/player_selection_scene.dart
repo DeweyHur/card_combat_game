@@ -11,9 +11,10 @@ class PlayerSelectionScene extends BaseScene {
   late final PlayerSelectionLayout layout;
   late GameCharacter selectedEnemy;
 
-  PlayerSelectionScene()
+  PlayerSelectionScene({Map<String, dynamic>? options})
       : super(
           sceneBackgroundColor: const Color(0xFF2C3E50),
+          options: options,
         ) {
     players = DataController.instance.get<List<GameCharacter>>('players') ?? [];
     enemies = DataController.instance.get<List<GameCharacter>>('enemies') ?? [];

@@ -15,6 +15,14 @@ class EquipmentData {
     required this.handedness,
     required this.cards,
   });
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'type': type,
+        'slot': slot,
+        'handedness': handedness,
+        'cards': cards,
+      };
 }
 
 Future<Map<String, EquipmentData>> loadEquipmentFromCsv(

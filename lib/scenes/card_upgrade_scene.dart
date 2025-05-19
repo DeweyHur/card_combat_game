@@ -24,7 +24,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     UpgradeType.shield: 'Increase starting shield by 5',
   };
 
-  CardUpgradeScene() : super(sceneBackgroundColor: const Color(0xFF1A1A2E));
+  CardUpgradeScene({Map<String, dynamic>? options})
+      : super(sceneBackgroundColor: const Color(0xFF1A1A2E), options: options);
 
   @override
   Future<void> onLoad() async {
@@ -60,7 +61,7 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     );
 
     // Render upgrade options
-    final upgradeTypes = UpgradeType.values;
+    const upgradeTypes = UpgradeType.values;
     const optionWidth = 200.0;
     const optionHeight = 150.0;
     const spacing = 20.0;
@@ -256,7 +257,7 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
     final pos = Offset(event.canvasPosition.x, event.canvasPosition.y);
 
     // Check upgrade type selection
-    final upgradeTypes = UpgradeType.values;
+    const upgradeTypes = UpgradeType.values;
     const optionWidth = 200.0;
     const optionHeight = 150.0;
     const spacing = 20.0;

@@ -118,7 +118,7 @@ class GameEffects {
     Function(GameCard) onCardPlayed,
     bool isPlayerTurn,
   ) {
-    final totalWidth = (CardVisualComponent.maxCards *
+    const totalWidth = (CardVisualComponent.maxCards *
             CardVisualComponent.cardWidth) +
         ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = cardAreaPosition.x + (cardAreaSize.x - totalWidth) / 2;

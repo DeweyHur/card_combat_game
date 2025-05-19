@@ -6,6 +6,7 @@ import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'package:card_combat_app/scenes/game_result_scene.dart';
 import 'package:card_combat_app/scenes/card_upgrade_scene.dart';
 import 'package:card_combat_app/scenes/armory_scene.dart';
+import 'package:card_combat_app/scenes/inventory_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -14,7 +15,8 @@ class SceneManager {
   SceneManager._internal();
 
   FlameGame? _game;
-  final Map<String, BaseScene Function()> _scenes = {};
+  final Map<String, BaseScene Function(Map<String, dynamic>? options)> _scenes =
+      {};
   final List<String> _sceneStack = [];
 
   void initialize(FlameGame game) {
@@ -24,23 +26,29 @@ class SceneManager {
   }
 
   void _registerScenes() {
-    registerScene('title', () => TitleScene());
-    registerScene('player_selection', () => PlayerSelectionScene());
-    registerScene('combat', () => CombatScene());
-    registerScene('game_result', () => GameResultScene());
-    registerScene('card_upgrade', () => CardUpgradeScene());
-    registerScene('equipment', () => ArmoryScene());
+    registerScene('title', (options) => TitleScene(options: options));
+    registerScene('player_selection',
+        (options) => PlayerSelectionScene(options: options));
+    registerScene('combat', (options) => CombatScene(options: options));
+    registerScene(
+        'game_result', (options) => GameResultScene(options: options));
+    registerScene(
+        'card_upgrade', (options) => CardUpgradeScene(options: options));
+    registerScene('equipment', (options) => ArmoryScene(options: options));
+    registerScene('inventory', (options) => InventoryScene(options: options));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 
-  void registerScene(String name, BaseScene Function() sceneFactory) {
+  void registerScene(String name,
+      BaseScene Function(Map<String, dynamic>? options) sceneFactory) {
     _scenes[name] = sceneFactory;
     GameLogger.info(LogCategory.game, 'Registered scene: $name');
   }
 
-  void pushScene(String name) {
+  void pushScene(String name, {Map<String, dynamic>? options}) {
     if (_game == null) {
-      GameLogger.error(LogCategory.game, 'SceneManager not initialized with game');
+      GameLogger.error(
+          LogCategory.game, 'SceneManager not initialized with game');
       return;
     }
     if (!_scenes.containsKey(name)) {
@@ -50,24 +58,30 @@ class SceneManager {
     final currentScene = _game!.children.whereType<BaseScene>().firstOrNull;
     if (currentScene != null) {
       // Find the current scene's name and push to stack
-      final currentName = _scenes.entries.firstWhere(
-        (entry) => currentScene.runtimeType == entry.value().runtimeType,
-        orElse: () => MapEntry('', () => throw Exception('No scene found')),
-      ).key;
+      final currentName = _scenes.entries
+          .firstWhere(
+            (entry) =>
+                currentScene.runtimeType == entry.value(null).runtimeType,
+            orElse: () =>
+                MapEntry('', (options) => throw Exception('No scene found')),
+          )
+          .key;
       if (currentName.isNotEmpty) {
         _sceneStack.add(currentName);
       }
       _game!.remove(currentScene);
     }
-    final newScene = _scenes[name]!();
+    final newScene = _scenes[name]!(options);
     _game!.add(newScene);
-    GameLogger.info(LogCategory.game, 'Pushed scene: $name (stack: $_sceneStack)');
+    GameLogger.info(
+        LogCategory.game, 'Pushed scene: $name (stack: $_sceneStack)');
     GameLogger.debug(LogCategory.game, 'Scene stack after push: $_sceneStack');
   }
 
-  void popScene() {
+  void popScene({Map<String, dynamic>? options}) {
     if (_game == null) {
-      GameLogger.error(LogCategory.game, 'SceneManager not initialized with game');
+      GameLogger.error(
+          LogCategory.game, 'SceneManager not initialized with game');
       return;
     }
     if (_sceneStack.isEmpty) {
@@ -79,19 +93,22 @@ class SceneManager {
       _game!.remove(currentScene);
     }
     final prevSceneName = _sceneStack.removeLast();
-    final prevScene = _scenes[prevSceneName]?.call();
+    final prevScene = _scenes[prevSceneName]?.call(options);
     if (prevScene != null) {
       _game!.add(prevScene);
-      GameLogger.info(LogCategory.game, 'Popped to scene: $prevSceneName (stack: $_sceneStack)');
+      GameLogger.info(LogCategory.game,
+          'Popped to scene: $prevSceneName (stack: $_sceneStack)');
       GameLogger.debug(LogCategory.game, 'Scene stack after pop: $_sceneStack');
     } else {
-      GameLogger.error(LogCategory.game, 'Previous scene not found: $prevSceneName');
+      GameLogger.error(
+          LogCategory.game, 'Previous scene not found: $prevSceneName');
     }
   }
 
-  void moveScene(String name) {
+  void moveScene(String name, {Map<String, dynamic>? options}) {
     if (_game == null) {
-      GameLogger.error(LogCategory.game, 'SceneManager not initialized with game');
+      GameLogger.error(
+          LogCategory.game, 'SceneManager not initialized with game');
       return;
     }
     if (!_scenes.containsKey(name)) {
@@ -106,9 +123,9 @@ class SceneManager {
     // Clear the stack
     _sceneStack.clear();
     // Add the new scene
-    final newScene = _scenes[name]!();
+    final newScene = _scenes[name]!(options);
     _game!.add(newScene);
     GameLogger.info(LogCategory.game, 'Moved to scene: $name (stack cleared)');
     GameLogger.debug(LogCategory.game, 'Scene stack after move: $_sceneStack');
   }
-} 
+}

@@ -7,6 +7,7 @@ import 'package:card_combat_app/components/panel/player_selection_panel.dart';
 import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   late final TextComponent _titleText;
@@ -59,6 +60,17 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
           name: '', type: '', slot: '', handedness: '', cards: const []),
       position: Vector2(0, 0),
       size: Vector2(size.x, size.y * 0.3),
+      onChange: () {
+        final selectedPlayer =
+            DataController.instance.get<GameCharacter>('selectedPlayer');
+        final slot = _detailPanel?.equipment.slot;
+        if (selectedPlayer != null && slot != null) {
+          SceneManager().pushScene('inventory', options: {
+            'player': selectedPlayer,
+            'slot': slot,
+          });
+        }
+      },
     );
     registerVerticalStackComponent('detailPanel', _detailPanel!, size.y * 0.3);
     hideVerticalStackComponent('detailPanel');

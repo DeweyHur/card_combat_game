@@ -10,7 +10,8 @@ class GameResultScene extends BaseScene with TapCallbacks {
   GameCharacter? nextEnemy;
   List<Map<String, dynamic>> upgradeHistory = [];
 
-  GameResultScene() : super(sceneBackgroundColor: Colors.black);
+  GameResultScene({Map<String, dynamic>? options})
+      : super(sceneBackgroundColor: Colors.black, options: options);
 
   @override
   Future<void> onLoad() async {
@@ -50,11 +51,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
     if (result == 'Victory') {
       // Render card upgrade compensation text
-      final compensationText = 'Card Upgrade Available!';
+      const compensationText = 'Card Upgrade Available!';
       final compensationPainter = TextPainter(
-        text: TextSpan(
+        text: const TextSpan(
           text: compensationText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
             color: Colors.yellow,
@@ -88,11 +89,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
       // Render upgrade history
       if (upgradeHistory.isNotEmpty) {
-        final historyTitle = 'Upgrade History:';
+        const historyTitle = 'Upgrade History:';
         final historyTitlePainter = TextPainter(
-          text: TextSpan(
+          text: const TextSpan(
             text: historyTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -133,11 +134,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
     // Continue button (only show for victory)
     if (result == 'Victory') {
-      final continueText = 'Continue';
+      const continueText = 'Continue';
       final continuePainter = TextPainter(
-        text: TextSpan(
+        text: const TextSpan(
           text: continueText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             color: Colors.white,
           ),
@@ -164,11 +165,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
     }
 
     // Return to Main Menu button
-    final menuText = 'Return to Main Menu';
+    const menuText = 'Return to Main Menu';
     final menuPainter = TextPainter(
-      text: TextSpan(
+      text: const TextSpan(
         text: menuText,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 24,
           color: Colors.white,
         ),
@@ -202,11 +203,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
     // Check Continue button (only for victory)
     if (result == 'Victory') {
-      final continueText = 'Continue';
+      const continueText = 'Continue';
       final continuePainter = TextPainter(
-        text: TextSpan(
+        text: const TextSpan(
           text: continueText,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             color: Colors.white,
           ),
@@ -225,11 +226,11 @@ class GameResultScene extends BaseScene with TapCallbacks {
     }
 
     // Check Return to Main Menu button
-    final menuText = 'Return to Main Menu';
+    const menuText = 'Return to Main Menu';
     final menuPainter = TextPainter(
-      text: TextSpan(
+      text: const TextSpan(
         text: menuText,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 24,
           color: Colors.white,
         ),

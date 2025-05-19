@@ -2,10 +2,11 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/components/panel/card_detail_panel.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flame/input.dart';
 
 class CardsPanel extends BasePanel {
@@ -71,7 +72,7 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
-        debugPrint(
+        GameLogger.debug(LogCategory.ui,
             '[PlayButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onCardPlayed != null && selectedCard != null) {
           onCardPlayed!(selectedCard!);
@@ -112,7 +113,7 @@ class CardsPanel extends BasePanel {
       position: Vector2(0, size.y),
       anchor: Anchor.bottomLeft,
       onPressed: () {
-        debugPrint(
+        GameLogger.debug(LogCategory.ui,
             '[EndTurnButton] Pressed. selectedCard: \\${selectedCard?.name}');
         if (onEndTurn != null) {
           onEndTurn!();
@@ -176,7 +177,7 @@ class CardsPanel extends BasePanel {
   }
 
   Vector2 calculateCardPosition(int index) {
-    final totalWidth = (CardVisualComponent.maxCards *
+    const totalWidth = (CardVisualComponent.maxCards *
             CardVisualComponent.cardWidth) +
         ((CardVisualComponent.maxCards - 1) * CardVisualComponent.cardSpacing);
     final startX = (size.x - totalWidth) / 2;
