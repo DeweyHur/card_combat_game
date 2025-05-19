@@ -15,7 +15,8 @@ class SoundManager {
     CardType.heal: 'assets/sounds/healing.mp3',
     CardType.statusEffect: 'assets/sounds/poison.mp3',
     CardType.cure: 'assets/sounds/healing.mp3', // Using healing sound for cure
-    CardType.shield: 'assets/sounds/card_play.mp3', // Using generic card play sound for shield
+    CardType.shield:
+        'assets/sounds/card_play.mp3', // Using generic card play sound for shield
     CardType.shieldAttack: 'assets/sounds/heavystrike.mp3',
   };
 
@@ -42,7 +43,7 @@ class SoundManager {
       await FlameAudio.audioCache.load(_textSoundPath);
       _isInitialized = true;
     } catch (e) {
-      print('Error initializing sound: $e');
+      // Remove all print statements
     }
   }
 
@@ -69,11 +70,11 @@ class SoundManager {
 
   void playTextSound() {
     if (!_isInitialized) return;
-    
+
     try {
       FlameAudio.play(_textSoundPath, volume: 0.5);
     } catch (e) {
-      print('Error playing text sound: $e');
+      // Remove all print statements
     }
   }
-} 
+}

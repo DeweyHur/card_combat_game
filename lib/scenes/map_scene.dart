@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math';
 import 'dart:async';
 import '../managers/dialogue_manager.dart';
@@ -19,17 +18,17 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
   bool _showDialogue = true;
   bool _showBattleArea = false;
   bool _isInitialized = false;
-  
+
   // Player position
   double _playerX = 150;
   double _playerY = 150;
   final double _playerSize = 32;
   final double _moveSpeed = 3.0;
-  
+
   // Map boundaries - adjusted for mobile
   late double _mapWidth;
   late double _mapHeight;
-  
+
   // Movement control
   bool _isMovingUp = false;
   bool _isMovingDown = false;
@@ -37,7 +36,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
   bool _isMovingRight = false;
   Timer? _movementTimer;
   bool _showMovementControls = false;
-  
+
   // Landmarks
   final List<MapLandmark> _landmarks = [
     MapLandmark(
@@ -76,12 +75,12 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
       color: Colors.cyan,
     ),
   ];
-  
+
   // Battle crystal position - now relative to player
   late double _crystalX;
   late double _crystalY;
   final double _crystalSize = 40;
-  
+
   // Animation
   double _crystalGlow = 0;
   bool _crystalGlowIncreasing = true;
@@ -131,7 +130,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
         final double dx = _playerX - _crystalX;
         final double dy = _playerY - _crystalY;
         final double distance = sqrt(dx * dx + dy * dy);
-        
+
         if (distance < (_playerSize + _crystalSize) / 2) {
           Navigator.pushReplacementNamed(context, '/battle');
         }
@@ -150,7 +149,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
 
   Future<void> _initializeGame() async {
     if (_isInitialized) return;
-    
+
     try {
       await _soundManager.initialize();
       await _initializeDialogue();
@@ -159,7 +158,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
         _isInitialized = true;
       });
     } catch (e) {
-      print('Error initializing game: $e');
+      // Remove all print statements
     }
   }
 
@@ -213,121 +212,6 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
     }
   }
 
-  Widget _buildDirectionalPad() {
-    final buttonSize = 60.0;
-    final padSize = 180.0;
-    final buttonSpacing = (padSize - buttonSize * 2) / 3;
-
-    return Positioned(
-      left: 20,
-      bottom: 20,
-      child: Container(
-        width: padSize,
-        height: padSize,
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(padSize / 2),
-        ),
-        child: Stack(
-          children: [
-            // Up button
-            Positioned(
-              top: buttonSpacing,
-              left: buttonSize + buttonSpacing,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (_) => setState(() => _isMovingUp = true),
-                onTapUp: (_) => setState(() => _isMovingUp = false),
-                onTapCancel: () => setState(() => _isMovingUp = false),
-                child: Container(
-                  width: buttonSize,
-                  height: buttonSize,
-                  decoration: BoxDecoration(
-                    color: _isMovingUp ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_upward, color: Colors.white, size: 30),
-                ),
-              ),
-            ),
-            // Down button
-            Positioned(
-              bottom: buttonSpacing,
-              left: buttonSize + buttonSpacing,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (_) => setState(() => _isMovingDown = true),
-                onTapUp: (_) => setState(() => _isMovingDown = false),
-                onTapCancel: () => setState(() => _isMovingDown = false),
-                child: Container(
-                  width: buttonSize,
-                  height: buttonSize,
-                  decoration: BoxDecoration(
-                    color: _isMovingDown ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_downward, color: Colors.white, size: 30),
-                ),
-              ),
-            ),
-            // Left button
-            Positioned(
-              left: buttonSpacing,
-              top: buttonSize + buttonSpacing,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (_) => setState(() => _isMovingLeft = true),
-                onTapUp: (_) => setState(() => _isMovingLeft = false),
-                onTapCancel: () => setState(() => _isMovingLeft = false),
-                child: Container(
-                  width: buttonSize,
-                  height: buttonSize,
-                  decoration: BoxDecoration(
-                    color: _isMovingLeft ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                ),
-              ),
-            ),
-            // Right button
-            Positioned(
-              right: buttonSpacing,
-              top: buttonSize + buttonSpacing,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (_) => setState(() => _isMovingRight = true),
-                onTapUp: (_) => setState(() => _isMovingRight = false),
-                onTapCancel: () => setState(() => _isMovingRight = false),
-                child: Container(
-                  width: buttonSize,
-                  height: buttonSize,
-                  decoration: BoxDecoration(
-                    color: _isMovingRight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_forward, color: Colors.white, size: 30),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildLandmark(MapLandmark landmark) {
     return CustomPaint(
       size: const Size(32, 32),
@@ -348,7 +232,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
             _showMovementControls = !_showMovementControls;
           });
         },
-        backgroundColor: Colors.black.withOpacity(0.7),
+        backgroundColor: Colors.black.withAlpha((0.7 * 255).toInt()),
         child: Icon(
           _showMovementControls ? Icons.close : Icons.directions,
           color: Colors.white,
@@ -373,7 +257,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.8),
+          color: Colors.red.withAlpha((0.8 * 255).toInt()),
           borderRadius: BorderRadius.circular(4),
         ),
         child: const Row(
@@ -405,7 +289,7 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
         width: 120,
         height: 120,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withAlpha((0.5 * 255).toInt()),
           borderRadius: BorderRadius.circular(60),
         ),
         child: Stack(
@@ -423,7 +307,9 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _isMovingUp ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    color: _isMovingUp
+                        ? Colors.white.withAlpha((0.8 * 255).toInt())
+                        : Colors.white.withAlpha((0.3 * 255).toInt()),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       topRight: Radius.circular(8),
@@ -446,7 +332,9 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _isMovingDown ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    color: _isMovingDown
+                        ? Colors.white.withAlpha((0.8 * 255).toInt())
+                        : Colors.white.withAlpha((0.3 * 255).toInt()),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -469,7 +357,9 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _isMovingLeft ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    color: _isMovingLeft
+                        ? Colors.white.withAlpha((0.8 * 255).toInt())
+                        : Colors.white.withAlpha((0.3 * 255).toInt()),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       bottomLeft: Radius.circular(8),
@@ -492,7 +382,9 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _isMovingRight ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.3),
+                    color: _isMovingRight
+                        ? Colors.white.withAlpha((0.8 * 255).toInt())
+                        : Colors.white.withAlpha((0.3 * 255).toInt()),
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -601,31 +493,33 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                   ),
                   // Draw landmarks
                   ..._landmarks.map((landmark) => Positioned(
-                    left: landmark.x * (_mapWidth / 800),
-                    top: landmark.y * (_mapHeight / 500),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildLandmark(landmark),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            landmark.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'PressStart2P',
+                        left: landmark.x * (_mapWidth / 800),
+                        top: landmark.y * (_mapHeight / 500),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildLandmark(landmark),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color:
+                                    Colors.black.withAlpha((0.7 * 255).toInt()),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                landmark.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontFamily: 'PressStart2P',
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  )),
+                      )),
                   // Battle crystal
                   if (_showBattleArea)
                     Positioned(
@@ -635,9 +529,11 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                         width: _crystalSize,
                         height: _crystalSize,
                         decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.7 + _crystalGlow * 0.3),
+                          color: Colors.purple.withAlpha(
+                              ((0.7 + _crystalGlow * 0.3) * 255).toInt()),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.8 + _crystalGlow * 0.2),
+                            color: Colors.white.withAlpha(
+                                ((0.8 + _crystalGlow * 0.2) * 255).toInt()),
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -689,7 +585,8 @@ class _MapSceneState extends State<MapScene> with WidgetsBindingObserver {
                 left: 0,
                 right: 0,
                 child: NintendoMessageBox(
-                  character: _dialogueManager.getCurrentEntry()?.character ?? '',
+                  character:
+                      _dialogueManager.getCurrentEntry()?.character ?? '',
                   message: _dialogueManager.getCurrentEntry()?.message ?? '',
                   onNext: _handleNextDialogue,
                 ),
@@ -741,27 +638,27 @@ class IslandPainter extends CustomPainter {
 
     final path = Path();
     path.moveTo(points[0].dx, points[0].dy);
-    
+
     for (int i = 1; i < points.length; i++) {
       path.lineTo(points[i].dx, points[i].dy);
     }
-    
+
     path.close();
-    
+
     // Add a subtle shadow
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.3)
+      ..color = Colors.black.withAlpha((0.3 * 255).toInt())
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
-    
+
     canvas.drawPath(path, shadowPaint);
     canvas.drawPath(path, paint);
-    
+
     // Add a white border
     final borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawPath(path, borderPaint);
   }
 
@@ -808,39 +705,39 @@ class LandmarkPainter extends CustomPainter {
   void _drawTemple(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
     // Base
     canvas.drawRect(
-      Rect.fromLTWH(8, 24, 16, 8),
+      const Rect.fromLTWH(8, 24, 16, 8),
       paint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(8, 24, 16, 8),
+      const Rect.fromLTWH(8, 24, 16, 8),
       borderPaint,
     );
 
     // Middle
     canvas.drawRect(
-      Rect.fromLTWH(12, 16, 8, 8),
+      const Rect.fromLTWH(12, 16, 8, 8),
       paint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(12, 16, 8, 8),
+      const Rect.fromLTWH(12, 16, 8, 8),
       borderPaint,
     );
 
     // Top
     canvas.drawRect(
-      Rect.fromLTWH(14, 8, 4, 8),
+      const Rect.fromLTWH(14, 8, 4, 8),
       paint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(14, 8, 4, 8),
+      const Rect.fromLTWH(14, 8, 4, 8),
       borderPaint,
     );
   }
 
   void _drawMountain(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
     final path = Path();
-    path.moveTo(16, 8);  // Top
-    path.lineTo(8, 24);  // Bottom left
+    path.moveTo(16, 8); // Top
+    path.lineTo(8, 24); // Bottom left
     path.lineTo(24, 24); // Bottom right
     path.close();
 
@@ -851,11 +748,11 @@ class LandmarkPainter extends CustomPainter {
   void _drawBeach(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
     // Water
     canvas.drawRect(
-      Rect.fromLTWH(8, 8, 16, 16),
+      const Rect.fromLTWH(8, 8, 16, 16),
       paint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(8, 8, 16, 16),
+      const Rect.fromLTWH(8, 8, 16, 16),
       borderPaint,
     );
 
@@ -863,13 +760,13 @@ class LandmarkPainter extends CustomPainter {
     final sandPaint = Paint()
       ..color = Colors.yellow.shade700
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawRect(
-      Rect.fromLTWH(8, 20, 16, 12),
+      const Rect.fromLTWH(8, 20, 16, 12),
       sandPaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(8, 20, 16, 12),
+      const Rect.fromLTWH(8, 20, 16, 12),
       borderPaint,
     );
   }
@@ -877,11 +774,11 @@ class LandmarkPainter extends CustomPainter {
   void _drawIsland(Canvas canvas, Size size, Paint paint, Paint borderPaint) {
     // Island base
     canvas.drawRect(
-      Rect.fromLTWH(8, 16, 16, 16),
+      const Rect.fromLTWH(8, 16, 16, 16),
       paint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(8, 16, 16, 16),
+      const Rect.fromLTWH(8, 16, 16, 16),
       borderPaint,
     );
 
@@ -892,25 +789,25 @@ class LandmarkPainter extends CustomPainter {
 
     // Trunk
     canvas.drawRect(
-      Rect.fromLTWH(14, 8, 4, 8),
+      const Rect.fromLTWH(14, 8, 4, 8),
       treePaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(14, 8, 4, 8),
+      const Rect.fromLTWH(14, 8, 4, 8),
       borderPaint,
     );
 
     // Leaves
     canvas.drawRect(
-      Rect.fromLTWH(10, 4, 12, 4),
+      const Rect.fromLTWH(10, 4, 12, 4),
       treePaint,
     );
     canvas.drawRect(
-      Rect.fromLTWH(10, 4, 12, 4),
+      const Rect.fromLTWH(10, 4, 12, 4),
       borderPaint,
     );
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-} 
+}

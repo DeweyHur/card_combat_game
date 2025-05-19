@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class DialogueEntry {
@@ -20,7 +19,7 @@ class DialogueManager {
   factory DialogueManager() => _instance;
   DialogueManager._internal();
 
-  Map<String, List<DialogueEntry>> _dialogues = {};
+  final Map<String, List<DialogueEntry>> _dialogues = {};
   String? _currentDialogueId;
   int _currentIndex = 0;
 
@@ -28,14 +27,15 @@ class DialogueManager {
     if (_dialogues.containsKey(dialogueId)) return;
 
     try {
-      final String data = await rootBundle.loadString('assets/dialogues/$dialogueId.csv');
+      final String data =
+          await rootBundle.loadString('assets/dialogues/$dialogueId.csv');
       final List<String> lines = data.split('\n');
-      
+
       // Skip header
       final List<DialogueEntry> entries = [];
       for (int i = 1; i < lines.length; i++) {
         if (lines[i].trim().isEmpty) continue;
-        
+
         final List<String> values = lines[i].split(',');
         if (values.length >= 4) {
           entries.add(DialogueEntry(
@@ -46,10 +46,10 @@ class DialogueManager {
           ));
         }
       }
-      
+
       _dialogues[dialogueId] = entries;
     } catch (e) {
-      print('Error loading dialogue: $e');
+      // Optionally handle error
     }
   }
 
@@ -59,39 +59,42 @@ class DialogueManager {
   }
 
   DialogueEntry? getCurrentEntry() {
-    if (_currentDialogueId == null || !_dialogues.containsKey(_currentDialogueId)) {
+    if (_currentDialogueId == null ||
+        !_dialogues.containsKey(_currentDialogueId)) {
       return null;
     }
-    
+
     final entries = _dialogues[_currentDialogueId]!;
     if (_currentIndex >= entries.length) {
       return null;
     }
-    
+
     return entries[_currentIndex];
   }
 
   bool advanceDialogue() {
-    if (_currentDialogueId == null || !_dialogues.containsKey(_currentDialogueId)) {
+    if (_currentDialogueId == null ||
+        !_dialogues.containsKey(_currentDialogueId)) {
       return false;
     }
-    
+
     final entries = _dialogues[_currentDialogueId]!;
     _currentIndex++;
-    
+
     if (_currentIndex >= entries.length) {
       return false;
     }
-    
+
     return true;
   }
 
   bool isDialogueComplete() {
-    if (_currentDialogueId == null || !_dialogues.containsKey(_currentDialogueId)) {
+    if (_currentDialogueId == null ||
+        !_dialogues.containsKey(_currentDialogueId)) {
       return true;
     }
-    
+
     final entries = _dialogues[_currentDialogueId]!;
     return _currentIndex >= entries.length;
   }
-} 
+}

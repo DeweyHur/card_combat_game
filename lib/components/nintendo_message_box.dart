@@ -33,7 +33,7 @@ class _NintendoMessageBoxState extends State<NintendoMessageBox> {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withAlpha((0.7 * 255).toInt()),
         border: Border.all(
           color: Colors.white,
           width: 4,
@@ -87,4 +87,4 @@ class _NintendoMessageBoxState extends State<NintendoMessageBox> {
       ),
     );
   }
-} 
+}
