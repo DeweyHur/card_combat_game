@@ -6,7 +6,7 @@ import 'package:card_combat_app/scenes/map_scene.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -14,21 +14,8 @@ void main() {
   ]);
 
   runApp(
-    MaterialApp(
-      title: 'Card Combat',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'PressStart2P',
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const MapScene(),
-        '/battle': (context) => Scaffold(
-          body: GameWidget(
-            game: CardCombatGame(),
-          ),
-        ),
-      },
+    GameWidget(
+      game: CardCombatGame(),
     ),
   );
 }
