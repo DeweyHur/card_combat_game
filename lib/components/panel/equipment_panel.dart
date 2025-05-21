@@ -6,6 +6,9 @@ import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:flame/events.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/components/layout/data_component.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -22,6 +25,7 @@ class EquipmentPanel extends BasePanel {
   static const List<String> accessorySlots = ['Accessory 1', 'Accessory 2'];
 
   Map<String, PositionComponent> slotComponents = {};
+  Map<String, DataComponent<String>> slotWatchers = {};
   GameCharacter? currentPlayer;
   VoidCallback? _equipmentUnwatch;
   Map<String, EquipmentData>? equipmentData;
@@ -42,6 +46,10 @@ class EquipmentPanel extends BasePanel {
         // Store unwatch callback
         _equipmentUnwatch =
             () => currentPlayer!.unwatch('equipment', (_) => updateUI());
+        // Update all slot watchers to new player
+        for (final slot in slotWatchers.keys) {
+          slotWatchers[slot]?.setDataKey('equipment:$slot');
+        }
         updateUI();
       }
     });
@@ -55,10 +63,98 @@ class EquipmentPanel extends BasePanel {
     }
     _buildSlots();
     updateUI();
+
+    // Add Load Defaults button at the bottom
+    add(ButtonComponent(
+      label: 'Load Defaults',
+      color: Colors.green.shade700,
+      position: Vector2(size.x / 2 - 70, size.y - 50),
+      onPressed: () {
+        if (currentPlayer == null) return;
+        final playersCsv =
+            DataController.instance.get<List<List<dynamic>>>('playersCsv');
+        if (playersCsv == null) return;
+        final row = playersCsv.firstWhere(
+            (r) =>
+                r.isNotEmpty &&
+                r[0].toString().trim().toLowerCase() ==
+                    currentPlayer!.name.trim().toLowerCase(),
+            orElse: () => []);
+        if (row.isEmpty) return;
+        final defaultEquipmentStr =
+            row.length > 10 ? (row[10] as String? ?? '') : '';
+        final equipmentDataMap = DataController.instance
+                .get<Map<String, EquipmentData>>('equipmentData') ??
+            {};
+        // Build slot-to-eq map
+        final equipmentList = defaultEquipmentStr
+            .split('|')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        final Map<String, String> slotToEq = {};
+        for (final eqName in equipmentList) {
+          final eq = equipmentDataMap[eqName];
+          if (eq != null) {
+            // Map CSV slot to panel slot
+            String slot = eq.slot;
+            if (eq.name.contains('Pants')) {
+              slot = 'pants';
+            } else if (eq.name.contains('Helmet') || eq.name.contains('Cap')) {
+              slot = 'head';
+            } else {
+              slot = 'armor';
+            }
+            if (slot == 'accessory1') {
+              slot = 'Accessory 1';
+            } else if (slot == 'accessory2') {
+              slot = 'Accessory 2';
+            } else if (slot == 'accessory') {
+              slot = 'Accessory 1';
+            } else if (slot == 'head') {
+              slot = 'Head';
+            } else if (slot == 'pants') {
+              slot = 'Pants';
+            } else if (slot == 'shoes') {
+              slot = 'Shoes';
+            } else if (slot == 'belt') {
+              slot = 'Belt';
+            } else if (slot == 'weapon') {
+              slot = 'Weapon';
+            } else if (slot == 'offhand') {
+              slot = 'Offhand';
+            } else if (slot == 'armor') {
+              slot = 'Chest';
+            }
+            slotToEq[slot] = eqName;
+          }
+        }
+        currentPlayer!.equipment = slotToEq;
+        // Update deck as well
+        final List<String> cardNames = [];
+        for (final eqName in equipmentList) {
+          final eq = equipmentDataMap[eqName];
+          if (eq != null) {
+            cardNames.addAll(eq.cards);
+          }
+        }
+        final allCards =
+            DataController.instance.get<List<GameCard>>('cards') ?? [];
+        final List<GameCard> deck = [];
+        for (final cardName in cardNames) {
+          final cardIndex = allCards.indexWhere((c) => c.name == cardName);
+          if (cardIndex != -1) deck.add(allCards[cardIndex]);
+        }
+        currentPlayer!.deck.clear();
+        currentPlayer!.deck.addAll(deck);
+        updateUI();
+      },
+    ));
   }
 
   void _buildSlots() {
     slotComponents.clear();
+    slotWatchers.clear();
     children.clear();
     final double w = size.x;
     final double h = size.y;
@@ -69,59 +165,67 @@ class EquipmentPanel extends BasePanel {
     final double accH = h * 0.12;
     final double centerX = w / 2;
     final double baseY = h * 0.005;
+    // Helper to add slot and watcher
+    void addSlotWithWatcher(String slotLabel, Vector2 pos, Vector2 sz) {
+      final slotComp = _buildSlot(slotLabel, pos, sz);
+      slotComponents[slotLabel] = slotComp;
+      add(slotComp);
+      // Add DataComponent watcher for this slot
+      final watcher = DataComponent<String>(
+        dataKey: 'equipment:$slotLabel',
+        onDataChanged: (itemName) {
+          // Optionally, update only this slot UI if needed
+          updateUI();
+        },
+      );
+      slotWatchers[slotLabel] = watcher;
+      add(watcher);
+    }
+
     // Head (top center)
-    slotComponents['Head'] = _buildSlot(
+    addSlotWithWatcher(
         'Head', Vector2(centerX - slotW / 2, baseY), Vector2(slotW, slotH));
-    add(slotComponents['Head']!);
     // Chest (center)
-    slotComponents['Chest'] = _buildSlot(
+    addSlotWithWatcher(
         'Chest',
         Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Chest']!);
     // Belt (above pants)
-    slotComponents['Belt'] = _buildSlot(
+    addSlotWithWatcher(
         'Belt',
         Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)),
         Vector2(slotW, accH));
-    add(slotComponents['Belt']!);
     // Pants (below belt)
-    slotComponents['Pants'] = _buildSlot(
+    addSlotWithWatcher(
         'Pants',
         Vector2(centerX - slotW / 2,
             baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Pants']!);
     // Shoes (bottom center)
-    slotComponents['Shoes'] = _buildSlot(
+    addSlotWithWatcher(
         'Shoes',
         Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)),
         Vector2(slotW, accH));
-    add(slotComponents['Shoes']!);
     // Weapon (left of chest)
-    slotComponents['Weapon'] = _buildSlot(
+    addSlotWithWatcher(
         'Weapon',
         Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Weapon']!);
     // Offhand (right of chest)
-    slotComponents['Offhand'] = _buildSlot(
+    addSlotWithWatcher(
         'Offhand',
         Vector2(centerX + w * 0.08, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Offhand']!);
     // Accessory 1 (left of pants)
-    slotComponents['Accessory 1'] = _buildSlot(
+    addSlotWithWatcher(
         'Accessory 1',
         Vector2(centerX - slotW - w * 0.08, baseY + 2 * (slotH + h * 0.01)),
         Vector2(accW, accH));
-    add(slotComponents['Accessory 1']!);
     // Accessory 2 (right of pants)
-    slotComponents['Accessory 2'] = _buildSlot(
+    addSlotWithWatcher(
         'Accessory 2',
         Vector2(centerX + w * 0.08, baseY + 2 * (slotH + h * 0.01)),
         Vector2(accW, accH));
-    add(slotComponents['Accessory 2']!);
   }
 
   String getSlotEmoji(String slot) {

@@ -21,6 +21,17 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    // Ensure selected player is set in DataController
+    final players = DataController.instance.get<List<GameCharacter>>('players');
+    final selectedPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
+    if ((selectedPlayer == null ||
+            (players != null && !players.contains(selectedPlayer))) &&
+        players != null &&
+        players.isNotEmpty) {
+      DataController.instance
+          .set<GameCharacter>('selectedPlayer', players.first);
+    }
     resetVerticalStack();
 
     // Title

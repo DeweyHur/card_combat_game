@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -13,6 +13,7 @@ void main() {
   ]);
 
   runApp(
+<<<<<<< HEAD
     MaterialApp(
       title: 'Card Combat',
       theme: ThemeData(
@@ -24,6 +25,10 @@ void main() {
           game: CardCombatGame(),
         ),
       ),
+=======
+    GameWidget(
+      game: CardCombatGame(),
+>>>>>>> 2bd455da771eb965092902f27b938d15a3e2b2cc
     ),
   );
 }

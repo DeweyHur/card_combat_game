@@ -7,6 +7,7 @@ import 'package:card_combat_app/scenes/game_result_scene.dart';
 import 'package:card_combat_app/scenes/card_upgrade_scene.dart';
 import 'package:card_combat_app/scenes/armory_scene.dart';
 import 'package:card_combat_app/scenes/inventory_scene.dart';
+import 'package:card_combat_app/scenes/map_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -36,6 +37,7 @@ class SceneManager {
         'card_upgrade', (options) => CardUpgradeScene(options: options));
     registerScene('equipment', (options) => ArmoryScene(options: options));
     registerScene('inventory', (options) => InventoryScene(options: options));
+    registerScene('map', (options) => MapScene(options: options));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 
