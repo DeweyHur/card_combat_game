@@ -8,6 +8,7 @@ import 'package:flame/events.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/components/layout/data_component.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -24,6 +25,7 @@ class EquipmentPanel extends BasePanel {
   static const List<String> accessorySlots = ['Accessory 1', 'Accessory 2'];
 
   Map<String, PositionComponent> slotComponents = {};
+  Map<String, DataComponent<String>> slotWatchers = {};
   GameCharacter? currentPlayer;
   VoidCallback? _equipmentUnwatch;
   Map<String, EquipmentData>? equipmentData;
@@ -44,6 +46,10 @@ class EquipmentPanel extends BasePanel {
         // Store unwatch callback
         _equipmentUnwatch =
             () => currentPlayer!.unwatch('equipment', (_) => updateUI());
+        // Update all slot watchers to new player
+        for (final slot in slotWatchers.keys) {
+          slotWatchers[slot]?.setDataKey('equipment:$slot');
+        }
         updateUI();
       }
     });
@@ -148,6 +154,7 @@ class EquipmentPanel extends BasePanel {
 
   void _buildSlots() {
     slotComponents.clear();
+    slotWatchers.clear();
     children.clear();
     final double w = size.x;
     final double h = size.y;
@@ -158,59 +165,67 @@ class EquipmentPanel extends BasePanel {
     final double accH = h * 0.12;
     final double centerX = w / 2;
     final double baseY = h * 0.005;
+    // Helper to add slot and watcher
+    void addSlotWithWatcher(String slotLabel, Vector2 pos, Vector2 sz) {
+      final slotComp = _buildSlot(slotLabel, pos, sz);
+      slotComponents[slotLabel] = slotComp;
+      add(slotComp);
+      // Add DataComponent watcher for this slot
+      final watcher = DataComponent<String>(
+        dataKey: 'equipment:$slotLabel',
+        onDataChanged: (itemName) {
+          // Optionally, update only this slot UI if needed
+          updateUI();
+        },
+      );
+      slotWatchers[slotLabel] = watcher;
+      add(watcher);
+    }
+
     // Head (top center)
-    slotComponents['Head'] = _buildSlot(
+    addSlotWithWatcher(
         'Head', Vector2(centerX - slotW / 2, baseY), Vector2(slotW, slotH));
-    add(slotComponents['Head']!);
     // Chest (center)
-    slotComponents['Chest'] = _buildSlot(
+    addSlotWithWatcher(
         'Chest',
         Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Chest']!);
     // Belt (above pants)
-    slotComponents['Belt'] = _buildSlot(
+    addSlotWithWatcher(
         'Belt',
         Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)),
         Vector2(slotW, accH));
-    add(slotComponents['Belt']!);
     // Pants (below belt)
-    slotComponents['Pants'] = _buildSlot(
+    addSlotWithWatcher(
         'Pants',
         Vector2(centerX - slotW / 2,
             baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Pants']!);
     // Shoes (bottom center)
-    slotComponents['Shoes'] = _buildSlot(
+    addSlotWithWatcher(
         'Shoes',
         Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)),
         Vector2(slotW, accH));
-    add(slotComponents['Shoes']!);
     // Weapon (left of chest)
-    slotComponents['Weapon'] = _buildSlot(
+    addSlotWithWatcher(
         'Weapon',
         Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Weapon']!);
     // Offhand (right of chest)
-    slotComponents['Offhand'] = _buildSlot(
+    addSlotWithWatcher(
         'Offhand',
         Vector2(centerX + w * 0.08, baseY + slotH + h * 0.01),
         Vector2(slotW, slotH));
-    add(slotComponents['Offhand']!);
     // Accessory 1 (left of pants)
-    slotComponents['Accessory 1'] = _buildSlot(
+    addSlotWithWatcher(
         'Accessory 1',
         Vector2(centerX - slotW - w * 0.08, baseY + 2 * (slotH + h * 0.01)),
         Vector2(accW, accH));
-    add(slotComponents['Accessory 1']!);
     // Accessory 2 (right of pants)
-    slotComponents['Accessory 2'] = _buildSlot(
+    addSlotWithWatcher(
         'Accessory 2',
         Vector2(centerX + w * 0.08, baseY + 2 * (slotH + h * 0.01)),
         Vector2(accW, accH));
-    add(slotComponents['Accessory 2']!);
   }
 
   String getSlotEmoji(String slot) {
