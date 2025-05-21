@@ -183,12 +183,12 @@ class EquipmentDetailPanel extends PositionComponent {
       }
     }
     // Action buttons (right side)
-    add(_ButtonComponent(
+    add(ButtonComponent(
       label: 'Change Equipment',
       onPressed: onChange,
       position: Vector2(size.x - 160, 32),
     ));
-    add(_ButtonComponent(
+    add(ButtonComponent(
       label: 'Unequip',
       onPressed: onUnequip,
       position: Vector2(size.x - 160, 80),
@@ -198,12 +198,12 @@ class EquipmentDetailPanel extends PositionComponent {
   }
 }
 
-class _ButtonComponent extends PositionComponent with TapCallbacks {
+class ButtonComponent extends PositionComponent with TapCallbacks {
   final String label;
   final VoidCallback? onPressed;
   final Color color;
 
-  _ButtonComponent({
+  ButtonComponent({
     required this.label,
     this.onPressed,
     Vector2? position,

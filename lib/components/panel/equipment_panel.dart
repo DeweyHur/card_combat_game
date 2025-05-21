@@ -6,6 +6,8 @@ import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:flame/events.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -55,6 +57,93 @@ class EquipmentPanel extends BasePanel {
     }
     _buildSlots();
     updateUI();
+
+    // Add Load Defaults button at the bottom
+    add(ButtonComponent(
+      label: 'Load Defaults',
+      color: Colors.green.shade700,
+      position: Vector2(size.x / 2 - 70, size.y - 50),
+      onPressed: () {
+        if (currentPlayer == null) return;
+        final playersCsv =
+            DataController.instance.get<List<List<dynamic>>>('playersCsv');
+        if (playersCsv == null) return;
+        final row = playersCsv.firstWhere(
+            (r) =>
+                r.isNotEmpty &&
+                r[0].toString().trim().toLowerCase() ==
+                    currentPlayer!.name.trim().toLowerCase(),
+            orElse: () => []);
+        if (row.isEmpty) return;
+        final defaultEquipmentStr =
+            row.length > 10 ? (row[10] as String? ?? '') : '';
+        final equipmentDataMap = DataController.instance
+                .get<Map<String, EquipmentData>>('equipmentData') ??
+            {};
+        // Build slot-to-eq map
+        final equipmentList = defaultEquipmentStr
+            .split('|')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        final Map<String, String> slotToEq = {};
+        for (final eqName in equipmentList) {
+          final eq = equipmentDataMap[eqName];
+          if (eq != null) {
+            // Map CSV slot to panel slot
+            String slot = eq.slot;
+            if (eq.name.contains('Pants')) {
+              slot = 'pants';
+            } else if (eq.name.contains('Helmet') || eq.name.contains('Cap')) {
+              slot = 'head';
+            } else {
+              slot = 'armor';
+            }
+            if (slot == 'accessory1') {
+              slot = 'Accessory 1';
+            } else if (slot == 'accessory2') {
+              slot = 'Accessory 2';
+            } else if (slot == 'accessory') {
+              slot = 'Accessory 1';
+            } else if (slot == 'head') {
+              slot = 'Head';
+            } else if (slot == 'pants') {
+              slot = 'Pants';
+            } else if (slot == 'shoes') {
+              slot = 'Shoes';
+            } else if (slot == 'belt') {
+              slot = 'Belt';
+            } else if (slot == 'weapon') {
+              slot = 'Weapon';
+            } else if (slot == 'offhand') {
+              slot = 'Offhand';
+            } else if (slot == 'armor') {
+              slot = 'Chest';
+            }
+            slotToEq[slot] = eqName;
+          }
+        }
+        currentPlayer!.equipment = slotToEq;
+        // Update deck as well
+        final List<String> cardNames = [];
+        for (final eqName in equipmentList) {
+          final eq = equipmentDataMap[eqName];
+          if (eq != null) {
+            cardNames.addAll(eq.cards);
+          }
+        }
+        final allCards =
+            DataController.instance.get<List<GameCard>>('cards') ?? [];
+        final List<GameCard> deck = [];
+        for (final cardName in cardNames) {
+          final cardIndex = allCards.indexWhere((c) => c.name == cardName);
+          if (cardIndex != -1) deck.add(allCards[cardIndex]);
+        }
+        currentPlayer!.deck.clear();
+        currentPlayer!.deck.addAll(deck);
+        updateUI();
+      },
+    ));
   }
 
   void _buildSlots() {
