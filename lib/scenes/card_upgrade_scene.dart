@@ -62,11 +62,10 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Render upgrade options
     const upgradeTypes = UpgradeType.values;
-    const optionWidth = 200.0;
-    const optionHeight = 150.0;
-    const spacing = 20.0;
-    final startX =
-        (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
+    final optionWidth = size.x * 0.3; // Reduced from 0.4 to 0.3 (30% of screen width)
+    final optionHeight = size.y * 0.15; // Reduced from 0.2 to 0.15 (15% of screen height)
+    final spacing = size.x * 0.02; // Reduced from 0.05 to 0.02 (2% of screen width)
+    final startX = (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
     final startY = size.y * 0.15;
 
     for (var i = 0; i < upgradeTypes.length; i++) {
@@ -91,8 +90,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
       final namePainter = TextPainter(
         text: TextSpan(
           text: type.toString().split('.').last.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 20,
+          style: TextStyle(
+            fontSize: size.x * 0.035, // Reduced from 0.04 to 0.035
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -103,7 +102,7 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         canvas,
         Offset(
           optionRect.left + (optionWidth - namePainter.width) / 2,
-          optionRect.top + 20,
+          optionRect.top + optionHeight * 0.2,
         ),
       );
 
@@ -111,30 +110,29 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
       final descPainter = TextPainter(
         text: TextSpan(
           text: upgradeDescriptions[type] ?? '',
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: size.x * 0.025, // Reduced from 0.03 to 0.025
             color: Colors.white70,
           ),
         ),
         textDirection: TextDirection.ltr,
         maxLines: 2,
-      )..layout(maxWidth: optionWidth - 20);
+      )..layout(maxWidth: optionWidth - 10); // Reduced padding from 20 to 10
       descPainter.paint(
         canvas,
         Offset(
-          optionRect.left + 10,
-          optionRect.top + 60,
+          optionRect.left + 5, // Reduced padding from 10 to 5
+          optionRect.top + optionHeight * 0.4,
         ),
       );
     }
 
     // Render cards if card upgrade is selected
     if (selectedUpgradeType == UpgradeType.card && availableCards != null) {
-      const cardWidth = 200.0;
-      const cardHeight = 300.0;
-      const cardSpacing = 20.0;
-      final cardStartX =
-          (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
+      final cardWidth = size.x * 0.3; // Reduced from 0.4 to 0.3
+      final cardHeight = size.y * 0.3; // Reduced from 0.4 to 0.3
+      final cardSpacing = size.x * 0.02; // Reduced from 0.05 to 0.02
+      final cardStartX = (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
       final cardStartY = size.y * 0.35;
 
       for (var i = 0; i < availableCards!.length; i++) {
@@ -159,8 +157,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         final namePainter = TextPainter(
           text: TextSpan(
             text: card.name,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: size.x * 0.035, // Reduced from 0.04 to 0.035
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -171,7 +169,7 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
           canvas,
           Offset(
             cardRect.left + (cardWidth - namePainter.width) / 2,
-            cardRect.top + 20,
+            cardRect.top + cardHeight * 0.1,
           ),
         );
 
@@ -179,19 +177,19 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         final descPainter = TextPainter(
           text: TextSpan(
             text: card.description,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: size.x * 0.025, // Reduced from 0.03 to 0.025
               color: Colors.white70,
             ),
           ),
           textDirection: TextDirection.ltr,
           maxLines: 3,
-        )..layout(maxWidth: cardWidth - 20);
+        )..layout(maxWidth: cardWidth - 10); // Reduced padding from 20 to 10
         descPainter.paint(
           canvas,
           Offset(
-            cardRect.left + 10,
-            cardRect.top + 60,
+            cardRect.left + 5, // Reduced padding from 10 to 5
+            cardRect.top + cardHeight * 0.2,
           ),
         );
 
@@ -200,8 +198,8 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         final statsPainter = TextPainter(
           text: TextSpan(
             text: statsText,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: size.x * 0.025, // Reduced from 0.03 to 0.025
               color: Colors.white70,
             ),
           ),
@@ -211,7 +209,7 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
           canvas,
           Offset(
             cardRect.left + (cardWidth - statsPainter.width) / 2,
-            cardRect.bottom - 40,
+            cardRect.bottom - cardHeight * 0.1,
           ),
         );
       }
@@ -222,19 +220,19 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         (selectedUpgradeType != UpgradeType.card || selectedCard != null)) {
       const upgradeText = 'Apply Upgrade';
       final upgradePainter = TextPainter(
-        text: const TextSpan(
+        text: TextSpan(
           text: upgradeText,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: size.x * 0.04, // Reduced from 0.05 to 0.04
             color: Colors.white,
           ),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
       final upgradeRect = Rect.fromCenter(
-        center: Offset(size.x / 2, size.y * 0.9),
-        width: upgradePainter.width + 40,
-        height: 60,
+        center: Offset(size.x / 2, size.y * 0.85), // Moved up from 0.9 to 0.85
+        width: upgradePainter.width + size.x * 0.08, // Reduced from 0.1 to 0.08
+        height: size.y * 0.06, // Reduced from 0.08 to 0.06
       );
       final upgradePaint = Paint()..color = Colors.greenAccent;
       canvas.drawRRect(
@@ -258,11 +256,10 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
 
     // Check upgrade type selection
     const upgradeTypes = UpgradeType.values;
-    const optionWidth = 200.0;
-    const optionHeight = 150.0;
-    const spacing = 20.0;
-    final startX =
-        (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
+    final optionWidth = size.x * 0.3; // Match the render dimensions
+    final optionHeight = size.y * 0.15;
+    final spacing = size.x * 0.02;
+    final startX = (size.x - (upgradeTypes.length * (optionWidth + spacing))) / 2;
     final startY = size.y * 0.15;
 
     for (var i = 0; i < upgradeTypes.length; i++) {
@@ -274,18 +271,17 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
       );
       if (optionRect.contains(pos)) {
         selectedUpgradeType = upgradeTypes[i];
-        selectedCard = null; // Reset card selection when changing upgrade type
+        selectedCard = null;
         return;
       }
     }
 
     // Check card selection if card upgrade is selected
     if (selectedUpgradeType == UpgradeType.card && availableCards != null) {
-      const cardWidth = 200.0;
-      const cardHeight = 300.0;
-      const cardSpacing = 20.0;
-      final cardStartX =
-          (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
+      final cardWidth = size.x * 0.3; // Match the render dimensions
+      final cardHeight = size.y * 0.3;
+      final cardSpacing = size.x * 0.02;
+      final cardStartX = (size.x - (availableCards!.length * (cardWidth + cardSpacing))) / 2;
       final cardStartY = size.y * 0.35;
 
       for (var i = 0; i < availableCards!.length; i++) {
@@ -307,19 +303,19 @@ class CardUpgradeScene extends BaseScene with TapCallbacks {
         (selectedUpgradeType != UpgradeType.card || selectedCard != null)) {
       const upgradeText = 'Apply Upgrade';
       final upgradePainter = TextPainter(
-        text: const TextSpan(
+        text: TextSpan(
           text: upgradeText,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: size.x * 0.04,
             color: Colors.white,
           ),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
       final upgradeRect = Rect.fromCenter(
-        center: Offset(size.x / 2, size.y * 0.9),
-        width: upgradePainter.width + 40,
-        height: 60,
+        center: Offset(size.x / 2, size.y * 0.85),
+        width: upgradePainter.width + size.x * 0.08,
+        height: size.y * 0.06,
       );
       if (upgradeRect.contains(pos)) {
         _applyUpgrade();

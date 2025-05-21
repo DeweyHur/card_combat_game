@@ -2,7 +2,6 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/game/card_combat_game.dart';
 import 'package:flutter/services.dart';
-import 'package:card_combat_app/scenes/map_scene.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,15 +19,11 @@ void main() {
         primarySwatch: Colors.blue,
         fontFamily: 'PressStart2P',
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const MapScene(),
-        '/battle': (context) => Scaffold(
-          body: GameWidget(
-            game: CardCombatGame(),
-          ),
+      home: Scaffold(
+        body: GameWidget(
+          game: CardCombatGame(),
         ),
-      },
+      ),
     ),
   );
 }
