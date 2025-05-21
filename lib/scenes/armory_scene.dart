@@ -3,6 +3,7 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/layout/armory_scene_layout.dart';
 import 'base_scene.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class ArmoryScene extends BaseScene with TapCallbacks {
   late final ArmorySceneLayout _layout;
@@ -13,6 +14,13 @@ class ArmoryScene extends BaseScene with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    // Set selectedPlayer from options if provided
+    final player = options?['player'];
+    if (player != null) {
+      // Import DataController and GameCharacter if not already
+      // ignore: import_of_legacy_library_into_null_safe
+      DataController.instance.set('selectedPlayer', player);
+    }
     _layout = ArmorySceneLayout();
     add(_layout);
   }

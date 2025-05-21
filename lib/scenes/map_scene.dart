@@ -1,21 +1,14 @@
 import 'base_scene.dart';
 import 'package:card_combat_app/managers/dialogue_manager.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
-import 'package:card_combat_app/components/nintendo_message_box.dart';
-import 'package:flutter/material.dart'
-    show Color, Colors, Icon, Icons, TextStyle;
-import 'package:flame/components.dart';
-import 'package:flame/events.dart';
+import 'package:flutter/material.dart';
 import 'dart:math';
-import 'dart:ui';
 
-class MapScene extends BaseScene with TapCallbacks {
+class MapScene extends BaseScene {
   // All state variables from the widget, now as fields
   final DialogueManager _dialogueManager = DialogueManager();
   final SoundManager _soundManager = SoundManager();
-  bool _showDialogue = true;
-  bool _showBattleArea = false;
-  bool _isInitialized = false;
+  final bool _showBattleArea = false;
 
   double _playerX = 150;
   double _playerY = 150;
@@ -25,49 +18,16 @@ class MapScene extends BaseScene with TapCallbacks {
   late double _mapWidth;
   late double _mapHeight;
 
-  bool _isMovingUp = false;
-  bool _isMovingDown = false;
-  bool _isMovingLeft = false;
-  bool _isMovingRight = false;
-  double _crystalX = 0;
-  double _crystalY = 0;
+  final bool _isMovingUp = false;
+  final bool _isMovingDown = false;
+  final bool _isMovingLeft = false;
+  final bool _isMovingRight = false;
+  final double _crystalX = 0.0;
+  final double _crystalY = 0.0;
   final double _crystalSize = 40;
   double _crystalGlow = 0;
   bool _crystalGlowIncreasing = true;
   bool _isAnimating = false;
-
-  final List<MapLandmark> _landmarks = [
-    MapLandmark(
-        name: "Borobudur Temple",
-        x: 200,
-        y: 150,
-        type: LandmarkType.temple,
-        color: Colors.brown),
-    MapLandmark(
-        name: "Mount Bromo",
-        x: 300,
-        y: 180,
-        type: LandmarkType.mountain,
-        color: Colors.grey),
-    MapLandmark(
-        name: "Bali Beach",
-        x: 400,
-        y: 250,
-        type: LandmarkType.beach,
-        color: Colors.blue),
-    MapLandmark(
-        name: "Komodo Island",
-        x: 500,
-        y: 280,
-        type: LandmarkType.island,
-        color: Colors.green),
-    MapLandmark(
-        name: "Raja Ampat",
-        x: 600,
-        y: 150,
-        type: LandmarkType.beach,
-        color: Colors.cyan),
-  ];
 
   MapScene({Map<String, dynamic>? options})
       : super(sceneBackgroundColor: const Color(0xFF87CEEB), options: options);
@@ -81,7 +41,6 @@ class MapScene extends BaseScene with TapCallbacks {
     await _dialogueManager.loadDialogue('tutorial');
     _dialogueManager.startDialogue('tutorial');
     _startCrystalAnimation();
-    _isInitialized = true;
   }
 
   void _startCrystalAnimation() {
@@ -101,14 +60,18 @@ class MapScene extends BaseScene with TapCallbacks {
         if (_crystalGlow <= 0) _crystalGlowIncreasing = true;
       }
     }
-    if (_isMovingUp)
+    if (_isMovingUp) {
       _playerY = (_playerY - _moveSpeed).clamp(0, _mapHeight - _playerSize);
-    if (_isMovingDown)
+    }
+    if (_isMovingDown) {
       _playerY = (_playerY + _moveSpeed).clamp(0, _mapHeight - _playerSize);
-    if (_isMovingLeft)
+    }
+    if (_isMovingLeft) {
       _playerX = (_playerX - _moveSpeed).clamp(0, _mapWidth - _playerSize);
-    if (_isMovingRight)
+    }
+    if (_isMovingRight) {
       _playerX = (_playerX + _moveSpeed).clamp(0, _mapWidth - _playerSize);
+    }
     // Check for battle area
     if (_showBattleArea) {
       final dx = _playerX - _crystalX;
@@ -119,15 +82,6 @@ class MapScene extends BaseScene with TapCallbacks {
       }
     }
   }
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    // Draw map background, islands, landmarks, player, crystal, etc.
-    // (You can move the CustomPainter logic here as needed)
-  }
-
-  // Add input handling for movement, dialogue, etc.
 }
 
 enum LandmarkType {
