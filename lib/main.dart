@@ -13,22 +13,8 @@ void main() {
   ]);
 
   runApp(
-<<<<<<< HEAD
-    MaterialApp(
-      title: 'Card Combat',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'PressStart2P',
-      ),
-      home: Scaffold(
-        body: GameWidget(
-          game: CardCombatGame(),
-        ),
-      ),
-=======
     GameWidget(
       game: CardCombatGame(),
->>>>>>> 2bd455da771eb965092902f27b938d15a3e2b2cc
     ),
   );
 }
