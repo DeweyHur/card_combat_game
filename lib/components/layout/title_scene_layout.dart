@@ -140,7 +140,7 @@ class TitleSceneLayout extends PositionComponent {
     if (_startButton.toRect().contains(pos.toOffset())) {
       SceneManager().pushScene('player_selection');
     } else if (_armoryButton.toRect().contains(pos.toOffset())) {
-      SceneManager().pushScene('equipment');
+      SceneManager().pushScene('outpost');
     } else if (_exitButton.toRect().contains(pos.toOffset())) {
       exit(0);
     }

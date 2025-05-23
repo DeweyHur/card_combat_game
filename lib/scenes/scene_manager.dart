@@ -8,6 +8,9 @@ import 'package:card_combat_app/scenes/card_upgrade_scene.dart';
 import 'package:card_combat_app/scenes/armory_scene.dart';
 import 'package:card_combat_app/scenes/inventory_scene.dart';
 import 'package:card_combat_app/scenes/map_scene.dart';
+import 'package:card_combat_app/scenes/outpost_scene.dart';
+import 'package:card_combat_app/scenes/shop_scene.dart';
+import 'package:card_combat_app/scenes/tavern_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -30,6 +33,7 @@ class SceneManager {
     registerScene('title', (options) => TitleScene(options: options));
     registerScene('player_selection',
         (options) => PlayerSelectionScene(options: options));
+    registerScene('outpost', (options) => OutpostScene(options: options));
     registerScene('combat', (options) => CombatScene(options: options));
     registerScene(
         'game_result', (options) => GameResultScene(options: options));
@@ -38,6 +42,8 @@ class SceneManager {
     registerScene('equipment', (options) => ArmoryScene(options: options));
     registerScene('inventory', (options) => InventoryScene(options: options));
     registerScene('map', (options) => MapScene(options: options));
+    registerScene('shop', (options) => ShopScene(options: options));
+    registerScene('tavern', (options) => TavernScene(options: options));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 

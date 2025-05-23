@@ -116,7 +116,7 @@ class PlayerSelectionLayout extends PositionComponent
     if (battleButton.toRect().contains(event.localPosition.toOffset())) {
       GameLogger.debug(LogCategory.ui, 'Start Battle button pressed');
       // Just push the combat scene
-      SceneManager().pushScene('combat');
+      SceneManager().pushScene('outpost');
     }
     // Handle Back button
     if (backButton.toRect().contains(event.localPosition.toOffset())) {
