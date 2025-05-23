@@ -3,7 +3,6 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/components/panel/player_detail_panel.dart';
 import 'package:card_combat_app/components/panel/player_selection_panel.dart';
-import 'package:card_combat_app/components/panel/enemy_detail_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
@@ -13,7 +12,6 @@ class PlayerSelectionLayout extends PositionComponent
   late PlayerDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
-  late EnemyDetailPanel enemyPanel;
   late PositionComponent backButton;
 
   PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
@@ -102,9 +100,6 @@ class PlayerSelectionLayout extends PositionComponent
         ),
       );
     add(battleButton);
-
-    enemyPanel = EnemyDetailPanel();
-    registerVerticalStackComponent('enemyPanel', enemyPanel, size.y * 0.45);
 
     GameLogger.debug(
         LogCategory.game, 'PlayerSelectionLayout loaded successfully');

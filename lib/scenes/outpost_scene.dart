@@ -3,6 +3,9 @@ import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/scenes/base_scene.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 // Simple model for an outpost site
 class OutpostSite {
@@ -24,9 +27,17 @@ class OutpostScene extends BaseScene {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    // Log the selected player
+    final player = DataController.instance.get('selectedPlayer');
+    if (player != null) {
+      GameLogger.info(LogCategory.game,
+          'Outpost: Current player is: [32m[1m[4m[7m${player.name}[0m');
+    } else {
+      GameLogger.info(LogCategory.game, 'Outpost: No player selected');
+    }
     // Define the sites in grid order
     sites = [
-      OutpostSite(name: 'Entrance', emoji: '🚪', sceneName: 'title'),
+      OutpostSite(name: 'Back to Title', emoji: '🚪', sceneName: 'title'),
       OutpostSite(name: 'Armory', emoji: '🛡️', sceneName: 'equipment'),
       OutpostSite(
           name: 'Shop',
@@ -52,6 +63,18 @@ class OutpostScene extends BaseScene {
     final site = sites[index];
     await Future.delayed(
         const Duration(milliseconds: 400)); // Simulate animation
+    // Save game if going back to title
+    if (site.sceneName == 'title') {
+      final prefs = await SharedPreferences.getInstance();
+      final player = DataController.instance.get('selectedPlayer');
+      final coins = DataController.instance.get('coins');
+      if (player != null) {
+        prefs.setString('selectedPlayerName', player.name);
+      }
+      if (coins != null) {
+        prefs.setInt('coins', coins);
+      }
+    }
     // Navigate to the selected scene
     SceneManager().pushScene(site.sceneName);
   }

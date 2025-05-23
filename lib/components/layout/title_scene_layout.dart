@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TitleSceneLayout extends PositionComponent {
   late final TextComponent _titleText;
@@ -9,6 +10,7 @@ class TitleSceneLayout extends PositionComponent {
   late final PositionComponent _exitButton;
   late final TextComponent _copyrightText;
   late final PositionComponent _armoryButton;
+  late final PositionComponent _resumeButton;
   bool _isLoaded = false;
 
   TitleSceneLayout();
@@ -28,6 +30,36 @@ class TitleSceneLayout extends PositionComponent {
       anchor: Anchor.center,
     );
     add(_titleText);
+
+    // Check for saved game
+    final prefs = await SharedPreferences.getInstance();
+    final hasSave = prefs.getString('selectedPlayerName') != null;
+    if (hasSave) {
+      _resumeButton = PositionComponent(
+        size: Vector2(200, 50),
+        anchor: Anchor.center,
+      )
+        ..add(RectangleComponent(
+          size: Vector2(200, 50),
+          paint: Paint()..color = Colors.orange,
+          anchor: Anchor.topLeft,
+        ))
+        ..add(
+          TextComponent(
+            text: 'Resume',
+            textRenderer: TextPaint(
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            anchor: Anchor.center,
+            position: Vector2(100, 25),
+          ),
+        );
+      add(_resumeButton);
+    }
 
     _startButton = PositionComponent(
       size: Vector2(200, 50),
@@ -130,17 +162,25 @@ class TitleSceneLayout extends PositionComponent {
 
   void _updatePositions(Vector2 size) {
     _titleText.position = Vector2(size.x / 2, size.y * 0.22);
-    _startButton.position = Vector2(size.x / 2, size.y * 0.42);
-    _armoryButton.position = Vector2(size.x / 2, size.y * 0.54);
-    _exitButton.position = Vector2(size.x / 2, size.y * 0.66);
+    double y = size.y * 0.42;
+    if (children.contains(_resumeButton)) {
+      _resumeButton.position = Vector2(size.x / 2, y);
+      y += size.y * 0.08;
+    }
+    _startButton.position = Vector2(size.x / 2, y);
+    _armoryButton.position = Vector2(size.x / 2, y + size.y * 0.12);
+    _exitButton.position = Vector2(size.x / 2, y + size.y * 0.24);
     _copyrightText.position = Vector2(size.x / 2, size.y - 10);
   }
 
   void handleTap(Vector2 pos) {
-    if (_startButton.toRect().contains(pos.toOffset())) {
+    if (children.contains(_resumeButton) &&
+        _resumeButton.toRect().contains(pos.toOffset())) {
+      SceneManager().pushScene('outpost');
+    } else if (_startButton.toRect().contains(pos.toOffset())) {
       SceneManager().pushScene('player_selection');
     } else if (_armoryButton.toRect().contains(pos.toOffset())) {
-      SceneManager().pushScene('outpost');
+      SceneManager().pushScene('equipment');
     } else if (_exitButton.toRect().contains(pos.toOffset())) {
       exit(0);
     }

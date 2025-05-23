@@ -132,7 +132,7 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
 
   void handleTap(Vector2 pos) {
     if (_backButton.toRect().contains(pos.toOffset())) {
-      SceneManager().moveScene('title');
+      SceneManager().popScene();
     }
   }
 
