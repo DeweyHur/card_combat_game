@@ -9,6 +9,7 @@ import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart' show Colors;
 import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:card_combat_app/utils/slot_mapper.dart';
 
 class InventoryPanelContainer extends PositionComponent
     with VerticalStackMixin {
@@ -126,7 +127,7 @@ class InventoryPanelContainer extends PositionComponent
         equipmentList.removeWhere((eqName) {
           final eq = equipmentMap[eqName];
           return eq != null &&
-              _mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name) == slot;
+              mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name) == slot;
         });
         equipmentList.add(equipment.name);
         if (row.length > 10) {
@@ -207,34 +208,5 @@ class InventoryPanelContainer extends PositionComponent
       size: size,
     );
     registerVerticalStackComponent('inventoryPanel', panel, size.y);
-  }
-
-  String _mapEquipmentSlotToPanelSlot(String slot, String type, String name) {
-    switch (slot) {
-      case 'head':
-        return 'Head';
-      case 'armor':
-        if (name.contains('Pants')) return 'Pants';
-        if (name.contains('Helmet') || name.contains('Cap')) return 'Head';
-        return 'Chest';
-      case 'pants':
-        return 'Pants';
-      case 'shoes':
-        return 'Shoes';
-      case 'belt':
-        return 'Belt';
-      case 'weapon':
-        return 'Weapon';
-      case 'offhand':
-        return 'Offhand';
-      case 'accessory1':
-        return 'Accessory 1';
-      case 'accessory2':
-        return 'Accessory 2';
-      case 'accessory':
-        return 'Accessory 1';
-      default:
-        return slot;
-    }
   }
 }

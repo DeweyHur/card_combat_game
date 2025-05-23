@@ -9,6 +9,7 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/layout/data_component.dart';
+import 'package:card_combat_app/utils/slot_mapper.dart';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -96,36 +97,9 @@ class EquipmentPanel extends BasePanel {
         for (final eqName in equipmentList) {
           final eq = equipmentDataMap[eqName];
           if (eq != null) {
-            // Map CSV slot to panel slot
-            String slot = eq.slot;
-            if (eq.name.contains('Pants')) {
-              slot = 'pants';
-            } else if (eq.name.contains('Helmet') || eq.name.contains('Cap')) {
-              slot = 'head';
-            } else {
-              slot = 'armor';
-            }
-            if (slot == 'accessory1') {
-              slot = 'Accessory 1';
-            } else if (slot == 'accessory2') {
-              slot = 'Accessory 2';
-            } else if (slot == 'accessory') {
-              slot = 'Accessory 1';
-            } else if (slot == 'head') {
-              slot = 'Head';
-            } else if (slot == 'pants') {
-              slot = 'Pants';
-            } else if (slot == 'shoes') {
-              slot = 'Shoes';
-            } else if (slot == 'belt') {
-              slot = 'Belt';
-            } else if (slot == 'weapon') {
-              slot = 'Weapon';
-            } else if (slot == 'offhand') {
-              slot = 'Offhand';
-            } else if (slot == 'armor') {
-              slot = 'Chest';
-            }
+            // Use shared slot mapping function
+            String slot =
+                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
             slotToEq[slot] = eqName;
           }
         }
