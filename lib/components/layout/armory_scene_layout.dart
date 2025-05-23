@@ -5,6 +5,7 @@ import 'package:card_combat_app/components/panel/equipment_panel.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/panel/player_selection_panel.dart';
 import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:card_combat_app/components/panel/player_detail_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
@@ -15,8 +16,9 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   EquipmentDetailPanel? _detailPanel;
   EquipmentPanel? _equipmentPanel;
   Map<String, EquipmentData>? _equipmentData;
+  final Map<String, dynamic>? options;
 
-  ArmorySceneLayout();
+  ArmorySceneLayout({this.options});
 
   @override
   Future<void> onLoad() async {
@@ -49,11 +51,18 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
     );
     registerVerticalStackComponent('titleText', _titleText, 50);
 
-    // Player Selection Panel
-    final playerSelectionPanel = PlayerSelectionPanel()
-      ..size = Vector2(size.x, size.y * 0.18);
-    registerVerticalStackComponent(
-        'playerSelectionPanel', playerSelectionPanel, size.y * 0.18);
+    // Show PlayerDetailPanel if options contains 'player', else show PlayerSelectionPanel
+    if (options != null && options!['player'] != null) {
+      final playerDetailPanel = PlayerDetailPanel()
+        ..size = Vector2(size.x, size.y * 0.18);
+      registerVerticalStackComponent(
+          'playerDetailPanel', playerDetailPanel, size.y * 0.18);
+    } else {
+      final playerSelectionPanel = PlayerSelectionPanel()
+        ..size = Vector2(size.x, size.y * 0.18);
+      registerVerticalStackComponent(
+          'playerSelectionPanel', playerSelectionPanel, size.y * 0.18);
+    }
 
     // Equipment Panel - fill the rest of the space except for detail and back button (60px)
     _equipmentData = DataController.instance

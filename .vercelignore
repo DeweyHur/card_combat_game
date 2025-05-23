@@ -1,0 +1,15 @@
+# Ignore build and tool directories
+.dart_tool/
+android/
+ios/
+macos/
+windows/
+linux/
+test/
+# Ignore IDE and misc files
+*.iml
+*.zip
+*.png
+*.ps1
+*.sh
+.DS_Store 

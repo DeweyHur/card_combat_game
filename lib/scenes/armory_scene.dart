@@ -21,7 +21,7 @@ class ArmoryScene extends BaseScene with TapCallbacks {
       // ignore: import_of_legacy_library_into_null_safe
       DataController.instance.set('selectedPlayer', player);
     }
-    _layout = ArmorySceneLayout();
+    _layout = ArmorySceneLayout(options: options);
     add(_layout);
   }
 
