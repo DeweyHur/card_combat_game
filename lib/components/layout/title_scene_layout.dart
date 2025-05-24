@@ -11,6 +11,7 @@ class TitleSceneLayout extends PositionComponent {
   late final TextComponent _copyrightText;
   late final PositionComponent _armoryButton;
   late final PositionComponent _resumeButton;
+  late final PositionComponent _creditButton;
   bool _isLoaded = false;
 
   TitleSceneLayout();
@@ -111,6 +112,31 @@ class TitleSceneLayout extends PositionComponent {
       );
     add(_armoryButton);
 
+    _creditButton = PositionComponent(
+      size: Vector2(200, 50),
+      anchor: Anchor.center,
+    )
+      ..add(RectangleComponent(
+        size: Vector2(200, 50),
+        paint: Paint()..color = Colors.purple,
+        anchor: Anchor.topLeft,
+      ))
+      ..add(
+        TextComponent(
+          text: 'Credit',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          anchor: Anchor.center,
+          position: Vector2(100, 25),
+        ),
+      );
+    add(_creditButton);
+
     _exitButton = PositionComponent(
       size: Vector2(200, 50),
       anchor: Anchor.center,
@@ -169,6 +195,7 @@ class TitleSceneLayout extends PositionComponent {
     }
     _startButton.position = Vector2(size.x / 2, y);
     _armoryButton.position = Vector2(size.x / 2, y + size.y * 0.12);
+    _creditButton.position = Vector2(size.x / 2, y + size.y * 0.18);
     _exitButton.position = Vector2(size.x / 2, y + size.y * 0.24);
     _copyrightText.position = Vector2(size.x / 2, size.y - 10);
   }
@@ -181,6 +208,8 @@ class TitleSceneLayout extends PositionComponent {
       SceneManager().pushScene('player_selection');
     } else if (_armoryButton.toRect().contains(pos.toOffset())) {
       SceneManager().pushScene('equipment');
+    } else if (_creditButton.toRect().contains(pos.toOffset())) {
+      SceneManager().pushScene('credit');
     } else if (_exitButton.toRect().contains(pos.toOffset())) {
       exit(0);
     }
