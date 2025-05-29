@@ -52,12 +52,12 @@ class CreditScene extends BaseScene with TapCallbacks {
     final double scrollAreaTop = size.y * 0.12;
     final double scrollAreaHeight = size.y * 0.7;
     final double scrollAreaBottom = scrollAreaTop + scrollAreaHeight;
-    final double lineHeight = 36;
+    const double lineHeight = 36;
     final double totalHeight = credits.length * lineHeight;
 
     // Animate scroll
     final double time = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    final double scrollSpeed = 30.0; // pixels per second
+    const double scrollSpeed = 30.0; // pixels per second
     final double scrollOffset =
         (time * scrollSpeed) % (totalHeight + scrollAreaHeight);
     final double startY = scrollAreaBottom - scrollOffset;
@@ -65,8 +65,9 @@ class CreditScene extends BaseScene with TapCallbacks {
     // Draw credits
     for (int i = 0; i < credits.length; i++) {
       final y = startY + i * lineHeight;
-      if (y < scrollAreaTop - lineHeight || y > scrollAreaBottom + lineHeight)
+      if (y < scrollAreaTop - lineHeight || y > scrollAreaBottom + lineHeight) {
         continue;
+      }
       final textPainter = TextPainter(
         text: TextSpan(
           text: credits[i],
@@ -87,25 +88,25 @@ class CreditScene extends BaseScene with TapCallbacks {
     }
 
     // Draw a fade effect at top and bottom
-    final fadeHeight = 40.0;
-    final fadePaint = Paint()
+    const fadeHeight = 40.0;
+    final Paint fadePaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
+        colors: <Color>[
           Colors.purple,
-          Colors.purple.withOpacity(0.0),
+          Colors.purple.withAlpha(0),
         ],
       ).createShader(Rect.fromLTWH(0, scrollAreaTop, size.x, fadeHeight));
     canvas.drawRect(
         Rect.fromLTWH(0, scrollAreaTop, size.x, fadeHeight), fadePaint);
-    final fadePaintBottom = Paint()
+    final Paint fadePaintBottom = Paint()
       ..shader = LinearGradient(
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
-        colors: [
+        colors: <Color>[
           Colors.purple,
-          Colors.purple.withOpacity(0.0),
+          Colors.purple.withAlpha(0),
         ],
       ).createShader(
           Rect.fromLTWH(0, scrollAreaBottom - fadeHeight, size.x, fadeHeight));
@@ -114,23 +115,24 @@ class CreditScene extends BaseScene with TapCallbacks {
         fadePaintBottom);
 
     // Draw back button
-    const buttonText = 'Back';
-    final buttonPainter = TextPainter(
+    const String buttonText = 'Back';
+    const TextStyle buttonTextStyle = TextStyle(
+      fontSize: 24,
+      color: Colors.white,
+    );
+    final TextPainter buttonPainter = TextPainter(
       text: const TextSpan(
         text: buttonText,
-        style: TextStyle(
-          fontSize: 24,
-          color: Colors.white,
-        ),
+        style: buttonTextStyle,
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    final buttonRect = Rect.fromCenter(
+    final Rect buttonRect = Rect.fromCenter(
       center: Offset(size.x / 2, size.y * 0.92),
       width: buttonPainter.width + 40,
       height: 60,
     );
-    final buttonPaint = Paint()..color = Colors.deepPurpleAccent;
+    final Paint buttonPaint = Paint()..color = Colors.deepPurpleAccent;
     canvas.drawRRect(
       RRect.fromRectAndRadius(buttonRect, const Radius.circular(12)),
       buttonPaint,
@@ -148,7 +150,7 @@ class CreditScene extends BaseScene with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     final size = this.size;
     final pos = Offset(event.canvasPosition.x, event.canvasPosition.y);
-    final buttonPainter = TextPainter(
+    final TextPainter buttonPainter = TextPainter(
       text: const TextSpan(
         text: 'Back',
         style: TextStyle(
@@ -158,7 +160,7 @@ class CreditScene extends BaseScene with TapCallbacks {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    final buttonRect = Rect.fromCenter(
+    final Rect buttonRect = Rect.fromCenter(
       center: Offset(size.x / 2, size.y * 0.92),
       width: buttonPainter.width + 40,
       height: 60,
