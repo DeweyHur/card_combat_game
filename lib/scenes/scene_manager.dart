@@ -12,6 +12,7 @@ import 'package:card_combat_app/scenes/outpost_scene.dart';
 import 'package:card_combat_app/scenes/shop_scene.dart';
 import 'package:card_combat_app/scenes/tavern_scene.dart';
 import 'package:card_combat_app/scenes/credit_scene.dart';
+import 'package:card_combat_app/scenes/expedition_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -46,6 +47,7 @@ class SceneManager {
     registerScene('shop', (options) => ShopScene(options: options));
     registerScene('tavern', (options) => TavernScene(options: options));
     registerScene('credit', (options) => CreditScene(options: options));
+    registerScene('expedition', (options) => ExpeditionScene(options: options));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 

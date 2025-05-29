@@ -52,7 +52,7 @@ class OutpostSceneLayout extends PositionComponent with VerticalStackMixin {
       OutpostSite(name: 'Back to Title', emoji: '🚪', sceneName: 'title'),
       OutpostSite(name: 'Armory', emoji: '🛡️', sceneName: 'equipment'),
       OutpostSite(name: 'Shop', emoji: '🛒', sceneName: 'shop'),
-      OutpostSite(name: 'Expedition', emoji: '🗺️', sceneName: 'combat'),
+      OutpostSite(name: 'Expedition', emoji: '🗺️', sceneName: 'expedition'),
       OutpostSite(name: 'Tavern', emoji: '🍻', sceneName: 'tavern'),
     ];
 
