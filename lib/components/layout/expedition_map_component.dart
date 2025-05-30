@@ -1,16 +1,21 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/game/map/map_generator.dart';
 
-class ExpeditionMapComponent extends PositionComponent {
+class ExpeditionMapComponent extends PositionComponent with TapCallbacks {
   final MapStage mapStage;
-  final int playerRow;
-  final int playerCol;
+  int playerRow;
+  int playerCol;
+  List<(int, int)> selectableNodes;
+  final void Function(int row, int col)? onNodeTap;
 
   ExpeditionMapComponent({
     required this.mapStage,
     this.playerRow = 0,
     this.playerCol = 0,
+    this.selectableNodes = const [],
+    this.onNodeTap,
     Vector2? size,
     Vector2? position,
   }) : super(size: size, position: position);
@@ -18,6 +23,8 @@ class ExpeditionMapComponent extends PositionComponent {
   static const double nodeRadius = 28;
   static const double verticalSpacing = 90;
   static const double horizontalSpacing = 90;
+
+  late List<Offset> _nodePositions;
 
   @override
   void render(Canvas canvas) {
@@ -28,13 +35,13 @@ class ExpeditionMapComponent extends PositionComponent {
     final int numRows = rows.length;
 
     // Calculate node positions
-    final nodePositions = <Offset>[];
+    _nodePositions = <Offset>[];
     for (int row = 0; row < numRows; row++) {
       final cols = rows[row].length;
       for (int col = 0; col < cols; col++) {
         final double x = (mapWidth / (cols + 1)) * (col + 1);
         final double y = mapHeight - (row + 1) * (mapHeight / (numRows + 1));
-        nodePositions.add(Offset(x, y));
+        _nodePositions.add(Offset(x, y));
       }
     }
 
@@ -44,9 +51,9 @@ class ExpeditionMapComponent extends PositionComponent {
       final cols = rows[row].length;
       for (int col = 0; col < cols; col++) {
         final node = rows[row][col];
-        final from = nodePositions[nodeIndex];
+        final from = _nodePositions[nodeIndex];
         for (final nextCol in node.nextIndices) {
-          final to = nodePositions[_nodeIndex(row + 1, nextCol)];
+          final to = _nodePositions[_nodeIndex(row + 1, nextCol)];
           final paint = Paint()
             ..color = Colors.white.withAlpha(120)
             ..strokeWidth = 3;
@@ -62,9 +69,10 @@ class ExpeditionMapComponent extends PositionComponent {
       final cols = rows[row].length;
       for (int col = 0; col < cols; col++) {
         final node = rows[row][col];
-        final pos = nodePositions[nodeIndex];
+        final pos = _nodePositions[nodeIndex];
         final isPlayer = (row == playerRow && col == playerCol);
-        _drawNode(canvas, pos, node.type, isPlayer);
+        final isSelectable = selectableNodes.contains((row, col));
+        _drawNode(canvas, pos, node.type, isPlayer, isSelectable);
         nodeIndex++;
       }
     }
@@ -78,9 +86,14 @@ class ExpeditionMapComponent extends PositionComponent {
     return idx + col;
   }
 
-  void _drawNode(Canvas canvas, Offset pos, MapNodeType type, bool isPlayer) {
+  void _drawNode(Canvas canvas, Offset pos, MapNodeType type, bool isPlayer,
+      bool isSelectable) {
     final Paint paint = Paint()
-      ..color = isPlayer ? Colors.yellow : _nodeColor(type)
+      ..color = isPlayer
+          ? Colors.yellow
+          : isSelectable
+              ? Colors.lightBlueAccent
+              : _nodeColor(type)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(pos, nodeRadius, paint);
     // Draw border
@@ -140,6 +153,30 @@ class ExpeditionMapComponent extends PositionComponent {
         return Colors.deepPurple;
       case MapNodeType.start:
         return Colors.orange;
+    }
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    if (onNodeTap == null) return;
+    // Find which node (if any) was tapped
+    for (int i = 0; i < _nodePositions.length; i++) {
+      final pos = _nodePositions[i];
+      if ((event.canvasPosition.toOffset() - pos).distance <= nodeRadius) {
+        // Convert flat index to (row, col)
+        int idx = i;
+        int row = 0;
+        while (idx >= mapStage.rows[row].length) {
+          idx -= mapStage.rows[row].length;
+          row++;
+        }
+        int col = idx;
+        if (selectableNodes.contains((row, col))) {
+          onNodeTap!(row, col);
+        }
+        break;
+      }
     }
   }
 }

@@ -13,6 +13,9 @@ import 'package:card_combat_app/scenes/shop_scene.dart';
 import 'package:card_combat_app/scenes/tavern_scene.dart';
 import 'package:card_combat_app/scenes/credit_scene.dart';
 import 'package:card_combat_app/scenes/expedition_scene.dart';
+import 'package:card_combat_app/scenes/quest_event_scene.dart';
+import 'package:card_combat_app/scenes/random_event_scene.dart';
+import 'package:card_combat_app/scenes/camp_event_scene.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -48,6 +51,11 @@ class SceneManager {
     registerScene('tavern', (options) => TavernScene(options: options));
     registerScene('credit', (options) => CreditScene(options: options));
     registerScene('expedition', (options) => ExpeditionScene(options: options));
+    registerScene(
+        'quest_event', (options) => QuestEventScene(options: options));
+    registerScene(
+        'random_event', (options) => RandomEventScene(options: options));
+    registerScene('camp_event', (options) => CampEventScene(options: options));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 
