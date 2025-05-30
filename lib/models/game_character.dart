@@ -1,5 +1,7 @@
 import 'game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class GameCharacter {
   final String name;
@@ -248,20 +250,48 @@ class GameCharacter {
         'equipment': _equipment,
       };
 
-  static GameCharacter fromJson(Map<String, dynamic> json) => GameCharacter(
-        name: json['name'],
-        maxHealth: json['maxHealth'],
-        attack: json['attack'],
-        defense: json['defense'],
-        emoji: json['emoji'],
-        color: json['color'],
-        imagePath: json['imagePath'],
-        soundPath: json['soundPath'],
-        description: json['description'],
-        deck: (json['deck'] as List).map((c) => GameCard.fromJson(c)).toList(),
-        maxEnergy: json['maxEnergy'] ?? 3,
-        handSize: json['handSize'] ?? 5,
-      )..equipment = (json['equipment'] != null)
-          ? Map<String, String>.from(json['equipment'])
-          : {};
+  static GameCharacter fromJson(Map<String, dynamic> json) {
+    final character = GameCharacter(
+      name: json['name'],
+      maxHealth: json['maxHealth'],
+      attack: json['attack'],
+      defense: json['defense'],
+      emoji: json['emoji'],
+      color: json['color'],
+      imagePath: json['imagePath'],
+      soundPath: json['soundPath'],
+      description: json['description'],
+      deck: (json['deck'] as List).map((c) => GameCard.fromJson(c)).toList(),
+      maxEnergy: json['maxEnergy'] ?? 3,
+      handSize: json['handSize'] ?? 5,
+    );
+
+    // Load saved equipment synchronously
+    final prefs = SharedPreferences.getInstance();
+    prefs.then((prefs) {
+      final savedEquipment =
+          prefs.getString('playerEquipment:${character.name}');
+      if (savedEquipment != null) {
+        try {
+          final equipmentMap =
+              Map<String, String>.from(jsonDecode(savedEquipment));
+          character.equipment = equipmentMap;
+          // Force UI update after loading equipment
+          character._notify('equipment', character.equipment);
+        } catch (e) {
+          GameLogger.error(
+              LogCategory.data, 'Error loading saved equipment: $e');
+        }
+      } else {
+        // If no saved equipment, load defaults from JSON
+        if (json['equipment'] != null) {
+          character.equipment = Map<String, String>.from(json['equipment']);
+          // Force UI update after loading default equipment
+          character._notify('equipment', character.equipment);
+        }
+      }
+    });
+
+    return character;
+  }
 }

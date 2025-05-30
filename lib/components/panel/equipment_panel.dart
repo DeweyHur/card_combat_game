@@ -10,6 +10,8 @@ import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/layout/data_component.dart';
 import 'package:card_combat_app/utils/slot_mapper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
@@ -279,6 +281,14 @@ class EquipmentPanel extends BasePanel {
         );
       }
     });
+
+    // Save equipment changes to local storage
+    if (currentPlayer != null) {
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString('playerEquipment:${currentPlayer!.name}',
+            jsonEncode(currentPlayer!.equipment));
+      });
+    }
   }
 
   String? _getEquipmentNameForSlot(String slot) {

@@ -92,15 +92,44 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
       final found = players.where((p) => p.name == selectedPlayerName);
       if (found.isNotEmpty) {
         selectedPlayer = found.first;
+        // Load saved equipment for selected player
+        final savedEquipment =
+            await prefs.getString('playerEquipment:${selectedPlayer.name}');
+        if (savedEquipment != null) {
+          try {
+            final equipmentMap =
+                Map<String, String>.from(jsonDecode(savedEquipment));
+            selectedPlayer.equipment = equipmentMap;
+          } catch (e) {
+            GameLogger.error(
+                LogCategory.data, 'Error loading saved equipment: $e');
+          }
+        }
       }
     }
     if (selectedPlayer == null && players.isNotEmpty) {
       selectedPlayer = players.first;
+      // Load saved equipment for first player
+      final savedEquipment =
+          await prefs.getString('playerEquipment:${selectedPlayer.name}');
+      if (savedEquipment != null) {
+        try {
+          final equipmentMap =
+              Map<String, String>.from(jsonDecode(savedEquipment));
+          selectedPlayer.equipment = equipmentMap;
+        } catch (e) {
+          GameLogger.error(
+              LogCategory.data, 'Error loading saved equipment: $e');
+        }
+      }
     }
     if (selectedPlayer != null) {
       DataController.instance
           .set<GameCharacter>('selectedPlayer', selectedPlayer);
       prefs.setString('selectedPlayerName', selectedPlayer.name);
+      // Save the player's equipment to local storage
+      prefs.setString('playerEquipment:${selectedPlayer.name}',
+          jsonEncode(selectedPlayer.equipment));
     }
 
     // Also store the parsed players.csv rows for equipment lookup
