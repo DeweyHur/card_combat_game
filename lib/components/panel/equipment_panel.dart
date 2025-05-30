@@ -314,7 +314,7 @@ class EquipmentPanel extends BasePanel {
 
     if (playerRow.isEmpty) return;
 
-    // Get the default equipment string from column 9
+    // Get the default equipment string from column 9 (startingEquipment)
     final defaultEquipmentStr =
         playerRow.length > 9 ? (playerRow[9] as String? ?? '') : '';
     GameLogger.info(LogCategory.game,
@@ -327,7 +327,11 @@ class EquipmentPanel extends BasePanel {
     }
 
     // Parse the equipment list
-    final equipmentList = defaultEquipmentStr.split('|');
+    final equipmentList = defaultEquipmentStr
+        .split('|')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     GameLogger.info(
         LogCategory.game, '[EQUIP_PANEL] Equipment list: $equipmentList');
 

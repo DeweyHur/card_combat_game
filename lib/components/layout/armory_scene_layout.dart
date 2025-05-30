@@ -133,6 +133,15 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   }
 
   @override
+  void onMount() {
+    super.onMount();
+    // Reload the equipment panel when the layout is mounted
+    if (_equipmentPanel != null) {
+      _equipmentPanel!.updateUI();
+    }
+  }
+
+  @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     this.size = size;
@@ -174,5 +183,9 @@ class ArmorySceneLayout extends PositionComponent with VerticalStackMixin {
   void _handlePlayerSelection(dynamic player) {
     // Hide the detail panel if the player changes
     hideVerticalStackComponent('detailPanel');
+    // Reload the equipment panel
+    if (_equipmentPanel != null) {
+      _equipmentPanel!.updateUI();
+    }
   }
 }

@@ -26,6 +26,17 @@ class InventoryScene extends BaseScene {
     filter = options?['slot'] as String?;
     player = options?['player'] as GameCharacter?;
     slot = filter;
+
+    // Log available equipment for the slot
+    final filteredEquipment = allEquipment
+        .where((item) => filter == null || item.slot == filter)
+        .toList();
+    GameLogger.info(
+        LogCategory.game, '[INVENTORY] Available equipment for slot $filter:');
+    for (final item in filteredEquipment) {
+      GameLogger.info(LogCategory.game,
+          '[INVENTORY] - ${item.name} (Type: ${item.type}, Slot: ${item.slot})');
+    }
     GameLogger.info(LogCategory.game,
         '[INVENTORY] Will add InventoryPanel in onMount: items=${allEquipment.length}, filter=$filter, player=${player?.name}, slot=$slot');
   }

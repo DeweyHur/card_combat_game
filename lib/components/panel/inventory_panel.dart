@@ -4,6 +4,7 @@ import 'package:flame/input.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart' show Colors, TextStyle;
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 class InventoryPanel extends PositionComponent
     with HasGameReference, TapCallbacks {
@@ -30,9 +31,25 @@ class InventoryPanel extends PositionComponent
     ));
     // List items as buttons
     double y = 16;
-    final filtered =
-        items.where((item) => filter == null || item.slot == filter).toList();
+    final filtered = items
+        .where((item) =>
+            filter == null ||
+            item.handedness?.toLowerCase() == filter?.toLowerCase() ||
+            (filter == 'Chest' &&
+                item.handedness?.toLowerCase().contains('armor') == true) ||
+            (filter == 'Head' &&
+                item.handedness?.toLowerCase().contains('helmet') == true) ||
+            (filter == 'Pants' &&
+                item.handedness?.toLowerCase().contains('legs') == true) ||
+            (filter == 'Shoes' &&
+                item.handedness?.toLowerCase().contains('boots') == true))
+        .toList();
+
+    GameLogger.info(LogCategory.game,
+        '[INVENTORY] Filtered items: ${filtered.length} items for $filter');
     for (final item in filtered) {
+      GameLogger.info(LogCategory.game,
+          '[INVENTORY] Item: ${item.name} (${item.handedness})');
       final button = ButtonComponent(
         button: RectangleComponent(
           size: Vector2(size.x - 48, 28),
@@ -40,7 +57,7 @@ class InventoryPanel extends PositionComponent
           anchor: Anchor.topLeft,
           children: [
             TextComponent(
-              text: '${item.name} (${item.slot})',
+              text: '${item.name} (${item.handedness})',
               textRenderer: TextPaint(
                 style: const TextStyle(color: Colors.white, fontSize: 18),
               ),

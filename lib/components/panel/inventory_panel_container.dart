@@ -39,14 +39,14 @@ class InventoryPanelContainer extends PositionComponent
           if (row.isEmpty) return;
           // Get default equipment from CSV
           final defaultEquipmentStr =
-              row.length > 10 ? (row[10] as String? ?? '') : '';
-          if (row.length > 10) {
-            row[10] = defaultEquipmentStr;
+              row.length > 9 ? (row[9] as String? ?? '') : '';
+          if (row.length > 9) {
+            row[9] = defaultEquipmentStr;
           } else {
-            while (row.length < 11) {
+            while (row.length < 10) {
               row.add('');
             }
-            row[10] = defaultEquipmentStr;
+            row[9] = defaultEquipmentStr;
           }
           DataController.instance
               .set<List<List<dynamic>>>('playersCsv', playersCsv);
@@ -75,9 +75,9 @@ class InventoryPanelContainer extends PositionComponent
           }
           final updatedPlayer = GameCharacter(
             name: row[0] as String,
-            maxHealth: int.parse(row[1].toString()),
-            attack: int.parse(row[2].toString()),
-            defense: int.parse(row[3].toString()),
+            maxHealth: int.tryParse(row[1].toString()) ?? 100,
+            attack: int.tryParse(row[2].toString()) ?? 10,
+            defense: int.tryParse(row[3].toString()) ?? 5,
             emoji: row[4].toString(),
             color: row[5].toString(),
             imagePath: row.length > 6 ? row[6].toString() : '',
@@ -115,94 +115,112 @@ class InventoryPanelContainer extends PositionComponent
         }
         GameLogger.info(
             LogCategory.game, '[INVENTORY] Updating row for player: ${row[0]}');
-        String equipmentStr = row.length > 10 ? (row[10] as String? ?? '') : '';
-        List<String> equipmentList = equipmentStr
+
+        // Get both default and current equipment
+        String defaultEquipmentStr =
+            row.length > 9 ? (row[9] as String? ?? '') : '';
+        String currentEquipmentStr =
+            row.length > 10 ? (row[10] as String? ?? '') : '';
+
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Default equipment string: $defaultEquipmentStr');
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Current equipment string: $currentEquipmentStr');
+
+        // Parse both equipment lists
+        List<String> defaultEquipmentList = defaultEquipmentStr
             .split('|')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
+        List<String> currentEquipmentList = currentEquipmentStr
+            .split('|')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Default equipment list: $defaultEquipmentList');
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Current equipment list before update: $currentEquipmentList');
+
         final equipmentMap = DataController.instance
                 .get<Map<String, EquipmentData>>('equipmentData') ??
             {};
-        equipmentList.removeWhere((eqName) {
+
+        // Remove any existing equipment in the same slot from current equipment
+        currentEquipmentList.removeWhere((eqName) {
           final eq = equipmentMap[eqName];
-          return eq != null &&
+          final shouldRemove = eq != null &&
               mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name) == slot;
+          if (shouldRemove) {
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Removing equipment from slot $slot: $eqName');
+          }
+          return shouldRemove;
         });
-        equipmentList.add(equipment.name);
+
+        // Add the new equipment to current equipment
+        currentEquipmentList.add(equipment.name);
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Current equipment list after update: $currentEquipmentList');
+
+        // Update the CSV data
         if (row.length > 10) {
-          row[10] = equipmentList.join('|');
+          row[10] = currentEquipmentList.join('|');
         } else {
           while (row.length < 11) {
             row.add('');
           }
-          row[10] = equipmentList.join('|');
+          row[10] = currentEquipmentList.join('|');
         }
         DataController.instance
             .set<List<List<dynamic>>>('playersCsv', playersCsv);
-        // Rebuild the GameCharacter from the updated row
-        final allCards =
-            DataController.instance.get<List<GameCard>>('cards') ?? [];
-        final equipmentData = DataController.instance
-                .get<Map<String, EquipmentData>>('equipmentData') ??
-            {};
-        final rowIndex = playersCsv.indexOf(row);
-        if (rowIndex != -1) {
-          final newEquipmentStr = equipmentList.join('|');
-          DataController.instance
-              .updatePlayersCsvField(rowIndex, 10, newEquipmentStr);
-          final updatedRow = playersCsv[rowIndex];
-          final name = updatedRow[0] as String;
-          final equipmentStr =
-              updatedRow.length > 10 ? updatedRow[10] as String : '';
-          final updatedEquipmentList = equipmentStr
-              .split('|')
-              .map((e) => e.trim())
-              .where((e) => e.isNotEmpty)
-              .toList();
-          final List<String> cardNames = [];
-          for (final eqName in updatedEquipmentList) {
-            final eq = equipmentData[eqName];
-            if (eq != null) {
-              cardNames.addAll(eq.cards);
-            }
+
+        // Update the player's equipment map using both default and current equipment
+        final Map<String, String> newEquipment = {};
+
+        // First add default equipment
+        for (final eqName in defaultEquipmentList) {
+          final eq = equipmentMap[eqName];
+          if (eq != null) {
+            final panelSlot =
+                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            newEquipment[panelSlot] = eqName;
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Adding default equipment: $eqName to slot $panelSlot');
           }
-          final List<GameCard> deck = [];
-          for (final cardName in cardNames) {
-            final cardIndex = allCards.indexWhere((c) => c.name == cardName);
-            if (cardIndex != -1) deck.add(allCards[cardIndex]);
-          }
-          final updatedPlayer = GameCharacter(
-            name: name,
-            maxHealth: int.parse(updatedRow[1].toString()),
-            attack: int.parse(updatedRow[2].toString()),
-            defense: int.parse(updatedRow[3].toString()),
-            emoji: updatedRow[4].toString(),
-            color: updatedRow[5].toString(),
-            imagePath: updatedRow.length > 6 ? updatedRow[6].toString() : '',
-            soundPath: updatedRow.length > 7 ? updatedRow[7].toString() : '',
-            description: updatedRow.length > 8 ? updatedRow[8].toString() : '',
-            deck: deck,
-            maxEnergy: 3,
-            handSize: updatedRow.length > 9
-                ? int.tryParse(updatedRow[9].toString()) ?? 5
-                : 5,
-          );
-          GameLogger.info(LogCategory.game,
-              '[INVENTORY] Updated player: ${updatedPlayer.name}');
-          // Log the Mage row after update
-          for (final row in playersCsv) {
-            if (row.isNotEmpty &&
-                row[0].toString().trim().toLowerCase() == 'mage') {
-              GameLogger.info(
-                  LogCategory.game, '[INVENTORY] Mage row after update: $row');
-            }
-          }
-          DataController.instance
-              .set<GameCharacter>('selectedPlayer', updatedPlayer);
         }
+
+        // Then override with current equipment
+        for (final eqName in currentEquipmentList) {
+          final eq = equipmentMap[eqName];
+          if (eq != null) {
+            final panelSlot =
+                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
+            newEquipment[panelSlot] = eqName;
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Adding current equipment: $eqName to slot $panelSlot');
+          }
+        }
+
+        // Update the player's equipment
+        player!.equipment = newEquipment;
+        GameLogger.info(
+            LogCategory.game, '[INVENTORY] Final equipment map: $newEquipment');
+
+        // Update the selected player in DataController
+        DataController.instance.set<GameCharacter>('selectedPlayer', player!);
         GameLogger.info(LogCategory.game,
-            '[INVENTORY] Selected equipment: ${equipment.name} (slot: ${equipment.slot})');
+            '[INVENTORY] Player ${player!.name} equipment after update: ${currentEquipmentList.join('|')}');
+
+        // Log the current state of the selected player
+        final currentPlayer =
+            DataController.instance.get<GameCharacter>('selectedPlayer');
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Current selected player state: ${currentPlayer?.name} (Health: ${currentPlayer?.maxHealth}, Attack: ${currentPlayer?.attack}, Defense: ${currentPlayer?.defense})');
+        GameLogger.info(LogCategory.game,
+            '[INVENTORY] Current selected player deck size: ${currentPlayer?.deck.length}');
         SceneManager().popScene();
       },
       size: size,
