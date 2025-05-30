@@ -1,43 +1,123 @@
-name,type,slot,handedness,cards
-Short Sword,weapon,weapon,one,Slash|Slash|Quick Stab|Bash
-Long Sword,weapon,weapon,two,Slash|Power Strike|Heavy Strike|Bash
-Dagger,weapon,weapon,one,Quick Stab|Quick Stab|Poison|Enrage
-Bow,weapon,weapon,two,Double Shot|Slash|Poison|Lightning
-Staff,weapon,weapon,two,Slash|Burn|Greater Heal|Freeze
-Wand,weapon,weapon,one,Slash|Poison|Burn|Heal
-Mace,weapon,weapon,one,Slash|Bash|Heavy Strike|Guard
-Maul,weapon,weapon,two,Power Strike|Bash|Bash|Enrage
-Gauntlet,weapon,weapon,one,Slash|Bash|Shield Up|Enrage
+name,description,rarity,type,cards
+Mystic Amulet,An amulet of great power,legendary,Accessory,Arcane Bolt|Mystic Shield|Time Warp
+Battle Trinkets,A set of combat trinkets,legendary,Accessory,Warrior's Strike|Tactical Retreat|Battle Cry
+Elemental Ring,A ring of elemental power,legendary,Accessory,Fire Bolt|Ice Bolt|Lightning Bolt
+Cosmic Lens,A lens that sees the future,epic,Accessory,Cosmic Vision|Starlight|Time Warp
+Celestial Vision,A lens that sees the stars,rare,Accessory,Celestial Sight|Starlight|Cosmic Vision
+Cloud Walker,A charm that lets you walk on clouds,rare,Accessory,Cloud Step|Cloud Mastery|Wind Walk
+Combat Belt,A belt of combat,rare,Belt,Power Strike|Battle Stance
+Cosmic Vision,A lens that sees the future,rare,Accessory,Cosmic Vision|Starlight|Time Warp
+Fairy Charm,A magical charm from the forest spirits,rare,Accessory,Fairy Blessing|Nature's Blessing|Healing Touch
+Magic Amulet,An amulet of magic,rare,Accessory,Arcane Bolt|Mystic Shield
+Magic Ring,A ring of magic,rare,Accessory,Energy Bolt|Arcane Bolt|Magic Shield
+Meditation Beads,Beads that enhance focus,rare,Accessory,Inner Peace|Balance|Healing Touch
+Natural Balance,A symbol of nature's harmony,rare,Accessory,Balance|Nature's Blessing|Inner Peace
+Temple's Blessing,A blessing from the temple,rare,Accessory,Temple's Grace|Divine Shield|Healing Touch
+Village Charm,A charm from the village,rare,Accessory,Village Blessing|Healing Touch|Herbal Remedy
+Warrior's Spirit,A spirit of an ancient warrior,rare,Accessory,Warrior's Blessing|Battle Cry|Warrior's Rage
+Village Charm,A charm from the village,common,Accessory,Village Blessing|Healing Touch|Herbal Remedy
+Combat Gauntlets,Gauntlets that enhance combat,epic,Chest,Power Strike|Defensive Stance|Battle Stance
+Shadow Cloak,A cloak of shadows,epic,Chest,Shadow Strike|Shadow Step|Ghost Strike
+Time Shield,A shield that bends time,epic,Offhand,Time Barrier|Time Mastery|Defensive Stance
+Warrior's Belt,A belt of combat prowess,epic,Belt,Power Strike|Battle Stance|Warrior's Rage
+Crystal Shield,A shield of pure crystal,rare,Offhand,Crystal Barrier|Crystal Strike|Defensive Stance
+Enchanted Gauntlets,Gauntlets with defensive magic,rare,Chest,Defensive Stance|Magic Shield|Guard
+Glacial Shield,A shield made of ice,rare,Offhand,Glacial Barrier|Frost Strike|Ice Storm
+Stealth Cloak,A cloak of stealth,rare,Chest,Shadow Step|Stealth Strike|Ghost Walk
+Mage's Grimoire,A book of powerful spells,legendary,Offhand,Fireball|Ice Storm|Arcane Knowledge
+Time Knowledge,A guide to time manipulation,epic,Offhand,Time Mastery|Time Warp|Ancient Knowledge
+Alchemist's Notes,Notes from a master alchemist,rare,Offhand,Alchemical Knowledge|Fire Potion|Poison Blade
+Ancient Scroll,A scroll of ancient knowledge,rare,Offhand,Ancient Knowledge|Arcane Knowledge|Time Warp
+Arcane Tome,An ancient book of powerful spells,rare,Offhand,Arcane Bolt|Arcane Knowledge|Mystic Shield
+Arena Training,A manual of combat techniques,rare,Offhand,Arena Training|Battle Cry|Warrior's Strike
+Cavern Knowledge,A guide to the mystic caverns,rare,Offhand,Cavern Mastery|Shadow Step|Ancient Knowledge
+Cloud Magic,A book of cloud magic,rare,Offhand,Cloud Mastery|Cloud Step|Wind Walk
+Forge Knowledge,A book of magical forging,rare,Offhand,Forge Mastery|Power Strike|Battle Strike
+Shield Manual,A guide to magical defense,rare,Offhand,Magic Shield|Defensive Stance|Guard
+Spellbook,A book of spells,rare,Offhand,Fireball|Arcane Bolt
+Spirit Guide,A guide to the spirit realm,rare,Offhand,Spirit Walk|Shadow Step|Ancient Knowledge
+Arena Training,A manual of combat techniques,common,Offhand,Arena Training|Battle Cry|Warrior's Strike
+Shield Manual,A guide to magical defense,common,Offhand,Magic Shield|Defensive Stance|Guard
+Alchemical Fire,A volatile alchemical mixture,rare,Offhand,Fire Potion|Fire Strike|Burn
+Desert Wind,A magical sandstorm in a bottle,rare,Offhand,Desert Storm|Fire Strike|Sand Storm
+Golden Fruit,A fruit of pure energy,rare,Offhand,Energy Surge|Energy Bolt|Power Strike
+Oasis Water,A flask of magical water,rare,Offhand,Oasis Blessing|Water Blessing|Healing Touch
+Oasis Water,A flask of magical water,common,Offhand,Oasis Blessing|Water Blessing|Healing Touch
+Time Crystal,A crystal that manipulates time,legendary,Offhand,Time Warp|Time Strike|Time Mastery
+Dragon's Scale,A scale from an ancient dragon,epic,Chest,Dragon's Breath|Fire Strike|Dragon Slayer
+Cavern Crystal,A crystal from the mystic caverns,rare,Offhand,Cavern Strike|Shadow Strike|Deep Strike
+Crystal Shard,A glowing crystal shard,rare,Offhand,Crystal Strike|Crystal Barrier|Energy Surge
+Fire Bloom,A flower of pure fire,rare,Offhand,Fire Strike|Fire Bolt|Burn
+Fire Crystal,A crystal of pure fire,rare,Offhand,Fire Strike|Fire Bolt|Burn
+Frost Crystal,A crystal of pure ice,rare,Offhand,Frost Bolt|Ice Strike|Glacial Barrier
+Grove's Gift,A gift from the ancient trees,rare,Offhand,Nature's Blessing|Healing Touch|Balance
+Ice Bloom,A flower of pure ice,rare,Offhand,Ice Strike|Frost Bolt|Freeze
+Ice Crystal,A crystal of pure ice,rare,Offhand,Ice Strike|Frost Bolt|Freeze
+Mountain's Heart,A crystal from the mountain's core,rare,Offhand,Mountain's Protection|Crystal Barrier|Defensive Stance
+Starlight Crystal,A crystal that captures starlight,rare,Offhand,Starlight|Starlight Strike|Celestial Sight
+Water Crystal,A crystal of pure water,rare,Offhand,Water Blessing|Water Strike|Healing Touch
+Crystal Shard,A glowing crystal shard,common,Offhand,Crystal Strike|Crystal Barrier|Energy Surge
+Healing Herbs,A bundle of magical herbs,common,Offhand,Healing Potion|Herbal Remedy|Nature's Blessing
+Healer's Kit,A complete healing kit,epic,Offhand,Healing Touch|Herbal Remedy|Purify
+Rogue's Tools,A set of stealth tools,epic,Offhand,Precision Strike|Shadow Step|Poison Blade
+Curse Breaker,A tool to break curses,rare,Offhand,Curse Removal|Purify|Cleanse
+Herbal Kit,A small healing kit,rare,Offhand,Herbal Remedy|Healing Touch
+Stealth Tool,A single stealth tool,rare,Offhand,Precision Strike|Shadow Step
+Herbal Kit,A small healing kit,common,Offhand,Herbal Remedy|Healing Touch
+Dragon Slayer,A legendary weapon,legendary,Weapon,Dragon Slayer|Dragon's Breath|Warrior's Rage
+Time Blade,A blade that manipulates time,legendary,Weapon,Time Strike|Time Warp|Time Mastery
+Champion's Blade,A blade of a legendary champion,epic,Weapon,Champion's Strike|Warrior's Rage|Battle Cry
+Cloud Blade,A blade that harnesses the clouds,epic,Weapon,Cloud Strike|Cloud Step|Wind Strike
+Crystal Blade,A blade of pure crystal,epic,Weapon,Crystal Strike|Crystal Barrier|Energy Surge
+Deep Blade,A blade forged in the depths,epic,Weapon,Deep Strike|Shadow Strike|Cavern Strike
+Dual Element Staff,A staff that channels fire and ice,epic,Weapon,Fire Bolt|Ice Bolt|Elemental Strike
+Mystic Blade,A blade of pure magic,epic,Weapon,Mystic Strike|Arcane Bolt|Mystic Shield
+Sky Blade,A blade that harnesses the wind,epic,Weapon,Sky Strike|Cloud Strike|Lightning Bolt
+Starlight Blade,A blade that harnesses starlight,epic,Weapon,Starlight Strike|Starlight|Celestial Sight
+Battle Axe,A weapon from the ancient battle,rare,Weapon,Battle Strike|Warrior's Strike|Power Strike
+Element Staff,A staff of pure energy,rare,Weapon,Energy Bolt|Energy Surge|Power Strike
+Flame Blade,A blade wreathed in flames,rare,Weapon,Flame Strike|Fire Strike|Burn
+Frost Blade,A blade of pure ice,rare,Weapon,Frost Strike|Ice Strike|Freeze
+Ghost Blade,A blade that can harm spirits,rare,Weapon,Ghost Strike|Shadow Strike|Poison Blade
+Merchant's Blade,A blade from the underground market,rare,Weapon,Merchant's Strike|Quick Strike|Precision Strike
+Mining Pick,A sturdy mining tool,rare,Weapon,Mining Strike|Power Strike|Battle Strike
+Soul Blade,A blade that drains life force,rare,Weapon,Soul Strike|Shadow Step|Ghost Strike
+Summit's Edge,A blade forged at the mountain's peak,rare,Weapon,Summit Strike|Power Strike|Battle Strike
+Water Blade,A blade that flows like water,rare,Weapon,Water Strike|Water Blessing|Flow Strike
+Battle Axe,A weapon from the ancient battle,common,Weapon,Battle Strike|Warrior's Strike|Power Strike
 
-Small Shield,offhand,offhand,one,Shield Up|Guard|Fortify
-Tower Shield,offhand,offhand,two,Shield Up|Shield Up|Shield Bash|Fortify
-Orb,offhand,offhand,one,Poison|Burn|Regenerate
-Book,offhand,offhand,one,Heal|Cleanse|Greater Heal|Silence
-Symbol,offhand,offhand,one,Heal|Cleanse|Shield Up|Regenerate
-Arrow,offhand,offhand,one,Double Shot|Poison|Quick Stab
+// Barbarian-specific equipment
+Berserker's Axe,A mighty axe that grows stronger with each hit,epic,Weapon,Battle Strike|Warrior's Rage|Power Surge
+Warrior's Helm,A helmet that enhances combat prowess,epic,Head,Battle Cry|Defensive Stance|Warrior's Spirit
+Rage Gauntlets,Gauntlets that channel the warrior's rage,epic,Chest,Rage Strike|Power Surge|Battle Stance
+Battle Belt,A belt that enhances combat abilities,epic,Belt,Battle Stance|Power Strike|Warrior's Strike
 
-Leather Boots,shoes,shoes,,Quick Stab
-Iron Boots,shoes,shoes,,Guard
-Sandals,shoes,shoes,,Regenerate
+// Paladin-specific equipment
+Holy Shield,A shield blessed with divine power,epic,Offhand,Divine Shield|Healing Light|Protection
+Crusader's Helm,A helmet of the holy warrior,epic,Head,Divine Blessing|Healing Touch|Protection
+Righteous Armor,A suit of armor blessed by the gods,epic,Chest,Divine Protection|Healing Aura|Guard
+Holy Belt,A belt that enhances healing abilities,epic,Belt,Healing Touch|Divine Blessing|Protection
 
-Small Belt,belt,belt,,Guard
-Large Belt,belt,belt,,Fortify
-Magic Belt,belt,belt,,Enrage
+// Rogue-specific equipment
+Shadow Blade,A blade that strikes from the shadows,epic,Weapon,Shadow Strike|Stealth Strike|Precision Strike
+Assassin's Hood,A hood that enhances stealth,epic,Head,Shadow Step|Stealth Strike|Ghost Walk
+Silent Cloak,A cloak that muffles sound,epic,Chest,Stealth Strike|Shadow Step|Ghost Walk
+Thief's Belt,A belt that enhances agility,epic,Belt,Quick Strike|Stealth Step|Precision Strike
 
-Leather Vest,armor,armor,,Guard
-Chainmail,armor,armor,,Fortify
-Linen Robe,armor,armor,,Regenerate
+// Warlock-specific equipment
+Soul Blade,A blade that drains life force,epic,Weapon,Soul Strike|Life Drain|Dark Pact
+Warlock's Crown,A crown that enhances dark magic,epic,Head,Dark Magic|Soul Drain|Curse
+Corrupted Robes,Robes infused with dark energy,epic,Chest,Dark Pact|Soul Drain|Curse
+Demon's Belt,A belt that channels demonic power,epic,Belt,Dark Magic|Soul Strike|Curse
 
-Ring of Health,accessory,accessory1,,Heal
-Amulet of Power,accessory,accessory2,,Power Strike
-Bracelet of Speed,accessory,accessory1,,Quick Stab
-Necklace of Wisdom,accessory,accessory2,,Greater Heal
-Ring of Lightning,accessory,accessory1,,Lightning
-Amulet of Silence,accessory,accessory2,,Silence
-Bracelet of Frost,accessory,accessory1,,Freeze
-Necklace of Fire,accessory,accessory2,,Burn
+// Mage-specific equipment
+Archmage's Staff,A staff of immense magical power,epic,Weapon,Fireball|Ice Storm|Arcane Bolt
+Mage's Hat,A hat that enhances spellcasting,epic,Head,Arcane Knowledge|Magic Shield|Spell Focus
+Enchanted Robes,Robes that enhance magical abilities,epic,Chest,Arcane Bolt|Magic Shield|Spell Focus
+Mage's Belt,A belt that enhances magical power,epic,Belt,Spell Focus|Arcane Knowledge|Magic Shield
 
-Iron Helmet,armor,head,,Guard
-Leather Cap,armor,head,,Guard
-Iron Greaves,armor,pants,,Fortify
-Leather Pants,armor,pants,,Guard
+// Necromancer-specific equipment
+Death Scythe,A scythe that channels death energy,epic,Weapon,Death Strike|Life Drain|Soul Harvest
+Necromancer's Hood,A hood that enhances dark magic,epic,Head,Death Magic|Soul Drain|Curse
+Death Robes,Robes infused with death energy,epic,Chest,Death Magic|Soul Drain|Curse
+Soul Belt,A belt that enhances soul manipulation,epic,Belt,Soul Harvest|Death Magic|Curse

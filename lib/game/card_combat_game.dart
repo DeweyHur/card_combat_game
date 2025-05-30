@@ -13,6 +13,7 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy_action_loader.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/models/card_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:csv/csv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     // If not found, load from CSV as before
     if (players.isEmpty) {
-      final allCards = await loadAllGameCards();
+      final cardData = await loadCardsByOwnerFromCsv('assets/data/cards.csv');
       final equipmentData =
           await loadEquipmentFromCsv('assets/data/equipment.csv');
       final enemyActionsByName =
@@ -54,20 +55,20 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
         enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
       });
       CombatManager().setEnemyActionsByName(enemyActionsByName);
-      players = await loadCharactersFromCsv(
-          'assets/data/players.csv', allCards, equipmentData,
+      players = await loadCharactersFromCsv('assets/data/players.csv',
+          cardData.cardsByName.values.toList(), equipmentData,
           isEnemy: false);
       enemies = await loadEnemiesFromCsv('assets/data/enemies.csv', enemyDecks);
       // Save to local storage
       prefs.setString(
           'players', jsonEncode(players.map((e) => e.toJson()).toList()));
       // Save other data as before
-      DataController.instance.set<List<GameCard>>('cards', allCards);
+      DataController.instance.set<CardLoaderResult>('cardData', cardData);
       DataController.instance
           .set<Map<String, EquipmentData>>('equipmentData', equipmentData);
     } else {
       // If loaded from local storage, still need to load enemies and cards for the game
-      final allCards = await loadAllGameCards();
+      final cardData = await loadCardsByOwnerFromCsv('assets/data/cards.csv');
       final equipmentData =
           await loadEquipmentFromCsv('assets/data/equipment.csv');
       final enemyActionsByName =
@@ -78,7 +79,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
       });
       CombatManager().setEnemyActionsByName(enemyActionsByName);
       enemies = await loadEnemiesFromCsv('assets/data/enemies.csv', enemyDecks);
-      DataController.instance.set<List<GameCard>>('cards', allCards);
+      DataController.instance.set<CardLoaderResult>('cardData', cardData);
       DataController.instance
           .set<Map<String, EquipmentData>>('equipmentData', equipmentData);
     }

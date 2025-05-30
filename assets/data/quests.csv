@@ -1,0 +1,126 @@
+title,description,choice_text,success_chance,success_reward_type,success_reward_value,failure_penalty_type,failure_penalty_value
+Ancient Library,Explore the ruins of an ancient library. You might find powerful knowledge... or dangerous traps.,Search for rare tomes,0.7,add_equipment,Arcane Tome,take_damage,15
+Ancient Library,Explore the ruins of an ancient library. You might find powerful knowledge... or dangerous traps.,Study defensive techniques,0.9,add_equipment,Shield Manual,take_damage,5
+Ancient Library,Explore the ruins of an ancient library. You might find powerful knowledge... or dangerous traps.,Leave,1.0,message,You decided to leave the library.,message,You left safely.
+Mysterious Merchant,A strange merchant offers to trade with you. Their wares seem... unusual.,Trade health for a cursed blade,1.0,add_equipment,Soul Blade,take_damage,20
+Mysterious Merchant,A strange merchant offers to trade with you. Their wares seem... unusual.,Decline and leave,1.0,message,You decided not to trade.,message,You left safely.
+Dragon's Lair,The entrance to a dragon's lair lies before you. The heat is intense.,Attempt to steal treasure,0.3,add_equipment,Dragon's Scale,take_damage,30
+Dragon's Lair,The entrance to a dragon's lair lies before you. The heat is intense.,Challenge the dragon,0.5,add_equipment,Dragon Slayer,take_damage,25
+Dragon's Lair,The entrance to a dragon's lair lies before you. The heat is intense.,Leave quietly,1.0,message,You wisely chose to leave.,message,You left safely.
+Enchanted Forest,A magical forest with glowing plants and mysterious creatures.,Gather magical herbs,0.8,add_equipment,Healing Herbs,take_damage,8
+Enchanted Forest,A magical forest with glowing plants and mysterious creatures.,Follow the fairy lights,0.6,add_equipment,Fairy Charm,take_damage,12
+Enchanted Forest,A magical forest with glowing plants and mysterious creatures.,Stay on the path,1.0,message,You stayed safe on the main path.,message,You left safely.
+Abandoned Mine,An old mine shaft with strange noises echoing from within.,Search for gems,0.7,add_equipment,Crystal Shard,take_damage,10
+Abandoned Mine,An old mine shaft with strange noises echoing from within.,Investigate the noises,0.5,add_equipment,Mining Pick,take_damage,15
+Abandoned Mine,An old mine shaft with strange noises echoing from within.,Leave the mine,1.0,message,You decided to leave the mine.,message,You left safely.
+Haunted Castle,A decrepit castle with ghostly apparitions floating about.,Search for the treasure room,0.4,add_equipment,Ghost Blade,take_damage,20
+Haunted Castle,A decrepit castle with ghostly apparitions floating about.,Communicate with spirits,0.6,add_equipment,Spirit Guide,take_damage,12
+Haunted Castle,A decrepit castle with ghostly apparitions floating about.,Leave the castle,1.0,message,You chose to leave the haunted castle.,message,You left safely.
+Mystic Temple,An ancient temple with powerful magical energies.,Meditate in the inner sanctum,0.8,add_equipment,Meditation Beads,take_damage,8
+Mystic Temple,An ancient temple with powerful magical energies.,Study the wall carvings,0.7,add_equipment,Ancient Scroll,take_damage,10
+Mystic Temple,An ancient temple with powerful magical energies.,Leave the temple,1.0,message,You decided to leave the temple.,message,You left safely.
+Frozen Caverns,A series of ice caves with strange crystals growing within.,Harvest ice crystals,0.7,add_equipment,Frost Crystal,take_damage,12
+Frozen Caverns,A series of ice caves with strange crystals growing within.,Follow the blue light,0.5,add_equipment,Glacial Shield,take_damage,15
+Frozen Caverns,A series of ice caves with strange crystals growing within.,Leave the caverns,1.0,message,You chose to leave the frozen caverns.,message,You left safely.
+Desert Oasis,A beautiful oasis in the middle of a vast desert.,Drink from the spring,0.9,add_equipment,Oasis Water,take_damage,5
+Desert Oasis,A beautiful oasis in the middle of a vast desert.,Search for artifacts,0.6,add_equipment,Desert Wind,take_damage,12
+Desert Oasis,A beautiful oasis in the middle of a vast desert.,Rest and leave,1.0,message,You rested and left refreshed.,message,You left safely.
+Cursed Village,An abandoned village with strange markings on the buildings.,Investigate the markings,0.5,add_equipment,Curse Breaker,take_damage,18
+Cursed Village,An abandoned village with strange markings on the buildings.,Search for survivors,0.7,add_equipment,Village Charm,take_damage,10
+Cursed Village,An abandoned village with strange markings on the buildings.,Leave quickly,1.0,message,You wisely left the cursed village.,message,You left safely.
+Mountain Pass,A treacherous path through the mountains.,Climb the peak,0.4,add_equipment,Summit's Edge,take_damage,25
+Mountain Pass,A treacherous path through the mountains.,Search for minerals,0.7,add_equipment,Mountain's Heart,take_damage,12
+Mountain Pass,A treacherous path through the mountains.,Take the safe route,1.0,message,You took the safer path.,message,You left safely.
+Ancient Battlefield,The site of an epic battle from long ago.,Search for weapons,0.6,add_equipment,Battle Axe,take_damage,15
+Ancient Battlefield,The site of an epic battle from long ago.,Pay respects,0.8,add_equipment,Warrior's Spirit,take_damage,8
+Ancient Battlefield,The site of an epic battle from long ago.,Leave respectfully,1.0,message,You left the battlefield in peace.,message,You left safely.
+Mystic Grove,A grove of ancient trees with magical properties.,Harvest magical leaves,0.7,add_equipment,Grove's Gift,take_damage,10
+Mystic Grove,A grove of ancient trees with magical properties.,Commune with nature,0.6,add_equipment,Natural Balance,take_damage,12
+Mystic Grove,A grove of ancient trees with magical properties.,Leave peacefully,1.0,message,You left the grove in harmony.,message,You left safely.
+Abandoned Laboratory,An old alchemist's laboratory with strange equipment.,Experiment with potions,0.5,add_equipment,Alchemical Fire,take_damage,20
+Abandoned Laboratory,An old alchemist's laboratory with strange equipment.,Study the notes,0.7,add_equipment,Alchemist's Notes,take_damage,12
+Abandoned Laboratory,An old alchemist's laboratory with strange equipment.,Leave carefully,1.0,message,You left the laboratory intact.,message,You left safely.
+Crystal Cave,A cave filled with glowing crystals of various colors.,Harvest red crystals,0.7,add_equipment,Fire Crystal,take_damage,10
+Crystal Cave,A cave filled with glowing crystals of various colors.,Harvest blue crystals,0.7,add_equipment,Ice Crystal,take_damage,10
+Crystal Cave,A cave filled with glowing crystals of various colors.,Leave the cave,1.0,message,You left the crystal cave.,message,You left safely.
+Floating Islands,Mysterious islands floating in the sky.,Explore the highest island,0.4,add_equipment,Sky Blade,take_damage,25
+Floating Islands,Mysterious islands floating in the sky.,Gather cloud essence,0.7,add_equipment,Cloud Walker,take_damage,12
+Floating Islands,Mysterious islands floating in the sky.,Stay on the lowest island,1.0,message,You stayed on the safe island.,message,You left safely.
+Time-Warped Ruins,Ancient ruins where time seems to flow differently.,Enter the time stream,0.3,add_equipment,Time Crystal,take_damage,30
+Time-Warped Ruins,Ancient ruins where time seems to flow differently.,Study the patterns,0.7,add_equipment,Time Shield,take_damage,12
+Time-Warped Ruins,Ancient ruins where time seems to flow differently.,Stay outside,1.0,message,You avoided the time distortion.,message,You left safely.
+Elemental Forge,A forge where the elements themselves are shaped.,Craft a fire weapon,0.6,add_equipment,Flame Blade,take_damage,15
+Elemental Forge,A forge where the elements themselves are shaped.,Craft an ice weapon,0.6,add_equipment,Frost Blade,take_damage,15
+Elemental Forge,A forge where the elements themselves are shaped.,Leave the forge,1.0,message,You left the elemental forge.,message,You left safely.
+Celestial Observatory,An ancient observatory studying the stars.,Chart the stars,0.7,add_equipment,Starlight Crystal,take_damage,10
+Celestial Observatory,An ancient observatory studying the stars.,Study the telescope,0.6,add_equipment,Cosmic Lens,take_damage,12
+Celestial Observatory,An ancient observatory studying the stars.,Leave the observatory,1.0,message,You left the observatory.,message,You left safely.
+Underground City,A vast city built beneath the surface.,Explore the market,0.7,add_equipment,Merchant's Blade,take_damage,10
+Underground City,A vast city built beneath the surface.,Visit the archives,0.6,add_equipment,Ancient Scroll,take_damage,12
+Underground City,A vast city built beneath the surface.,Leave the city,1.0,message,You left the underground city.,message,You left safely.
+Mystic Waterfall,A waterfall with magical properties.,Drink the water,0.8,add_equipment,Water Crystal,take_damage,8
+Mystic Waterfall,A waterfall with magical properties.,Search behind the falls,0.5,add_equipment,Water Blade,take_damage,15
+Mystic Waterfall,A waterfall with magical properties.,Leave the waterfall,1.0,message,You left the mystic waterfall.,message,You left safely.
+Ancient Arena,The site of legendary gladiatorial battles.,Challenge the champion's spirit,0.4,add_equipment,Champion's Blade,take_damage,25
+Ancient Arena,The site of legendary gladiatorial battles.,Train in the arena,0.7,add_equipment,Arena Training,take_damage,12
+Ancient Arena,The site of legendary gladiatorial battles.,Leave the arena,1.0,message,You left the ancient arena.,message,You left safely.
+Mystic Garden,A garden where plants seem to move on their own.,Harvest the golden fruit,0.6,add_equipment,Golden Fruit,take_damage,15
+Mystic Garden,A garden where plants seem to move on their own.,Study the plants,0.7,add_equipment,Garden's Gift,take_damage,10
+Mystic Garden,A garden where plants seem to move on their own.,Leave the garden,1.0,message,You left the mystic garden.,message,You left safely.
+Crystal Tower,A tower made entirely of crystal.,Climb to the top,0.4,add_equipment,Crystal Blade,take_damage,20
+Crystal Tower,A tower made entirely of crystal.,Study the structure,0.7,add_equipment,Crystal Shield,take_damage,12
+Crystal Tower,A tower made entirely of crystal.,Leave the tower,1.0,message,You left the crystal tower.,message,You left safely.
+Mystic Forge,A forge where magical items are created.,Craft a weapon,0.6,add_equipment,Mystic Blade,take_damage,15
+Mystic Forge,A forge where magical items are created.,Study the techniques,0.7,add_equipment,Forge Knowledge,take_damage,10
+Mystic Forge,A forge where magical items are created.,Leave the forge,1.0,message,You left the mystic forge.,message,You left safely.
+Ancient Temple,An ancient temple with powerful magical energies.,Enter the inner sanctum,0.5,add_equipment,Temple's Blessing,take_damage,18
+Ancient Temple,An ancient temple with powerful magical energies.,Study the carvings,0.7,add_equipment,Ancient Wisdom,take_damage,12
+Ancient Temple,An ancient temple with powerful magical energies.,Leave the temple,1.0,message,You left the ancient temple.,message,You left safely.
+Mystic Caverns,A series of caves with magical properties.,Search for crystals,0.7,add_equipment,Cavern Crystal,take_damage,10
+Mystic Caverns,A series of caves with magical properties.,Study the formations,0.6,add_equipment,Cavern Knowledge,take_damage,12
+Mystic Caverns,A series of caves with magical properties.,Leave the caverns,1.0,message,You left the mystic caverns.,message,You left safely.
+Floating Castle,A castle floating in the clouds.,Enter the castle,0.5,add_equipment,Cloud Blade,take_damage,18
+Floating Castle,A castle floating in the clouds.,Study the magic,0.7,add_equipment,Cloud Magic,take_damage,12
+Floating Castle,A castle floating in the clouds.,Leave the castle,1.0,message,You left the floating castle.,message,You left safely.
+Time-Warped Forest,A forest where time flows differently.,Enter the time stream,0.4,add_equipment,Time Blade,take_damage,25
+Time-Warped Forest,A forest where time flows differently.,Study the patterns,0.7,add_equipment,Time Knowledge,take_damage,12
+Time-Warped Forest,A forest where time flows differently.,Stay outside,1.0,message,You avoided the time distortion.,message,You left safely.
+Elemental Garden,A garden where the elements are in harmony.,Harvest fire plants,0.6,add_equipment,Fire Bloom,take_damage,15
+Elemental Garden,A garden where the elements are in harmony.,Harvest ice plants,0.6,add_equipment,Ice Bloom,take_damage,15
+Elemental Garden,A garden where the elements are in harmony.,Leave the garden,1.0,message,You left the elemental garden.,message,You left safely.
+Celestial Temple,A temple dedicated to the study of the stars.,Chart the stars,0.7,add_equipment,Starlight Blade,take_damage,10
+Celestial Temple,A temple dedicated to the study of the stars.,Study the telescope,0.6,add_equipment,Celestial Vision,take_damage,12
+Celestial Temple,A temple dedicated to the study of the stars.,Leave the temple,1.0,message,You left the celestial temple.,message,You left safely.
+Underground Forge,A forge deep beneath the surface.,Craft a weapon,0.6,add_equipment,Deep Blade,take_damage,15
+Underground Forge,A forge deep beneath the surface.,Study the techniques,0.7,add_equipment,Forge Knowledge,take_damage,10
+Underground Forge,A forge deep beneath the surface.,Leave the forge,1.0,message,You left the underground forge.,message,You left safely.
+Dual Element Staff,A staff that channels multiple elements.,Harvest both elements,0.5,add_equipment,Dual Element Staff,take_damage,20
+Dual Element Staff,A staff that channels multiple elements.,Focus on one element,0.7,add_equipment,Element Staff,take_damage,12
+Dual Element Staff,A staff that channels multiple elements.,Leave the staff,1.0,message,You left the staff untouched.,message,You left safely.
+Combat Gauntlets,A pair of magical gauntlets that enhance combat abilities.,Try them on,0.6,add_equipment,Combat Gauntlets,take_damage,15
+Combat Gauntlets,A pair of magical gauntlets that enhance combat abilities.,Study the enchantments,0.7,add_equipment,Enchanted Gauntlets,take_damage,10
+Combat Gauntlets,A pair of magical gauntlets that enhance combat abilities.,Leave the gauntlets,1.0,message,You left the gauntlets behind.,message,You left safely.
+Shadow Cloak,A cloak that grants stealth abilities.,Try it on,0.5,add_equipment,Shadow Cloak,take_damage,18
+Shadow Cloak,A cloak that grants stealth abilities.,Study its properties,0.7,add_equipment,Stealth Cloak,take_damage,12
+Shadow Cloak,A cloak that grants stealth abilities.,Leave the cloak,1.0,message,You left the cloak untouched.,message,You left safely.
+Battle Trinkets,A collection of magical trinkets from ancient battles.,Take the set,0.4,add_equipment,Battle Trinkets,take_damage,25
+Battle Trinkets,A collection of magical trinkets from ancient battles.,Take one trinket,0.7,add_equipment,Battle Trinket,take_damage,12
+Battle Trinkets,A collection of magical trinkets from ancient battles.,Leave the trinkets,1.0,message,You left the trinkets behind.,message,You left safely.
+Elemental Ring,A ring that channels elemental powers.,Claim the ring,0.5,add_equipment,Elemental Ring,take_damage,20
+Elemental Ring,A ring that channels elemental powers.,Study its magic,0.7,add_equipment,Magic Ring,take_damage,12
+Elemental Ring,A ring that channels elemental powers.,Leave the ring,1.0,message,You left the ring untouched.,message,You left safely.
+Healer's Kit,A collection of healing tools and herbs.,Take the kit,0.6,add_equipment,Healer's Kit,take_damage,15
+Healer's Kit,A collection of healing tools and herbs.,Take some herbs,0.8,add_equipment,Herbal Kit,take_damage,8
+Healer's Kit,A collection of healing tools and herbs.,Leave the kit,1.0,message,You left the healing kit.,message,You left safely.
+Mystic Amulet,An amulet with powerful magical properties.,Claim the amulet,0.4,add_equipment,Mystic Amulet,take_damage,25
+Mystic Amulet,An amulet with powerful magical properties.,Study its magic,0.7,add_equipment,Magic Amulet,take_damage,12
+Mystic Amulet,An amulet with powerful magical properties.,Leave the amulet,1.0,message,You left the amulet untouched.,message,You left safely.
+Warrior's Belt,A belt that enhances combat abilities.,Try it on,0.6,add_equipment,Warrior's Belt,take_damage,15
+Warrior's Belt,A belt that enhances combat abilities.,Study its properties,0.7,add_equipment,Combat Belt,take_damage,10
+Warrior's Belt,A belt that enhances combat abilities.,Leave the belt,1.0,message,You left the belt behind.,message,You left safely.
+Mage's Grimoire,A book of powerful spells.,Take the grimoire,0.5,add_equipment,Mage's Grimoire,take_damage,20
+Mage's Grimoire,A book of powerful spells.,Study its contents,0.7,add_equipment,Spellbook,take_damage,12
+Mage's Grimoire,A book of powerful spells.,Leave the grimoire,1.0,message,You left the grimoire untouched.,message,You left safely.
+Rogue's Tools,A set of tools for stealth and precision.,Take the set,0.5,add_equipment,Rogue's Tools,take_damage,18
+Rogue's Tools,A set of tools for stealth and precision.,Take one tool,0.7,add_equipment,Stealth Tool,take_damage,12
+Rogue's Tools,A set of tools for stealth and precision.,Leave the tools,1.0,message,You left the tools behind.,message,You left safely.

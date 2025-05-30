@@ -71,57 +71,12 @@ class EquipmentPanel extends BasePanel {
       color: Colors.green.shade700,
       position: Vector2(size.x / 2 - 70, size.y - 50),
       onPressed: () {
-        if (currentPlayer == null) return;
-        final playersCsv =
-            DataController.instance.get<List<List<dynamic>>>('playersCsv');
-        if (playersCsv == null) return;
-        final row = playersCsv.firstWhere(
-            (r) =>
-                r.isNotEmpty &&
-                r[0].toString().trim().toLowerCase() ==
-                    currentPlayer!.name.trim().toLowerCase(),
-            orElse: () => []);
-        if (row.isEmpty) return;
-        final defaultEquipmentStr =
-            row.length > 10 ? (row[10] as String? ?? '') : '';
-        final equipmentDataMap = DataController.instance
-                .get<Map<String, EquipmentData>>('equipmentData') ??
-            {};
-        // Build slot-to-eq map
-        final equipmentList = defaultEquipmentStr
-            .split('|')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-        final Map<String, String> slotToEq = {};
-        for (final eqName in equipmentList) {
-          final eq = equipmentDataMap[eqName];
-          if (eq != null) {
-            // Use shared slot mapping function
-            String slot =
-                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-            slotToEq[slot] = eqName;
-          }
+        if (currentPlayer == null) {
+          GameLogger.error(
+              LogCategory.game, '[EQUIP_PANEL] No current player selected');
+          return;
         }
-        currentPlayer!.equipment = slotToEq;
-        // Update deck as well
-        final List<String> cardNames = [];
-        for (final eqName in equipmentList) {
-          final eq = equipmentDataMap[eqName];
-          if (eq != null) {
-            cardNames.addAll(eq.cards);
-          }
-        }
-        final allCards =
-            DataController.instance.get<List<GameCard>>('cards') ?? [];
-        final List<GameCard> deck = [];
-        for (final cardName in cardNames) {
-          final cardIndex = allCards.indexWhere((c) => c.name == cardName);
-          if (cardIndex != -1) deck.add(allCards[cardIndex]);
-        }
-        currentPlayer!.deck.clear();
-        currentPlayer!.deck.addAll(deck);
-        updateUI();
+        _loadDefaultEquipment();
       },
     ));
   }
@@ -329,6 +284,115 @@ class EquipmentPanel extends BasePanel {
   String? _getEquipmentNameForSlot(String slot) {
     if (currentPlayer == null) return null;
     return currentPlayer!.equipment[slot];
+  }
+
+  Future<void> _loadDefaultEquipment() async {
+    if (currentPlayer == null) {
+      GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player selected');
+      return;
+    }
+
+    final playersCsv = await DataController.getPlayersCsv();
+    if (playersCsv == null) {
+      GameLogger.error(
+          LogCategory.game, '[EQUIP_PANEL] Could not load players CSV');
+      return;
+    }
+
+    GameLogger.info(LogCategory.game,
+        '[EQUIP_PANEL] Loading defaults for player: ${currentPlayer!.name}');
+
+    // Find the player's row in the CSV
+    final playerRow = playersCsv.firstWhere(
+      (row) => row[0] == currentPlayer!.name,
+      orElse: () {
+        GameLogger.error(LogCategory.game,
+            '[EQUIP_PANEL] No matching row found for player: ${currentPlayer!.name}');
+        return [];
+      },
+    );
+
+    if (playerRow.isEmpty) return;
+
+    // Get the default equipment string from column 9
+    final defaultEquipmentStr =
+        playerRow.length > 9 ? (playerRow[9] as String? ?? '') : '';
+    GameLogger.info(LogCategory.game,
+        '[EQUIP_PANEL] Default equipment string: $defaultEquipmentStr');
+
+    if (defaultEquipmentStr.isEmpty) {
+      GameLogger.error(LogCategory.game,
+          '[EQUIP_PANEL] No default equipment found for player: ${currentPlayer!.name}');
+      return;
+    }
+
+    // Parse the equipment list
+    final equipmentList = defaultEquipmentStr.split('|');
+    GameLogger.info(
+        LogCategory.game, '[EQUIP_PANEL] Equipment list: $equipmentList');
+
+    // Get the equipment data
+    final equipmentData = await DataController.getEquipmentData();
+    if (equipmentData == null) {
+      GameLogger.error(
+          LogCategory.game, '[EQUIP_PANEL] Could not load equipment data');
+      return;
+    }
+
+    // Get the card data
+    final cardData = await DataController.getCardData();
+    if (cardData == null) {
+      GameLogger.error(
+          LogCategory.game, '[EQUIP_PANEL] Could not load card data');
+      return;
+    }
+
+    // Build a mapping of equipment slots to panel slots
+    final Map<String, String> slotMapping = {};
+    for (final equipmentName in equipmentList) {
+      final equipment = equipmentData[equipmentName];
+      if (equipment != null) {
+        final panelSlot = mapEquipmentSlotToPanelSlot(
+            equipment.slot, equipment.type, equipment.name);
+        GameLogger.info(LogCategory.game,
+            '[EQUIP_PANEL] Mapping equipment: $equipmentName (slot: ${equipment.slot}, type: ${equipment.type}) -> $panelSlot');
+        slotMapping[panelSlot] = equipmentName;
+      }
+    }
+
+    GameLogger.info(
+        LogCategory.game, '[EQUIP_PANEL] Final slot mapping: $slotMapping');
+
+    // Update the player's equipment
+    currentPlayer!.equipment = slotMapping;
+
+    // Update the player's deck with the cards from the equipment
+    final List<GameCard> cardsToAdd = [];
+    for (final equipmentName in equipmentList) {
+      final equipment = equipmentData[equipmentName];
+      if (equipment != null) {
+        for (final cardName in equipment.cards) {
+          final card = cardData.cardsByName[cardName];
+          if (card != null) {
+            cardsToAdd.add(card);
+          } else {
+            GameLogger.error(
+                LogCategory.game, '[EQUIP_PANEL] Card not found: $cardName');
+          }
+        }
+      }
+    }
+
+    GameLogger.info(LogCategory.game,
+        '[EQUIP_PANEL] Cards to add: ${cardsToAdd.map((c) => c.name).toList()}');
+    currentPlayer!.setDeck(cardsToAdd);
+    GameLogger.info(LogCategory.game,
+        '[EQUIP_PANEL] Final deck size: ${currentPlayer!.deck.length}');
+
+    // Notify listeners
+    DataController.updateSelectedPlayer(currentPlayer!);
+    GameLogger.info(LogCategory.game,
+        '[EQUIP_PANEL] Default equipment loaded successfully');
   }
 }
 

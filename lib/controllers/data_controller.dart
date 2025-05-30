@@ -3,19 +3,18 @@ import 'dart:convert';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/models/card_loader.dart';
 
 class DataController {
-  static final DataController instance = DataController._();
-  DataController._();
-
+  static final DataController instance = DataController._internal();
   final Map<String, dynamic> _data = {};
   final Map<String, List<Function(dynamic)>> _watchers = {};
   final Map<String, StreamController<dynamic>> _streamControllers = {};
 
+  DataController._internal();
+
   // Get value for a key
-  T? get<T>(String key) {
-    return _data[key] as T?;
-  }
+  T? get<T>(String key) => _data[key] as T?;
 
   // Set value for a key and notify watchers
   void set<T>(String key, T value) {
@@ -57,6 +56,10 @@ class DataController {
 
     GameLogger.debug(LogCategory.data,
         'Data updated: $key = ${serialize(value)} (was: ${serialize(oldValue)})');
+  }
+
+  void update<T>(String key, T value) {
+    set(key, value);
   }
 
   // Watch a key for changes
@@ -136,5 +139,25 @@ class DataController {
     set<List<List<dynamic>>>('playersCsv', playersCsv);
     GameLogger.debug(LogCategory.data,
         'playersCsv[[38;5;214m$rowIndex[0m][[38;5;214m$colIndex[0m] updated: $oldValue -> $value');
+  }
+
+  /// Get the players CSV data
+  static Future<List<List<dynamic>>?> getPlayersCsv() async {
+    return instance.get<List<List<dynamic>>>('playersCsv');
+  }
+
+  /// Get the equipment data
+  static Future<Map<String, EquipmentData>?> getEquipmentData() async {
+    return instance.get<Map<String, EquipmentData>>('equipmentData');
+  }
+
+  /// Get the card data
+  static Future<CardLoaderResult?> getCardData() async {
+    return instance.get<CardLoaderResult>('cardData');
+  }
+
+  /// Update the selected player
+  static void updateSelectedPlayer(GameCharacter player) {
+    instance.update('selectedPlayer', player);
   }
 }

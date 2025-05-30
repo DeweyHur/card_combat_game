@@ -11,7 +11,7 @@ class GameCharacter {
   final String imagePath;
   final String soundPath;
   final String description;
-  final List<GameCard> deck;
+  List<GameCard> deck = [];
   final int maxEnergy;
   int handSize;
 
@@ -82,14 +82,22 @@ class GameCharacter {
     required this.defense,
     required this.emoji,
     required this.color,
-    required this.imagePath,
-    required this.soundPath,
+    this.imagePath = '',
+    this.soundPath = '',
     required this.description,
-    required this.deck,
+    List<GameCard>? deck,
+    Map<String, String>? equipment,
     this.maxEnergy = 3,
     this.handSize = 5,
   })  : _currentHealth = maxHealth,
-        _currentEnergy = maxEnergy;
+        _currentEnergy = maxEnergy {
+    if (deck != null) this.deck = deck;
+    if (equipment != null) this.equipment = equipment;
+  }
+
+  void setDeck(List<GameCard> newDeck) {
+    deck = newDeck;
+  }
 
   // --- Watch/Unwatch/Notify ---
   void watch(String property, Function(dynamic) callback) {

@@ -3,9 +3,18 @@ import 'package:csv/csv.dart';
 import 'game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 
-/// Loads all cards from CSV and returns a map: owner name -> List<GameCard>
-Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
-    String assetPath) async {
+class CardLoaderResult {
+  final Map<String, List<GameCard>> ownerCards;
+  final Map<String, GameCard> cardsByName;
+
+  CardLoaderResult({
+    required this.ownerCards,
+    required this.cardsByName,
+  });
+}
+
+/// Loads all cards from CSV and returns both owner-based and name-based maps
+Future<CardLoaderResult> loadCardsByOwnerFromCsv(String assetPath) async {
   final csvString = await rootBundle.loadString(assetPath);
   final rows =
       const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
@@ -14,6 +23,7 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
   final dataRows = rows.skip(1);
 
   final Map<String, List<GameCard>> ownerCards = {};
+  final Map<String, GameCard> cardsByName = {};
 
   for (final row in dataRows) {
     try {
@@ -23,14 +33,50 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
         continue;
       }
       final owner = row[0] as String;
+      final name = row[1] as String;
       CardType cardType;
+      final typeStr = row[3].toString().toLowerCase();
       try {
-        cardType = CardType.values.firstWhere(
-          (e) => e.toString().split('.').last == row[3],
-        );
+        // Map card types to enum values
+        switch (typeStr) {
+          case 'attack':
+            cardType = CardType.attack;
+            break;
+          case 'defense':
+          case 'shield':
+            cardType = CardType.shield;
+            break;
+          case 'heal':
+            cardType = CardType.heal;
+            break;
+          case 'skill':
+            // Map skill cards to appropriate types based on their effect
+            final description = row[2].toString().toLowerCase();
+            if (description.contains('draw') &&
+                description.contains('energy')) {
+              cardType = CardType
+                  .attack; // Map to attack since it's an offensive skill
+            } else if (description.contains('shield') ||
+                description.contains('block')) {
+              cardType = CardType.shield;
+            } else if (description.contains('heal') ||
+                description.contains('restore')) {
+              cardType = CardType.heal;
+            } else {
+              cardType = CardType.attack; // Default to attack for other skills
+            }
+            break;
+          case 'cure':
+            cardType = CardType.cure;
+            break;
+          default:
+            GameLogger.warning(LogCategory.data,
+                'Unknown card type: \'$typeStr\' in row: $row');
+            continue;
+        }
       } catch (e) {
-        GameLogger.warning(
-            LogCategory.data, 'Unknown card type: \'${row[3]}\' in row: $row');
+        GameLogger.warning(LogCategory.data,
+            'Error mapping card type: \'$typeStr\' in row: $row');
         continue;
       }
       StatusEffect? statusEffect;
@@ -46,7 +92,7 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
         }
       }
       final card = GameCard(
-        name: row[1] as String,
+        name: name,
         description: row[2] as String,
         type: cardType,
         value: int.tryParse(row[4].toString()) ?? 0,
@@ -60,11 +106,12 @@ Future<Map<String, List<GameCard>>> loadCardsByOwnerFromCsv(
       );
       ownerCards.putIfAbsent(owner, () => []);
       ownerCards[owner]!.add(card);
+      cardsByName[name] = card;
     } catch (e) {
       GameLogger.warning(
           LogCategory.data, 'Error parsing card row: $row, error: $e');
       continue;
     }
   }
-  return ownerCards;
+  return CardLoaderResult(ownerCards: ownerCards, cardsByName: cardsByName);
 }

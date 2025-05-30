@@ -1,20 +1,82 @@
 owner,name,description,type,value,cost,statusEffect,statusDuration,color
-Player,Slash,Deal 5 damage,attack,200,1,,,red
-Player,Heavy Strike,Deal 8 damage,attack,8,2,,,red
-Player,Heal,Restore 3 HP,heal,3,1,,,green
-Player,Greater Heal,Restore 5 HP,heal,5,2,,,green
-Player,Poison,Apply poison for 3 turns,statusEffect,2,1,poison,3,purple
-Player,Cleanse,Remove all status effects,cure,0,1,,,blue
-Player,Shield Up,Gain 8 shield,shield,8,1,,,blueGrey
-Player,Shield Bash,Attack with your shield value (consumes shield),shieldAttack,0,2,,,amber
-Player,Burn,Apply burn (stacks and halves each turn),statusEffect,4,1,burn,4,orange
-Player,Quick Stab,Deal 3 damage quickly,attack,3,0,,,red
-Player,Double Shot,Deal 4 damage twice,attack,4,2,,,red
-Player,Power Strike,Deal 12 damage,attack,12,3,,,red
-Player,Guard,Gain 5 shield,shield,5,1,,,blueGrey
-Player,Fortify,Gain 12 shield,shield,12,2,,,blueGrey
-Player,Regenerate,Restore 2 HP for 3 turns,statusEffect,2,2,regenerate,3,green
-Player,Enrage,Deal 6 damage and gain 2 energy,attack,6,2,,,orange
-Player,Silence,Remove enemy's next status effect,cure,0,2,,,blue
-Player,Freeze,Freeze enemy for 1 turn,statusEffect,0,2,freeze,1,blue
-Player,Lightning,Deal 7 damage and apply burn,attack,7,2,burn,2,yellow
+Player,Arcane Bolt,Deal 12 damage and draw a card,attack,12,2,,,purple
+Player,Magic Shield,Block 8 damage and gain 2 energy,defense,8,1,,,blue
+Player,Soul Strike,Deal 15 damage. Costs 2 health,attack,15,1,,,purple
+Player,Dragon's Breath,Deal 20 damage to all enemies,attack,20,3,,,orange
+Player,Dragon Slayer,Deal 25 damage if enemy has 50+ health,attack,25,2,,,red
+Player,Healing Potion,Restore 10 health,heal,10,1,,,green
+Player,Fairy Blessing,Gain 5 energy and draw 2 cards,skill,0,0,,,green
+Player,Crystal Strike,Deal 8 damage and gain 3 energy,attack,8,1,,,blue
+Player,Mining Strike,Deal 12 damage and reduce enemy energy,attack,12,2,,,red
+Player,Ghost Strike,Deal 15 damage and ignore block,attack,15,2,,,purple
+Player,Spirit Walk,Draw 3 cards and gain 2 energy,skill,0,1,,,purple
+Player,Inner Peace,Restore 15 health and gain 3 energy,heal,15,1,,,green
+Player,Ancient Knowledge,Draw 2 cards and gain 2 energy,skill,0,0,,,purple
+Player,Frost Bolt,Deal 10 damage and freeze enemy,attack,10,1,freeze,1,blue
+Player,Glacial Barrier,Block 12 damage and freeze attacker,defense,12,2,freeze,1,blue
+Player,Oasis Blessing,Restore 20 health,heal,20,1,,,green
+Player,Desert Storm,Deal 8 damage to all enemies,attack,8,2,,,orange
+Player,Curse Removal,Remove all debuffs and gain 3 energy,cure,0,2,,,blue
+Player,Village Blessing,Restore 12 health and draw a card,heal,12,1,,,green
+Player,Summit Strike,Deal 18 damage and gain 2 energy,attack,18,2,,,red
+Player,Mountain's Protection,Block 10 damage and gain 2 energy,defense,10,1,,,blue
+Player,Battle Strike,Deal 16 damage and gain 1 energy,attack,16,2,,,red
+Player,Warrior's Blessing,Draw 2 cards and gain 2 energy,skill,0,0,,,red
+Player,Nature's Blessing,Restore 15 health and draw a card,heal,15,2,,,green
+Player,Balance,Draw 2 cards and gain 3 energy,skill,0,0,,,green
+Player,Fire Potion,Deal 20 damage and apply burn,attack,20,2,burn,2,orange
+Player,Alchemical Knowledge,Draw 3 cards,skill,0,1,,,purple
+Player,Fire Strike,Deal 15 damage and apply burn,attack,15,2,burn,2,orange
+Player,Ice Strike,Deal 12 damage and freeze,attack,12,2,freeze,2,blue
+Player,Sky Strike,Deal 25 damage if you have 3+ energy,attack,25,3,,,blue
+Player,Cloud Step,Draw 2 cards and gain 2 energy,skill,0,1,,,blue
+Player,Time Warp,Take an extra turn,skill,0,3,,,purple
+Player,Time Barrier,Block 15 damage and draw a card,defense,15,2,,,purple
+Player,Flame Strike,Deal 18 damage and apply burn,attack,18,2,burn,2,orange
+Player,Frost Strike,Deal 15 damage and freeze,attack,15,2,freeze,2,blue
+Player,Starlight,Draw 3 cards and gain 2 energy,skill,0,1,,,purple
+Player,Cosmic Vision,See enemy's next move,skill,0,2,,,purple
+Player,Merchant's Strike,Deal 12 damage and gain 3 energy,attack,12,1,,,red
+Player,Water Blessing,Restore 20 health and draw a card,heal,20,1,,,green
+Player,Water Strike,Deal 15 damage and draw a card,attack,15,2,,,blue
+Player,Champion's Strike,Deal 25 damage if you have 5+ energy,attack,25,3,,,red
+Player,Arena Training,Draw 2 cards and gain 3 energy,skill,0,1,,,red
+Player,Energy Surge,Draw 3 cards and gain 2 energy,skill,0,1,,,yellow
+Player,Crystal Strike,Deal 20 damage and gain 2 energy,attack,20,2,,,blue
+Player,Crystal Barrier,Block 12 damage and draw a card,defense,12,1,,,blue
+Player,Mystic Strike,Deal 18 damage and draw a card,attack,18,2,,,purple
+Player,Forge Mastery,Draw 2 cards and gain 3 energy,skill,0,1,,,red
+Player,Temple's Grace,Restore 20 health and gain 3 energy,heal,20,2,,,green
+Player,Cavern Strike,Deal 15 damage and gain 2 energy,attack,15,2,,,purple
+Player,Cavern Mastery,Draw 2 cards and gain 2 energy,skill,0,1,,,purple
+Player,Cloud Strike,Deal 20 damage and gain 2 energy,attack,20,2,,,blue
+Player,Cloud Mastery,Draw 3 cards and gain 2 energy,skill,0,1,,,blue
+Player,Time Strike,Deal 25 damage if you have 3+ energy,attack,25,3,,,purple
+Player,Time Mastery,Draw 2 cards and gain 3 energy,skill,0,1,,,purple
+Player,Fire Bloom,Deal 18 damage and apply burn,attack,18,2,burn,2,orange
+Player,Ice Bloom,Deal 15 damage and freeze,attack,15,2,freeze,2,blue
+Player,Starlight Strike,Deal 15 damage and draw a card,attack,15,2,,,purple
+Player,Celestial Sight,Draw 2 cards and gain 2 energy,skill,0,1,,,purple
+Player,Deep Strike,Deal 18 damage and gain 2 energy,attack,18,2,,,purple
+Player,Fire Bolt,Deal 10 damage and apply burn,attack,10,1,burn,2,orange
+Player,Ice Bolt,Deal 8 damage and freeze,attack,8,1,freeze,1,blue
+Player,Energy Bolt,Deal 15 damage and gain 2 energy,attack,15,2,,,yellow
+Player,Power Strike,Deal 12 damage and gain 1 energy,attack,12,1,,,red
+Player,Defensive Stance,Block 8 damage and draw a card,defense,8,1,,,blue
+Player,Shadow Strike,Deal 15 damage and draw a card,attack,15,2,,,purple
+Player,Shadow Step,Draw 2 cards and gain 1 energy,skill,0,1,,,purple
+Player,Warrior's Strike,Deal 12 damage and gain 1 energy,attack,12,1,,,red
+Player,Tactical Retreat,Draw 2 cards and gain 2 energy,skill,0,1,,,blue
+Player,Lightning Bolt,Deal 12 damage and draw a card,attack,12,2,,,yellow
+Player,Healing Touch,Restore 12 health,heal,12,1,,,green
+Player,Herbal Remedy,Restore 8 health and draw a card,heal,8,1,,,green
+Player,Purify,Remove all debuffs,cure,0,2,,,blue
+Player,Mystic Shield,Block 10 damage and gain 2 energy,defense,10,1,,,blue
+Player,Battle Stance,Block 8 damage and draw a card,defense,8,1,,,blue
+Player,Warrior's Rage,Deal 20 damage if you have 3+ energy,attack,20,3,,,red
+Player,Fireball,Deal 15 damage and apply burn,attack,15,2,burn,2,orange
+Player,Ice Storm,Deal 12 damage and freeze,attack,12,2,freeze,2,blue
+Player,Arcane Knowledge,Draw 3 cards,skill,0,1,,,purple
+Player,Precision Strike,Deal 15 damage and draw a card,attack,15,2,,,purple
+Player,Poison Blade,Deal 10 damage and apply poison,attack,10,1,poison,3,purple
+Player,Battle Cry,Deal 8 damage to all enemies,attack,8,2,,,red

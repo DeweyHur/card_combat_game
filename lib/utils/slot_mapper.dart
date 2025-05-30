@@ -1,28 +1,34 @@
 String mapEquipmentSlotToPanelSlot(String slot, String type, String name) {
-  switch (slot) {
-    case 'head':
-      return 'Head';
-    case 'armor':
-      if (name.contains('Pants')) return 'Pants';
-      if (name.contains('Helmet') || name.contains('Cap')) return 'Head';
-      return 'Chest';
-    case 'pants':
-      return 'Pants';
-    case 'shoes':
-      return 'Shoes';
-    case 'belt':
-      return 'Belt';
-    case 'weapon':
-      return 'Weapon';
-    case 'offhand':
-      return 'Offhand';
-    case 'accessory1':
-      return 'Accessory 1';
-    case 'accessory2':
-      return 'Accessory 2';
-    case 'accessory':
-      return 'Accessory 1';
-    default:
-      return slot;
+  // First check the type field
+  if (type.toLowerCase().contains('gauntlet')) {
+    return 'Hands';
+  } else if (type.toLowerCase().contains('belt')) {
+    return 'Belt';
+  } else if (type.toLowerCase().contains('weapon')) {
+    return 'Weapon';
+  } else if (type.toLowerCase().contains('shield') ||
+      type.toLowerCase().contains('manual')) {
+    return 'Offhand';
+  } else if (type.toLowerCase().contains('charm')) {
+    return 'Accessory 1';
   }
+
+  // Then check the name field
+  if (name.toLowerCase().contains('gauntlet')) {
+    return 'Hands';
+  } else if (name.toLowerCase().contains('belt')) {
+    return 'Belt';
+  } else if (name.toLowerCase().contains('axe') ||
+      name.toLowerCase().contains('sword') ||
+      name.toLowerCase().contains('weapon')) {
+    return 'Weapon';
+  } else if (name.toLowerCase().contains('shield') ||
+      name.toLowerCase().contains('manual')) {
+    return 'Offhand';
+  } else if (name.toLowerCase().contains('charm')) {
+    return 'Accessory 1';
+  }
+
+  // If no match found, return the original slot
+  return slot;
 }
