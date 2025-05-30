@@ -5,7 +5,6 @@ import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'package:card_combat_app/utils/audio_config.dart';
-import 'package:card_combat_app/models/game_cards_data.dart';
 import 'package:card_combat_app/models/game_character_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
