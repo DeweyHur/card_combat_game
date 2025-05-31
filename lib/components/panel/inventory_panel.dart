@@ -34,15 +34,15 @@ class InventoryPanel extends PositionComponent
     final filtered = items
         .where((item) =>
             filter == null ||
-            item.handedness?.toLowerCase() == filter?.toLowerCase() ||
+            item.handedness.toLowerCase() == filter?.toLowerCase() ||
             (filter == 'Chest' &&
-                item.handedness?.toLowerCase().contains('armor') == true) ||
+                item.handedness.toLowerCase().contains('armor') == true) ||
             (filter == 'Head' &&
-                item.handedness?.toLowerCase().contains('helmet') == true) ||
+                item.handedness.toLowerCase().contains('helmet') == true) ||
             (filter == 'Pants' &&
-                item.handedness?.toLowerCase().contains('legs') == true) ||
+                item.handedness.toLowerCase().contains('legs') == true) ||
             (filter == 'Shoes' &&
-                item.handedness?.toLowerCase().contains('boots') == true))
+                item.handedness.toLowerCase().contains('boots') == true))
         .toList();
 
     GameLogger.info(LogCategory.game,

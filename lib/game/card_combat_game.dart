@@ -94,7 +94,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
         selectedPlayer = found.first;
         // Load saved equipment for selected player
         final savedEquipment =
-            await prefs.getString('playerEquipment:${selectedPlayer.name}');
+            prefs.getString('playerEquipment:${selectedPlayer.name}');
         if (savedEquipment != null) {
           try {
             final equipmentMap =
@@ -111,7 +111,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
       selectedPlayer = players.first;
       // Load saved equipment for first player
       final savedEquipment =
-          await prefs.getString('playerEquipment:${selectedPlayer.name}');
+          prefs.getString('playerEquipment:${selectedPlayer.name}');
       if (savedEquipment != null) {
         try {
           final equipmentMap =

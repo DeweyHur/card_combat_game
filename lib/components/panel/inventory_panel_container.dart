@@ -205,14 +205,14 @@ class InventoryPanelContainer extends PositionComponent
         }
 
         // Update the player's equipment
-        player!.equipment = newEquipment;
+        player.equipment = newEquipment;
         GameLogger.info(
             LogCategory.game, '[INVENTORY] Final equipment map: $newEquipment');
 
         // Update the selected player in DataController
-        DataController.instance.set<GameCharacter>('selectedPlayer', player!);
+        DataController.instance.set<GameCharacter>('selectedPlayer', player);
         GameLogger.info(LogCategory.game,
-            '[INVENTORY] Player ${player!.name} equipment after update: ${currentEquipmentList.join('|')}');
+            '[INVENTORY] Player ${player.name} equipment after update: ${currentEquipmentList.join('|')}');
 
         // Log the current state of the selected player
         final currentPlayer =
