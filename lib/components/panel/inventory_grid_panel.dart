@@ -60,7 +60,12 @@ class InventoryGridPanel extends PositionComponent with TapCallbacks {
 
     // Filter equipment for the current slot
     final items = equipmentMap.values.where((e) {
-      final matches = e.slot == slot;
+      // Handle accessory slots specially
+      if (slot.startsWith('Accessory')) {
+        return e.slot.toLowerCase() == 'accessory';
+      }
+      // For other slots, do exact match
+      final matches = e.slot.toLowerCase() == slot.toLowerCase();
       GameLogger.info(LogCategory.game,
           '[INV_GRID] Item ${e.name} slot: ${e.slot}, matches: $matches');
       return matches;
@@ -83,6 +88,16 @@ class InventoryGridPanel extends PositionComponent with TapCallbacks {
         size: Vector2(cellWidth, cellHeight),
       );
       add(cell);
+    }
+
+    // Select currently equipped item if any
+    final equippedItemName = player.equipment[slot];
+    if (equippedItemName != null) {
+      final equippedItem = items.firstWhere(
+        (e) => e.name == equippedItemName,
+        orElse: () => items.first,
+      );
+      onSelect(equippedItem);
     }
   }
 }
