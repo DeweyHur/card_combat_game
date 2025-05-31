@@ -1,67 +1,62 @@
-import 'package:flutter/material.dart' as material;
 import 'package:flame/components.dart';
-import 'package:card_combat_app/models/card.dart';
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:card_combat_app/components/simple_button_component.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 class CardUpgradePanel extends PositionComponent {
-  final List<Card> cards;
-  final Function(Card) onCardUpgraded;
-  final Function(CardUpgradePanel) onClose;
+  final GameCard card;
+  final Function(GameCard) onUpgrade;
+  final Function() onCancel;
 
   CardUpgradePanel({
-    required this.cards,
-    required this.onCardUpgraded,
-    required this.onClose,
-  });
+    required this.card,
+    required this.onUpgrade,
+    required this.onCancel,
+    Vector2? position,
+    Vector2? size,
+  }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Title
+    // Add background
+    add(RectangleComponent(
+      size: size,
+      paint: material.Paint()..color = material.Colors.black.withAlpha(217),
+      anchor: Anchor.topLeft,
+    ));
+
+    // Add card name
     add(TextComponent(
-      text: 'Upgrade a Card',
-      position: Vector2(100, 50),
+      text: card.name,
       textRenderer: TextPaint(
         style: const material.TextStyle(
-          fontSize: 32,
-          color: material.Colors.black,
+          color: material.Colors.white,
+          fontSize: 24,
           fontWeight: material.FontWeight.bold,
         ),
       ),
+      anchor: Anchor.topLeft,
+      position: Vector2(20, 20),
     ));
 
-    // Description
-    add(TextComponent(
-      text: 'Choose a card to upgrade:',
-      position: Vector2(100, 100),
-      textRenderer: TextPaint(
-        style: const material.TextStyle(
-          fontSize: 18,
-          color: material.Colors.black87,
-        ),
-      ),
+    // Add upgrade button
+    add(SimpleButtonComponent.text(
+      text: 'Upgrade',
+      size: Vector2(200, 50),
+      color: material.Colors.green,
+      onPressed: () => onUpgrade(card),
+      position: Vector2(size.x / 2, size.y - 40),
     ));
 
-    // Card buttons
-    for (int i = 0; i < cards.length; i++) {
-      final card = cards[i];
-      add(ButtonComponent(
-        label: card.toString(),
-        onPressed: () {
-          card.upgrade();
-          onCardUpgraded(card);
-          onClose(this);
-        },
-        position: Vector2(100, 150 + i * 80),
-      ));
-    }
-
-    // Close button
-    add(ButtonComponent(
-      label: 'Cancel',
-      onPressed: () => onClose(this),
-      position: Vector2(100, 150 + cards.length * 80),
+    // Add cancel button
+    add(SimpleButtonComponent.text(
+      text: 'Cancel',
+      size: Vector2(200, 50),
+      color: material.Colors.red,
+      onPressed: onCancel,
+      position: Vector2(size.x / 2, size.y - 100),
     ));
   }
 }

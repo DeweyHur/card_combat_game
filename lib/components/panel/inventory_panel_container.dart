@@ -3,29 +3,150 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'inventory_panel.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:flutter/material.dart' show Colors;
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
-import 'package:card_combat_app/utils/slot_mapper.dart';
+import 'package:flame/events.dart';
+import 'package:card_combat_app/components/simple_button_component.dart';
+import 'dart:ui' show Paint;
 
 class InventoryPanelContainer extends PositionComponent
-    with VerticalStackMixin {
+    with VerticalStackMixin, TapCallbacks {
+  final GameCharacter? player;
+  final String? slot;
+  final InventoryPanel inventoryPanel;
+  SimpleButtonComponent? loadDefaultsButton;
+
   InventoryPanelContainer({
     required List<EquipmentData> items,
     required String? filter,
-    required GameCharacter? player,
-    required String? slot,
+    required this.player,
+    required this.slot,
     required Vector2 size,
-  }) : super(size: size) {
-    // Add Load Defaults button if player is not null
+  })  : inventoryPanel = InventoryPanel(
+          items: items,
+          filter: filter,
+          onSelect: (equipment) {
+            if (player == null || slot == null) return;
+            final playersCsv =
+                DataController.instance.get<List<List<dynamic>>>('playersCsv');
+            if (playersCsv == null) return;
+            final row = playersCsv.firstWhere(
+                (r) =>
+                    r.isNotEmpty &&
+                    r[0].toString().trim().toLowerCase() ==
+                        player.name.trim().toLowerCase(),
+                orElse: () => []);
+            if (row.isEmpty) {
+              GameLogger.info(LogCategory.game,
+                  '[INVENTORY] No matching row found for player: ${player.name}');
+              return;
+            }
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Updating row for player: ${row[0]}');
+
+            // Get both default and current equipment
+            String defaultEquipmentStr =
+                row.length > 9 ? (row[9] as String? ?? '') : '';
+            String currentEquipmentStr =
+                row.length > 10 ? (row[10] as String? ?? '') : '';
+
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Default equipment string: $defaultEquipmentStr');
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Current equipment string: $currentEquipmentStr');
+
+            // Parse both equipment lists
+            List<String> defaultEquipmentList = defaultEquipmentStr
+                .split('|')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList();
+            List<String> currentEquipmentList = currentEquipmentStr
+                .split('|')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList();
+
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Default equipment list: $defaultEquipmentList');
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Current equipment list before update: $currentEquipmentList');
+
+            final equipmentMap = DataController.instance
+                    .get<Map<String, EquipmentData>>('equipmentData') ??
+                {};
+
+            // Remove any existing equipment in the same slot from current equipment
+            currentEquipmentList.removeWhere((eqName) {
+              final eq = equipmentMap[eqName];
+              return eq != null && eq.slot == slot;
+            });
+
+            // Add the new equipment
+            currentEquipmentList.add(equipment.name);
+
+            // Update the row
+            if (row.length > 10) {
+              row[10] = currentEquipmentList.join('|');
+            } else {
+              while (row.length < 11) {
+                row.add('');
+              }
+              row[10] = currentEquipmentList.join('|');
+            }
+
+            GameLogger.info(LogCategory.game,
+                '[INVENTORY] Current equipment list after update: $currentEquipmentList');
+
+            // Update the CSV data
+            DataController.instance
+                .set<List<List<dynamic>>>('playersCsv', playersCsv);
+
+            // Update the player's equipment
+            final updatedPlayer = GameCharacter(
+              name: row[0] as String,
+              maxHealth: int.tryParse(row[1].toString()) ?? 100,
+              attack: int.tryParse(row[2].toString()) ?? 10,
+              defense: int.tryParse(row[3].toString()) ?? 5,
+              emoji: row[4].toString(),
+              color: row[5].toString(),
+              imagePath: row.length > 6 ? row[6].toString() : '',
+              soundPath: row.length > 7 ? row[7].toString() : '',
+              description: row.length > 8 ? row[8].toString() : '',
+              deck: player.deck,
+              maxEnergy: player.maxEnergy,
+              handSize: player.handSize,
+            );
+            DataController.instance
+                .set<GameCharacter>('selectedPlayer', updatedPlayer);
+          },
+          position: Vector2(0, 0),
+          size: size,
+        ),
+        super(size: size);
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    // Add background
+    add(RectangleComponent(
+      size: size,
+      paint: Paint()..color = Colors.black.withAlpha(217),
+      anchor: Anchor.topLeft,
+    ));
+
+    // Add inventory panel
+    add(inventoryPanel);
+
+    // Add load defaults button if player is not null
     if (player != null) {
-      final loadDefaultsButton = ButtonComponent(
-        label: 'Load Defaults',
-        color: Colors.green.shade700,
-        position: Vector2(24, 12),
+      loadDefaultsButton = SimpleButtonComponent.text(
+        text: 'Load Defaults',
+        size: Vector2(200, 50),
+        color: Colors.blue,
         onPressed: () {
           final playersCsv =
               DataController.instance.get<List<List<dynamic>>>('playersCsv');
@@ -34,7 +155,7 @@ class InventoryPanelContainer extends PositionComponent
               (r) =>
                   r.isNotEmpty &&
                   r[0].toString().trim().toLowerCase() ==
-                      player.name.trim().toLowerCase(),
+                      player!.name.trim().toLowerCase(),
               orElse: () => []);
           if (row.isEmpty) return;
           // Get default equipment from CSV
@@ -90,141 +211,9 @@ class InventoryPanelContainer extends PositionComponent
           DataController.instance
               .set<GameCharacter>('selectedPlayer', updatedPlayer);
         },
+        position: Vector2(size.x / 2, size.y - 40),
       );
-      registerVerticalStackComponent(
-          'loadDefaultsButton', loadDefaultsButton, 48);
+      add(loadDefaultsButton!);
     }
-    final panel = InventoryPanel(
-      items: items,
-      filter: filter,
-      onSelect: (equipment) {
-        if (player == null || slot == null) return;
-        final playersCsv =
-            DataController.instance.get<List<List<dynamic>>>('playersCsv');
-        if (playersCsv == null) return;
-        final row = playersCsv.firstWhere(
-            (r) =>
-                r.isNotEmpty &&
-                r[0].toString().trim().toLowerCase() ==
-                    player.name.trim().toLowerCase(),
-            orElse: () => []);
-        if (row.isEmpty) {
-          GameLogger.info(LogCategory.game,
-              '[INVENTORY] No matching row found for player: ${player.name}');
-          return;
-        }
-        GameLogger.info(
-            LogCategory.game, '[INVENTORY] Updating row for player: ${row[0]}');
-
-        // Get both default and current equipment
-        String defaultEquipmentStr =
-            row.length > 9 ? (row[9] as String? ?? '') : '';
-        String currentEquipmentStr =
-            row.length > 10 ? (row[10] as String? ?? '') : '';
-
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Default equipment string: $defaultEquipmentStr');
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Current equipment string: $currentEquipmentStr');
-
-        // Parse both equipment lists
-        List<String> defaultEquipmentList = defaultEquipmentStr
-            .split('|')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-        List<String> currentEquipmentList = currentEquipmentStr
-            .split('|')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Default equipment list: $defaultEquipmentList');
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Current equipment list before update: $currentEquipmentList');
-
-        final equipmentMap = DataController.instance
-                .get<Map<String, EquipmentData>>('equipmentData') ??
-            {};
-
-        // Remove any existing equipment in the same slot from current equipment
-        currentEquipmentList.removeWhere((eqName) {
-          final eq = equipmentMap[eqName];
-          final shouldRemove = eq != null &&
-              mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name) == slot;
-          if (shouldRemove) {
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Removing equipment from slot $slot: $eqName');
-          }
-          return shouldRemove;
-        });
-
-        // Add the new equipment to current equipment
-        currentEquipmentList.add(equipment.name);
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Current equipment list after update: $currentEquipmentList');
-
-        // Update the CSV data
-        if (row.length > 10) {
-          row[10] = currentEquipmentList.join('|');
-        } else {
-          while (row.length < 11) {
-            row.add('');
-          }
-          row[10] = currentEquipmentList.join('|');
-        }
-        DataController.instance
-            .set<List<List<dynamic>>>('playersCsv', playersCsv);
-
-        // Update the player's equipment map using both default and current equipment
-        final Map<String, String> newEquipment = {};
-
-        // First add default equipment
-        for (final eqName in defaultEquipmentList) {
-          final eq = equipmentMap[eqName];
-          if (eq != null) {
-            final panelSlot =
-                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-            newEquipment[panelSlot] = eqName;
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Adding default equipment: $eqName to slot $panelSlot');
-          }
-        }
-
-        // Then override with current equipment
-        for (final eqName in currentEquipmentList) {
-          final eq = equipmentMap[eqName];
-          if (eq != null) {
-            final panelSlot =
-                mapEquipmentSlotToPanelSlot(eq.slot, eq.type, eq.name);
-            newEquipment[panelSlot] = eqName;
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Adding current equipment: $eqName to slot $panelSlot');
-          }
-        }
-
-        // Update the player's equipment
-        player.equipment = newEquipment;
-        GameLogger.info(
-            LogCategory.game, '[INVENTORY] Final equipment map: $newEquipment');
-
-        // Update the selected player in DataController
-        DataController.instance.set<GameCharacter>('selectedPlayer', player);
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Player ${player.name} equipment after update: ${currentEquipmentList.join('|')}');
-
-        // Log the current state of the selected player
-        final currentPlayer =
-            DataController.instance.get<GameCharacter>('selectedPlayer');
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Current selected player state: ${currentPlayer?.name} (Health: ${currentPlayer?.maxHealth}, Attack: ${currentPlayer?.attack}, Defense: ${currentPlayer?.defense})');
-        GameLogger.info(LogCategory.game,
-            '[INVENTORY] Current selected player deck size: ${currentPlayer?.deck.length}');
-        SceneManager().popScene();
-      },
-      size: size,
-    );
-    registerVerticalStackComponent('inventoryPanel', panel, size.y);
   }
 }

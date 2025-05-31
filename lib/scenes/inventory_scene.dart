@@ -1,56 +1,67 @@
-import 'base_scene.dart';
-import 'package:card_combat_app/components/panel/inventory_panel_container.dart';
-import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:flame/components.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:flutter/material.dart' show Color;
+import 'package:card_combat_app/components/panel/inventory_grid_panel.dart';
+import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/scenes/base_scene.dart';
+import 'package:flutter/material.dart';
 
 class InventoryScene extends BaseScene {
-  InventoryScene({Map<String, dynamic>? options})
-      : super(sceneBackgroundColor: const Color(0xFF222244), options: options);
+  late InventoryGridPanel gridPanel;
+  late EquipmentDetailPanel detailPanel;
+  EquipmentData? selectedEquipment;
+  late GameCharacter player;
+  late String slot;
 
-  late List<EquipmentData> allEquipment;
-  String? filter;
-  GameCharacter? player;
-  String? slot;
+  InventoryScene({Map<String, dynamic>? options})
+      : super(sceneBackgroundColor: const Color(0xFF222244));
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Retrieve all equipment from DataController
-    final equipmentMap = DataController.instance
-            .get<Map<String, EquipmentData>>('equipmentData') ??
-        {};
-    allEquipment = equipmentMap.values.toList();
-    filter = options?['slot'] as String?;
-    player = options?['player'] as GameCharacter?;
-    slot = filter;
-
-    // Log available equipment for the slot
-    final filteredEquipment = allEquipment
-        .where((item) => filter == null || item.slot == filter)
-        .toList();
-    GameLogger.info(
-        LogCategory.game, '[INVENTORY] Available equipment for slot $filter:');
-    for (final item in filteredEquipment) {
-      GameLogger.info(LogCategory.game,
-          '[INVENTORY] - ${item.name} (Type: ${item.type}, Slot: ${item.slot})');
-    }
-    GameLogger.info(LogCategory.game,
-        '[INVENTORY] Will add InventoryPanel in onMount: items=${allEquipment.length}, filter=$filter, player=${player?.name}, slot=$slot');
   }
 
   @override
   void onMount() {
     super.onMount();
-    final container = InventoryPanelContainer(
-      items: allEquipment,
-      filter: filter,
-      player: player,
-      slot: slot,
-      size: size,
+    // Create grid panel
+    gridPanel = InventoryGridPanel(
+      onSelect: _handleItemSelect,
+      position: Vector2(0, 0),
+      size: Vector2(size.x, size.y - 220),
     );
-    add(container);
+    add(gridPanel);
+
+    // Create detail panel (initially hidden)
+    detailPanel = EquipmentDetailPanel(
+      equipment: DataController.instance
+          .get<Map<String, EquipmentData>>('equipmentData')!
+          .values
+          .first,
+      position: Vector2(0, size.y - 220),
+      size: Vector2(size.x, 220),
+    );
+    detailPanel.removeFromParent();
+
+    // If we're swapping equipment, select the currently equipped item
+    final equippedItemName = player.equipment[slot];
+    if (equippedItemName != null) {
+      final equipmentMap = DataController.instance
+          .get<Map<String, EquipmentData>>('equipmentData')!;
+      final equippedItem = equipmentMap.values.firstWhere(
+        (e) => e.name == equippedItemName,
+        orElse: () => equipmentMap.values.first,
+      );
+      _handleItemSelect(equippedItem);
+    }
+  }
+
+  void _handleItemSelect(EquipmentData item) {
+    selectedEquipment = item;
+    detailPanel.updateEquipment(item);
+    if (!detailPanel.isMounted) {
+      add(detailPanel);
+    }
   }
 }

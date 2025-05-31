@@ -3,83 +3,67 @@ import 'package:flutter/material.dart' as material;
 import 'package:card_combat_app/scenes/base_scene.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:flame/components.dart';
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/models/quest_data.dart';
+import 'package:card_combat_app/components/simple_button_component.dart';
 
 class QuestEventScene extends BaseScene {
-  QuestEventScene({Map<String, dynamic>? options})
-      : super(
-            sceneBackgroundColor: material.Colors.blue.shade100,
-            options: options);
-
-  @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-    add(QuestEventPanel());
-  }
-}
-
-class QuestEventPanel extends PositionComponent {
   late final Player player;
-  bool hasChosen = false;
   late final QuestData quest;
-  final _random = Random();
+  bool hasChosen = false;
+  final Random _random = Random();
+
+  QuestEventScene({required Map<String, dynamic> options})
+      : super(sceneBackgroundColor: material.Colors.brown.shade200) {
+    player = options['player'] as Player;
+    quest = options['quest'] as QuestData;
+  }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Initialize player from CSV
-    player = await Player.loadFromCSV('Warrior');
-
-    // Load quests and select one randomly
-    final quests = await QuestData.loadQuests();
-    quest = quests[_random.nextInt(quests.length)];
-
-    // Title
-    add(TextComponent(
-      text: 'Quest Event',
-      position: Vector2(100.0, 50.0),
-      textRenderer: TextPaint(
-        style: const material.TextStyle(
-          fontSize: 32,
-          color: material.Colors.black,
-          fontWeight: material.FontWeight.bold,
-        ),
-      ),
+    // Add background
+    add(RectangleComponent(
+      size: size,
+      paint: material.Paint()..color = material.Colors.black.withAlpha(217),
+      anchor: Anchor.topLeft,
     ));
 
-    // Quest Title
+    // Add title
     add(TextComponent(
       text: quest.title,
-      position: Vector2(100.0, 100.0),
       textRenderer: TextPaint(
         style: const material.TextStyle(
-          fontSize: 24,
-          color: material.Colors.black87,
+          color: material.Colors.white,
+          fontSize: 32,
           fontWeight: material.FontWeight.bold,
         ),
       ),
+      anchor: Anchor.topCenter,
+      position: Vector2(size.x / 2, 50),
     ));
 
-    // Quest Description
+    // Add description
     add(TextComponent(
       text: quest.description,
-      position: Vector2(100.0, 140.0),
       textRenderer: TextPaint(
         style: const material.TextStyle(
+          color: material.Colors.white,
           fontSize: 18,
-          color: material.Colors.black87,
         ),
       ),
+      anchor: Anchor.topCenter,
+      position: Vector2(size.x / 2, 100),
     ));
 
-    // Choice Buttons
+    // Add choices
     for (int i = 0; i < quest.choices.length; i++) {
       final choice = quest.choices[i];
-      add(ButtonComponent(
-        label: choice.text,
+      add(SimpleButtonComponent.text(
+        text: choice.text,
+        size: Vector2(300, 50),
+        color: material.Colors.blue,
         onPressed: () {
           if (!hasChosen) {
             hasChosen = true;
@@ -102,8 +86,10 @@ class QuestEventPanel extends PositionComponent {
             ));
 
             // Continue button
-            add(ButtonComponent(
-              label: 'Continue',
+            add(SimpleButtonComponent.text(
+              text: 'Continue',
+              size: Vector2(200, 50),
+              color: material.Colors.green,
               onPressed: () => SceneManager().popScene(),
               position: Vector2(100.0, 360.0),
             ));

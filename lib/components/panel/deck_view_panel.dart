@@ -1,81 +1,81 @@
-import 'package:flutter/material.dart' as material;
 import 'package:flame/components.dart';
-import 'package:card_combat_app/models/card.dart';
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:card_combat_app/components/simple_button_component.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 class DeckViewPanel extends PositionComponent {
-  final List<Card> cards;
-  final Function(Card) onCardRemoved;
-  final Function(DeckViewPanel) onClose;
+  final List<GameCard> cards;
+  final Function(GameCard) onCardRemoved;
+  final Function() onClose;
 
   DeckViewPanel({
     required this.cards,
     required this.onCardRemoved,
     required this.onClose,
-  });
+    Vector2? position,
+    Vector2? size,
+  }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Title
+    // Add background
+    add(RectangleComponent(
+      size: size,
+      paint: material.Paint()..color = material.Colors.black.withAlpha(217),
+      anchor: Anchor.topLeft,
+    ));
+
+    // Add title
     add(TextComponent(
-      text: 'Your Deck',
-      position: Vector2(100.0, 50.0),
+      text: 'Deck',
       textRenderer: TextPaint(
         style: const material.TextStyle(
-          fontSize: 32,
-          color: material.Colors.black,
+          color: material.Colors.white,
+          fontSize: 24,
           fontWeight: material.FontWeight.bold,
         ),
       ),
+      anchor: Anchor.topLeft,
+      position: Vector2(20, 20),
     ));
 
-    // Description
-    add(TextComponent(
-      text: 'View your cards or remove one:',
-      position: Vector2(100.0, 100.0),
-      textRenderer: TextPaint(
-        style: const material.TextStyle(
-          fontSize: 18,
-          color: material.Colors.black87,
-        ),
-      ),
+    // Add close button
+    add(SimpleButtonComponent.text(
+      text: 'Close',
+      size: Vector2(100, 40),
+      color: material.Colors.red,
+      onPressed: onClose,
+      position: Vector2(size.x - 60, 20),
     ));
 
-    // Card list with remove buttons
-    for (int i = 0; i < cards.length; i++) {
-      final card = cards[i];
-      final yPos = 150.0 + i * 80.0;
-
-      // Card info
+    // Add card list
+    double yOffset = 80;
+    for (var card in cards) {
+      // Add card name
       add(TextComponent(
-        text: card.toString(),
-        position: Vector2(100.0, yPos),
+        text: card.name,
         textRenderer: TextPaint(
           style: const material.TextStyle(
+            color: material.Colors.white,
             fontSize: 16,
-            color: material.Colors.black87,
           ),
         ),
+        anchor: Anchor.topLeft,
+        position: Vector2(20, yOffset),
       ));
 
-      // Remove button
-      add(ButtonComponent(
-        label: 'Remove',
-        onPressed: () {
-          onCardRemoved(card);
-          onClose(this);
-        },
-        position: Vector2(400.0, yPos),
+      // Add remove button
+      add(SimpleButtonComponent.text(
+        text: 'Remove',
+        size: Vector2(80, 30),
+        color: material.Colors.red,
+        onPressed: () => onCardRemoved(card),
+        position: Vector2(size.x - 60, yOffset),
       ));
+
+      yOffset += 40;
     }
-
-    // Close button
-    add(ButtonComponent(
-      label: 'Close',
-      onPressed: () => onClose(this),
-      position: Vector2(100.0, 150.0 + cards.length * 80.0),
-    ));
   }
 }

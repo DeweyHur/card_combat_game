@@ -1,10 +1,10 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flame/input.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart' show Colors, TextStyle;
 import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/simple_button_component.dart';
 
 class InventoryPanel extends PositionComponent
     with HasGameReference, TapCallbacks {
@@ -26,11 +26,24 @@ class InventoryPanel extends PositionComponent
     // Background
     add(RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.black54,
+      paint: Paint()..color = Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
     ));
+    // Add title
+    add(TextComponent(
+      text: 'Inventory',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      anchor: Anchor.topLeft,
+      position: Vector2(20, 20),
+    ));
     // List items as buttons
-    double y = 16;
+    double y = 80;
     final filtered = items
         .where((item) =>
             filter == null ||
@@ -50,27 +63,13 @@ class InventoryPanel extends PositionComponent
     for (final item in filtered) {
       GameLogger.info(LogCategory.game,
           '[INVENTORY] Item: ${item.name} (${item.handedness})');
-      final button = ButtonComponent(
-        button: RectangleComponent(
-          size: Vector2(size.x - 48, 28),
-          paint: Paint()..color = Colors.blueGrey.shade800,
-          anchor: Anchor.topLeft,
-          children: [
-            TextComponent(
-              text: '${item.name} (${item.handedness})',
-              textRenderer: TextPaint(
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-              ),
-              position: Vector2(8, 4),
-              anchor: Anchor.topLeft,
-            ),
-          ],
-        ),
-        position: Vector2(24, y),
-        anchor: Anchor.topLeft,
+      add(SimpleButtonComponent.text(
+        text: '${item.name} (${item.handedness})',
+        size: Vector2(size.x - 48, 28),
+        color: Colors.blueGrey.shade800,
         onPressed: () => onSelect(item),
-      );
-      add(button);
+        position: Vector2(24, y),
+      ));
       y += 36;
     }
   }

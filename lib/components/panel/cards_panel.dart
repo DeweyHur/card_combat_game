@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
+import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:flame/input.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
@@ -17,9 +17,9 @@ class CardsPanel extends BasePanel {
   List<CardVisualComponent> cardVisuals = [];
   List<bool> cardVisualsVisible = [];
   GameCard? selectedCard;
-  ButtonComponent? playButton;
+  SimpleButtonComponent? playButton;
   CardDetailPanel? cardDetailPanel;
-  ButtonComponent? endTurnButton;
+  SimpleButtonComponent? endTurnButton;
   void Function()? onEndTurn;
 
   final double buttonHeight = 120.0;
@@ -48,29 +48,10 @@ class CardsPanel extends BasePanel {
     // Show the player's hand as cards
     _showHand();
     // Add Play button (not attached by default)
-    playButton = ButtonComponent(
-      button: RectangleComponent(
-        size: Vector2(size.x / 2, buttonHeight),
-        paint: Paint()..color = Colors.blue,
-        anchor: Anchor.topLeft,
-        children: [
-          TextComponent(
-            text: 'Play',
-            textRenderer: TextPaint(
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            size: Vector2(size.x / 2, buttonHeight),
-            position: Vector2((size.x / 2) / 2, buttonHeight / 2),
-            anchor: Anchor.center,
-          ),
-        ],
-      ),
-      position: Vector2(0, size.y),
-      anchor: Anchor.bottomLeft,
+    playButton = SimpleButtonComponent.text(
+      text: 'Play',
+      size: Vector2(200, 50),
+      color: Colors.green,
       onPressed: () {
         GameLogger.debug(LogCategory.ui,
             '[PlayButton] Pressed. selectedCard: \\${selectedCard?.name}');
@@ -86,32 +67,14 @@ class CardsPanel extends BasePanel {
           }
         }
       },
+      position: Vector2(size.x / 2, size.y - 40),
     );
     // Do not add playButton yet
     // Add End Turn button (attached by default)
-    endTurnButton = ButtonComponent(
-      button: RectangleComponent(
-        size: Vector2(size.x / 2, buttonHeight),
-        paint: Paint()..color = Colors.orange,
-        anchor: Anchor.topLeft,
-        children: [
-          TextComponent(
-            text: 'End Turn',
-            textRenderer: TextPaint(
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            size: Vector2(size.x / 2, buttonHeight),
-            position: Vector2((size.x / 2) / 2, buttonHeight / 2),
-            anchor: Anchor.center,
-          ),
-        ],
-      ),
-      position: Vector2(0, size.y),
-      anchor: Anchor.bottomLeft,
+    endTurnButton = SimpleButtonComponent.text(
+      text: 'End Turn',
+      size: Vector2(200, 50),
+      color: Colors.red,
       onPressed: () {
         GameLogger.debug(LogCategory.ui,
             '[EndTurnButton] Pressed. selectedCard: \\${selectedCard?.name}');
@@ -119,6 +82,7 @@ class CardsPanel extends BasePanel {
           onEndTurn!();
         }
       },
+      position: Vector2(size.x / 2, size.y - 40),
     );
     add(endTurnButton!);
     // Create card detail panel once, hidden by default

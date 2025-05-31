@@ -22,10 +22,4 @@ class TitleScene extends BaseScene with TapCallbacks {
     super.onGameResize(size);
     _layout.onGameResize(size);
   }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
-    _layout.handleTap(event.canvasPosition);
-  }
 }

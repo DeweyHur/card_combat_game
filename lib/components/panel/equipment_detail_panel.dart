@@ -2,238 +2,203 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/components/simple_button_component.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
-class EquipmentDetailPanel extends PositionComponent {
+class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
   EquipmentData equipment;
-  final VoidCallback? onChange;
-  final VoidCallback? onUnequip;
-
-  // Add references to text components
-  late TextComponent nameText;
-  late TextComponent typeText;
-  late TextComponent slotText;
-  late TextComponent handednessText;
-  final List<TextComponent> cardTexts = [];
-  TextComponent? cardsLabelText;
-
-  bool _isLoaded = false;
+  SimpleButtonComponent? actionButton;
+  SimpleButtonComponent? inventoryButton;
 
   EquipmentDetailPanel({
     required this.equipment,
-    this.onChange,
-    this.onUnequip,
     Vector2? position,
     Vector2? size,
-  }) : super(position: position, size: size ?? Vector2(400, 220));
-
-  @override
-  bool get isLoaded => _isLoaded;
-
-  void updateEquipment(EquipmentData newEquipment) {
-    if (!isLoaded) return;
-    equipment = newEquipment;
-    // Update text fields
-    nameText.text = equipment.name;
-    typeText.text = 'Type: ${equipment.type}';
-    slotText.text = 'Slot: ${getSlotDisplayName(equipment.slot)}';
-    handednessText.text = 'Handedness: ${equipment.handedness}';
-    // Remove old card texts
-    for (final t in cardTexts) {
-      t.removeFromParent();
-    }
-    cardTexts.clear();
-    cardsLabelText?.removeFromParent();
-    cardsLabelText = null;
-    // Add new card texts if any
-    if (equipment.cards.isNotEmpty) {
-      double y = 120;
-      cardsLabelText = TextComponent(
-        text: 'Cards:',
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.lightBlueAccent,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        anchor: Anchor.topLeft,
-        position: Vector2(16, y),
-      );
-      add(cardsLabelText!);
-      y += 22;
-      for (final card in equipment.cards) {
-        final cardText = TextComponent(
-          text: card,
-          textRenderer: TextPaint(
-            style: const TextStyle(
-              color: Colors.lightBlueAccent,
-              fontSize: 14,
-            ),
-          ),
-          anchor: Anchor.topLeft,
-          position: Vector2(32, y),
-        );
-        add(cardText);
-        cardTexts.add(cardText);
-        y += 20;
-      }
-    }
-  }
-
-  String getSlotDisplayName(String slot) {
-    if (slot == 'Accessory 1') return 'Acc 1';
-    if (slot == 'Accessory 2') return 'Acc 2';
-    return slot;
-  }
+  }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Add a background
+
+    // Add background
     add(RectangleComponent(
       size: size,
       paint: Paint()..color = Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
     ));
-    // Equipment name
-    nameText = TextComponent(
+
+    // Add equipment details
+    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
+    if (player == null) {
+      GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
+      return;
+    }
+
+    final isEquipped = player.equipment[equipment.slot] == equipment.name;
+
+    // Add name
+    add(TextComponent(
       text: equipment.name,
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.amber,
-          fontSize: 22,
+          color: Colors.white,
+          fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
       ),
       anchor: Anchor.topLeft,
-      position: Vector2(16, 16),
-    );
-    add(nameText);
-    // Equipment type
-    typeText = TextComponent(
+      position: Vector2(20, 20),
+    ));
+
+    // Add type
+    add(TextComponent(
       text: 'Type: ${equipment.type}',
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 16,
+          color: Colors.white,
+          fontSize: 18,
         ),
       ),
       anchor: Anchor.topLeft,
-      position: Vector2(16, 48),
-    );
-    add(typeText);
-    // Equipment slot
-    slotText = TextComponent(
-      text: 'Slot: ${getSlotDisplayName(equipment.slot)}',
+      position: Vector2(20, 60),
+    ));
+
+    // Add slot
+    add(TextComponent(
+      text: 'Slot: ${equipment.slot}',
       textRenderer: TextPaint(
         style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 16,
+          color: Colors.white,
+          fontSize: 18,
         ),
       ),
       anchor: Anchor.topLeft,
-      position: Vector2(16, 72),
-    );
-    add(slotText);
-    // Handedness
-    handednessText = TextComponent(
-      text: 'Handedness: ${equipment.handedness}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 16,
+      position: Vector2(20, 90),
+    ));
+
+    // Add handedness if not empty
+    if (equipment.handedness.isNotEmpty) {
+      add(TextComponent(
+        text: 'Handedness: ${equipment.handedness}',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+          ),
         ),
-      ),
-      anchor: Anchor.topLeft,
-      position: Vector2(16, 96),
-    );
-    add(handednessText);
-    // Cards (if any)
+        anchor: Anchor.topLeft,
+        position: Vector2(20, 120),
+      ));
+    }
+
+    // Add cards if any
     if (equipment.cards.isNotEmpty) {
-      double y = 120;
-      cardsLabelText = TextComponent(
+      add(TextComponent(
         text: 'Cards:',
         textRenderer: TextPaint(
           style: const TextStyle(
-            color: Colors.lightBlueAccent,
-            fontSize: 14,
+            color: Colors.white,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         anchor: Anchor.topLeft,
-        position: Vector2(16, y),
-      );
-      add(cardsLabelText!);
-      y += 22;
-      for (final card in equipment.cards) {
-        final cardText = TextComponent(
-          text: card,
+        position: Vector2(20, 150),
+      ));
+
+      for (int i = 0; i < equipment.cards.length; i++) {
+        add(TextComponent(
+          text: '• ${equipment.cards[i]}',
           textRenderer: TextPaint(
             style: const TextStyle(
-              color: Colors.lightBlueAccent,
-              fontSize: 14,
+              color: Colors.white,
+              fontSize: 16,
             ),
           ),
           anchor: Anchor.topLeft,
-          position: Vector2(32, y),
-        );
-        add(cardText);
-        cardTexts.add(cardText);
-        y += 20;
+          position: Vector2(40, 180 + i * 25),
+        ));
       }
     }
-    // Action buttons (right side)
-    add(ButtonComponent(
-      label: 'Change Equipment',
-      onPressed: onChange,
-      position: Vector2(size.x - 160, 32),
-    ));
-    add(ButtonComponent(
-      label: 'Unequip',
-      onPressed: onUnequip,
-      position: Vector2(size.x - 160, 80),
-      color: Colors.redAccent,
-    ));
-    _isLoaded = true;
-  }
-}
 
-class ButtonComponent extends PositionComponent with TapCallbacks {
-  final String label;
-  final VoidCallback? onPressed;
-  final Color color;
-
-  ButtonComponent({
-    required this.label,
-    this.onPressed,
-    Vector2? position,
-    this.color = Colors.blueAccent,
-  }) : super(position: position, size: Vector2(140, 36));
-
-  @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-    add(RectangleComponent(
-      size: size,
-      paint: Paint()..color = color.withAlpha(217),
-      anchor: Anchor.topLeft,
-    ));
-    add(TextComponent(
-      text: label,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      anchor: Anchor.center,
-      position: Vector2(size.x / 2, size.y / 2),
-    ));
+    // Add action buttons
+    _updateActionButtons(isEquipped);
+    _addInventoryButton();
   }
 
-  @override
-  void onTapDown(TapDownEvent event) {
-    onPressed?.call();
+  void _updateActionButtons(bool isEquipped) {
+    // Remove existing button if any
+    actionButton?.removeFromParent();
+
+    // Create new button
+    actionButton = SimpleButtonComponent.text(
+      text: isEquipped ? 'Unequip' : 'Equip',
+      size: Vector2(200, 50),
+      color: isEquipped ? Colors.red : Colors.green,
+      onPressed: () {
+        final player =
+            DataController.instance.get<GameCharacter>('selectedPlayer');
+        if (player == null) {
+          GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
+          return;
+        }
+
+        if (isEquipped) {
+          player.unequip(equipment.slot);
+        } else {
+          player.equip(equipment.slot, equipment.name);
+        }
+
+        DataController.instance.set('selectedPlayer', player);
+        _updateActionButtons(!isEquipped);
+      },
+      position: Vector2(size.x / 2, size.y - 100),
+    );
+    add(actionButton!);
+  }
+
+  void _addInventoryButton() {
+    inventoryButton = SimpleButtonComponent.text(
+      text: 'Change Equipment',
+      size: Vector2(200, 50),
+      color: Colors.blue,
+      onPressed: () {
+        final selectedPlayer =
+            DataController.instance.get<GameCharacter>('selectedPlayer');
+        if (selectedPlayer != null && equipment.slot.isNotEmpty) {
+          SceneManager().pushScene('inventory', options: {
+            'player': selectedPlayer,
+            'slot': equipment.slot,
+          });
+        }
+      },
+      position: Vector2(size.x / 2, size.y - 40),
+    );
+    add(inventoryButton!);
+
+    // Add a close button in the top right
+    add(SimpleButtonComponent.text(
+      text: 'X',
+      size: Vector2(40, 40),
+      color: Colors.grey.shade800,
+      onPressed: () {
+        removeFromParent();
+      },
+      position: Vector2(size.x - 50, 10),
+    ));
+  }
+
+  void updateEquipment(EquipmentData newEquipment) {
+    equipment = newEquipment;
+    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
+    if (player == null) {
+      GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
+      return;
+    }
+    final isEquipped = player.equipment[equipment.slot] == equipment.name;
+    _updateActionButtons(isEquipped);
   }
 }

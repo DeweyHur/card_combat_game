@@ -35,27 +35,31 @@ class SceneManager {
   }
 
   void _registerScenes() {
-    registerScene('title', (options) => TitleScene(options: options));
+    registerScene('title', (options) => TitleScene(options: options ?? {}));
     registerScene('player_selection',
-        (options) => PlayerSelectionScene(options: options));
-    registerScene('outpost', (options) => OutpostScene(options: options));
-    registerScene('combat', (options) => CombatScene(options: options));
+        (options) => PlayerSelectionScene(options: options ?? {}));
+    registerScene('outpost', (options) => OutpostScene(options: options ?? {}));
+    registerScene('combat', (options) => CombatScene(options: options ?? {}));
     registerScene(
-        'game_result', (options) => GameResultScene(options: options));
+        'game_result', (options) => GameResultScene(options: options ?? {}));
     registerScene(
-        'card_upgrade', (options) => CardUpgradeScene(options: options));
-    registerScene('equipment', (options) => ArmoryScene(options: options));
-    registerScene('inventory', (options) => InventoryScene(options: options));
-    registerScene('map', (options) => MapScene(options: options));
-    registerScene('shop', (options) => ShopScene(options: options));
-    registerScene('tavern', (options) => TavernScene(options: options));
-    registerScene('credit', (options) => CreditScene(options: options));
-    registerScene('expedition', (options) => ExpeditionScene(options: options));
+        'card_upgrade', (options) => CardUpgradeScene(options: options ?? {}));
     registerScene(
-        'quest_event', (options) => QuestEventScene(options: options));
+        'equipment', (options) => ArmoryScene(options: options ?? {}));
     registerScene(
-        'random_event', (options) => RandomEventScene(options: options));
-    registerScene('camp_event', (options) => CampEventScene(options: options));
+        'inventory', (options) => InventoryScene(options: options ?? {}));
+    registerScene('map', (options) => MapScene(options: options ?? {}));
+    registerScene('shop', (options) => ShopScene(options: options ?? {}));
+    registerScene('tavern', (options) => TavernScene(options: options ?? {}));
+    registerScene('credit', (options) => CreditScene(options: options ?? {}));
+    registerScene(
+        'expedition', (options) => ExpeditionScene(options: options ?? {}));
+    registerScene(
+        'quest_event', (options) => QuestEventScene(options: options ?? {}));
+    registerScene(
+        'random_event', (options) => RandomEventScene(options: options ?? {}));
+    registerScene(
+        'camp_event', (options) => CampEventScene(options: options ?? {}));
     GameLogger.info(LogCategory.game, 'Scenes registered');
   }
 

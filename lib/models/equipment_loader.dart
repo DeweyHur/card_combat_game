@@ -38,15 +38,15 @@ Future<Map<String, EquipmentData>> loadEquipmentFromCsv(
     }
     final name = row[0] as String;
     final type = row[1] as String;
-    final slot = row[2] as String;
-    final handedness = row[3]?.toString() ?? '';
+    final rarity = row[2] as String;
+    final slot = row[3] as String;
     final cardsStr = row[4]?.toString() ?? '';
     final cards = cardsStr.isNotEmpty ? cardsStr.split('|') : <String>[];
     equipment[name] = EquipmentData(
       name: name,
       type: type,
       slot: slot,
-      handedness: handedness,
+      handedness: rarity,
       cards: cards,
     );
   }
