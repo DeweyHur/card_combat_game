@@ -40,9 +40,9 @@ class InventorySceneLayout extends PositionComponent
       equipment: EquipmentData(
         name: '',
         type: '',
-        slot: '',
-        handedness: '',
-        cards: [],
+        description: '',
+        rarity: '',
+        cards: const [],
       ),
       position: Vector2(0, size.y - 220),
       size: Vector2(size.x, 220),

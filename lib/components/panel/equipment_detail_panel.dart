@@ -40,7 +40,7 @@ class EquipmentDetailPanel extends PositionComponent
       return;
     }
 
-    final isEquipped = player.equipment[equipment.slot] == equipment.name;
+    final isEquipped = player.equipment[equipment.type] == equipment.name;
 
     // Add name
     final nameText = TextComponent(
@@ -71,9 +71,9 @@ class EquipmentDetailPanel extends PositionComponent
     );
     registerVerticalStackComponent('type', typeText, 30);
 
-    // Add slot
-    final slotText = TextComponent(
-      text: 'Slot: ${equipment.slot}',
+    // Add rarity
+    final rarityText = TextComponent(
+      text: 'Rarity: ${equipment.rarity}',
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
@@ -83,12 +83,12 @@ class EquipmentDetailPanel extends PositionComponent
       anchor: Anchor.topLeft,
       position: Vector2(20, 90),
     );
-    registerVerticalStackComponent('slot', slotText, 30);
+    registerVerticalStackComponent('rarity', rarityText, 30);
 
-    // Add handedness if not empty
-    if (equipment.handedness.isNotEmpty) {
-      final handednessText = TextComponent(
-        text: 'Handedness: ${equipment.handedness}',
+    // Add description if not empty
+    if (equipment.description.isNotEmpty) {
+      final descriptionText = TextComponent(
+        text: 'Description: ${equipment.description}',
         textRenderer: TextPaint(
           style: const TextStyle(
             color: Colors.white,
@@ -98,7 +98,7 @@ class EquipmentDetailPanel extends PositionComponent
         anchor: Anchor.topLeft,
         position: Vector2(20, 120),
       );
-      registerVerticalStackComponent('handedness', handednessText, 30);
+      registerVerticalStackComponent('description', descriptionText, 30);
     }
 
     // Add cards if any
@@ -158,9 +158,9 @@ class EquipmentDetailPanel extends PositionComponent
         }
 
         if (isEquipped) {
-          player.unequip(equipment.slot);
+          player.unequip(equipment.type);
         } else {
-          player.equip(equipment.slot, equipment.name);
+          player.equip(equipment.type, equipment.name);
         }
         // Return to previous scene after equipping/unequipping
         SceneManager().popScene();
@@ -183,10 +183,10 @@ class EquipmentDetailPanel extends PositionComponent
         onPressed: () {
           final selectedPlayer =
               DataController.instance.get<GameCharacter>('selectedPlayer');
-          if (selectedPlayer != null && equipment.slot.isNotEmpty) {
+          if (selectedPlayer != null && equipment.type.isNotEmpty) {
             SceneManager().pushScene('inventory', options: {
               'player': selectedPlayer,
-              'slot': equipment.slot,
+              'slot': equipment.type,
             });
           }
         },
@@ -203,9 +203,9 @@ class EquipmentDetailPanel extends PositionComponent
         hideVerticalStackComponent('background');
         hideVerticalStackComponent('name');
         hideVerticalStackComponent('type');
-        hideVerticalStackComponent('slot');
-        if (equipment.handedness.isNotEmpty) {
-          hideVerticalStackComponent('handedness');
+        hideVerticalStackComponent('rarity');
+        if (equipment.description.isNotEmpty) {
+          hideVerticalStackComponent('description');
         }
         if (equipment.cards.isNotEmpty) {
           hideVerticalStackComponent('cards_header');
@@ -230,7 +230,7 @@ class EquipmentDetailPanel extends PositionComponent
       GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
       return;
     }
-    final isEquipped = player.equipment[equipment.slot] == equipment.name;
+    final isEquipped = player.equipment[equipment.type] == equipment.name;
     _updateActionButtons(isEquipped);
   }
 }

@@ -4,140 +4,42 @@ import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'inventory_panel.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:flame/events.dart';
-import 'package:card_combat_app/components/simple_button_component.dart';
-import 'dart:ui' show Paint;
+import 'package:card_combat_app/scenes/scene_manager.dart';
 
 class InventoryPanelContainer extends PositionComponent
     with VerticalStackMixin, TapCallbacks {
   final GameCharacter? player;
-  final String? slot;
-  final InventoryPanel inventoryPanel;
-  SimpleButtonComponent? loadDefaultsButton;
+  final String? filter;
+  final List<EquipmentData> items;
+  late final InventoryPanel inventoryPanel;
 
   InventoryPanelContainer({
-    required List<EquipmentData> items,
-    required String? filter,
+    required this.items,
+    required this.filter,
     required this.player,
-    required this.slot,
     required Vector2 size,
-  })  : inventoryPanel = InventoryPanel(
-          items: items,
-          filter: filter,
-          onSelect: (equipment) {
-            if (player == null || slot == null) return;
-            final playersCsv =
-                DataController.instance.get<List<List<dynamic>>>('playersCsv');
-            if (playersCsv == null) return;
-            final row = playersCsv.firstWhere(
-                (r) =>
-                    r.isNotEmpty &&
-                    r[0].toString().trim().toLowerCase() ==
-                        player.name.trim().toLowerCase(),
-                orElse: () => []);
-            if (row.isEmpty) {
-              GameLogger.info(LogCategory.game,
-                  '[INVENTORY] No matching row found for player: ${player.name}');
-              return;
-            }
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Updating row for player: ${row[0]}');
-
-            // Get both default and current equipment
-            String defaultEquipmentStr =
-                row.length > 9 ? (row[9] as String? ?? '') : '';
-            String currentEquipmentStr =
-                row.length > 10 ? (row[10] as String? ?? '') : '';
-
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Default equipment string: $defaultEquipmentStr');
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Current equipment string: $currentEquipmentStr');
-
-            // Parse both equipment lists
-            List<String> defaultEquipmentList = defaultEquipmentStr
-                .split('|')
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toList();
-            List<String> currentEquipmentList = currentEquipmentStr
-                .split('|')
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toList();
-
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Default equipment list: $defaultEquipmentList');
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Current equipment list before update: $currentEquipmentList');
-
-            final equipmentMap = DataController.instance
-                    .get<Map<String, EquipmentData>>('equipmentData') ??
-                {};
-
-            // Remove any existing equipment in the same slot from current equipment
-            currentEquipmentList.removeWhere((eqName) {
-              final eq = equipmentMap[eqName];
-              return eq != null && eq.slot == slot;
-            });
-
-            // Add the new equipment
-            currentEquipmentList.add(equipment.name);
-
-            // Update the row
-            if (row.length > 10) {
-              row[10] = currentEquipmentList.join('|');
-            } else {
-              while (row.length < 11) {
-                row.add('');
-              }
-              row[10] = currentEquipmentList.join('|');
-            }
-
-            GameLogger.info(LogCategory.game,
-                '[INVENTORY] Current equipment list after update: $currentEquipmentList');
-
-            // Update the CSV data
-            DataController.instance
-                .set<List<List<dynamic>>>('playersCsv', playersCsv);
-
-            // Update the player's equipment
-            final updatedPlayer = GameCharacter(
-              name: row[0] as String,
-              maxHealth: int.tryParse(row[1].toString()) ?? 100,
-              attack: int.tryParse(row[2].toString()) ?? 10,
-              defense: int.tryParse(row[3].toString()) ?? 5,
-              emoji: row[4].toString(),
-              color: row[5].toString(),
-              imagePath: row.length > 6 ? row[6].toString() : '',
-              soundPath: row.length > 7 ? row[7].toString() : '',
-              description: row.length > 8 ? row[8].toString() : '',
-              deck: player.deck,
-              maxEnergy: player.maxEnergy,
-              handSize: player.handSize,
-            );
-            DataController.instance
-                .set<GameCharacter>('selectedPlayer', updatedPlayer);
-          },
-          position: Vector2(0, 0),
-          size: size,
-        ),
-        super(size: size);
+  }) : super(size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    // Add background
-    add(RectangleComponent(
+    inventoryPanel = InventoryPanel(
+      items: items,
+      filter: filter,
+      onSelect: _handleItemSelect,
+      position: Vector2(0, 0),
       size: size,
-      paint: Paint()..color = Colors.black.withAlpha(217),
-      anchor: Anchor.topLeft,
-    ));
-
-    // Add inventory panel
+    );
     add(inventoryPanel);
+  }
+
+  void _handleItemSelect(EquipmentData item) {
+    final selectedPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
+    if (selectedPlayer != null) {
+      selectedPlayer.equip(item.type, item.name);
+      SceneManager().popScene();
+    }
   }
 }

@@ -16,27 +16,25 @@ class ArmoryScene extends BaseScene with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Set selectedPlayer from options if provided
-    final player = options?['player'];
-    if (player != null) {
-      // Import DataController and GameCharacter if not already
-      // ignore: import_of_legacy_library_into_null_safe
-      DataController.instance.set('selectedPlayer', player);
+    final selectedPlayer =
+        DataController.instance.get<GameCharacter>('selectedPlayer');
+    if (selectedPlayer == null) {
+      // TODO: Handle case when no player is selected
+      return;
     }
-    _layout = ArmorySceneLayout(options: options);
+    _layout = ArmorySceneLayout(
+      player: selectedPlayer,
+      position: Vector2.zero(),
+      size: Vector2(0, 0), // Initialize with zero size
+    );
     add(_layout);
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
+    _layout.size = size; // Update layout size when game is resized
     _layout.onGameResize(size);
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
-    _layout.handleTap(event.canvasPosition);
   }
 
   @override

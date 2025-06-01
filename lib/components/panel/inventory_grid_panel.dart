@@ -53,8 +53,8 @@ class InventoryGridPanel extends PositionComponent
       equipment: EquipmentData(
         name: 'Select an item',
         type: '',
-        slot: slot,
-        handedness: '',
+        description: '',
+        rarity: '',
         cards: [],
       ),
       position: Vector2(0, 0),
@@ -73,10 +73,7 @@ class InventoryGridPanel extends PositionComponent
     // Filter equipment for the current slot
     final filteredEquipment = equipmentData.entries.where((entry) {
       final equipment = entry.value;
-      if (slot == 'Accessory 1' || slot == 'Accessory 2') {
-        return equipment.slot == 'Accessory';
-      }
-      return equipment.slot == slot;
+      return equipment.type.toLowerCase() == slot.toLowerCase();
     }).toList();
 
     GameLogger.info(LogCategory.game,

@@ -13,14 +13,13 @@ import 'dart:convert';
 import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:flame/events.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
-import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 
 class TapHandler extends PositionComponent with TapCallbacks {
-  final String slotLabel;
+  final String type;
   final Function(String) onTap;
 
   TapHandler({
-    required this.slotLabel,
+    required this.type,
     required this.onTap,
     required Vector2 position,
     required Vector2 size,
@@ -28,14 +27,14 @@ class TapHandler extends PositionComponent with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    onTap(slotLabel);
+    onTap(type);
   }
 }
 
 class EquipmentPanel extends BasePanel {
   EquipmentPanel({Vector2? size}) : super(size: size);
 
-  static const List<String> mainSlots = [
+  static const List<String> mainTypes = [
     'Head',
     'Chest',
     'Pants',
@@ -44,14 +43,13 @@ class EquipmentPanel extends BasePanel {
     'Offhand',
     'Belt'
   ];
-  static const List<String> accessorySlots = ['Accessory 1', 'Accessory 2'];
+  static const List<String> accessoryTypes = ['Accessory 1', 'Accessory 2'];
 
-  Map<String, PositionComponent> slotComponents = {};
-  Map<String, layout.DataComponent<String>> slotWatchers = {};
+  Map<String, PositionComponent> typeComponents = {};
+  Map<String, layout.DataComponent<String>> typeWatchers = {};
   GameCharacter? currentPlayer;
   VoidCallback? _equipmentUnwatch;
   Map<String, EquipmentData>? equipmentData;
-  EquipmentDetailPanel? _detailPanel;
 
   @override
   Future<void> onLoad() async {
@@ -69,9 +67,9 @@ class EquipmentPanel extends BasePanel {
         // Store unwatch callback
         _equipmentUnwatch =
             () => currentPlayer!.unwatch('equipment', (_) => updateUI());
-        // Update all slot watchers to new player
-        for (final slot in slotWatchers.keys) {
-          slotWatchers[slot]?.setDataKey('equipment:$slot');
+        // Update all type watchers to new player
+        for (final type in typeWatchers.keys) {
+          typeWatchers[type]?.setDataKey('equipment:$type');
         }
         updateUI();
       }
@@ -84,7 +82,7 @@ class EquipmentPanel extends BasePanel {
       _equipmentUnwatch =
           () => currentPlayer!.unwatch('equipment', (_) => updateUI());
     }
-    _buildSlots();
+    _buildTypes();
     updateUI();
 
     // Add Load Defaults button at the bottom
@@ -108,90 +106,90 @@ class EquipmentPanel extends BasePanel {
       size: Vector2(200, 50),
       color: material.Colors.blue,
       onPressed: () {
-        // ... existing code ...
+        SceneManager().popScene();
       },
       position: Vector2(size.x / 2, size.y - 40),
     ));
   }
 
-  void _buildSlots() {
-    slotComponents.clear();
-    slotWatchers.clear();
+  void _buildTypes() {
+    typeComponents.clear();
+    typeWatchers.clear();
     children.clear();
     final double w = size.x;
     final double h = size.y;
-    // Slot sizes (smaller proportions)
-    final double slotW = w * 0.13;
-    final double slotH = h * 0.18;
+    // Type sizes (smaller proportions)
+    final double typeW = w * 0.13;
+    final double typeH = h * 0.18;
     final double accW = w * 0.10;
     final double accH = h * 0.12;
     final double centerX = w / 2;
     final double baseY = h * 0.005;
-    // Helper to add slot and watcher
-    void addSlotWithWatcher(String slotLabel, Vector2 pos, Vector2 sz) {
-      final slotComp = _buildSlot(slotLabel, pos, sz);
-      slotComponents[slotLabel] = slotComp;
-      add(slotComp);
-      // Add DataComponent watcher for this slot
+    // Helper to add type and watcher
+    void addTypeWithWatcher(String typeLabel, Vector2 pos, Vector2 sz) {
+      final typeComp = _buildType(typeLabel, pos, sz);
+      typeComponents[typeLabel] = typeComp;
+      add(typeComp);
+      // Add DataComponent watcher for this type
       final watcher = layout.DataComponent<String>(
-        dataKey: 'equipment:$slotLabel',
+        dataKey: 'equipment:$typeLabel',
         onDataChanged: (itemName) {
-          // Optionally, update only this slot UI if needed
+          // Optionally, update only this type UI if needed
           updateUI();
         },
       );
-      slotWatchers[slotLabel] = watcher;
+      typeWatchers[typeLabel] = watcher;
       add(watcher);
     }
 
     // Head (top center)
-    addSlotWithWatcher(
-        'Head', Vector2(centerX - slotW / 2, baseY), Vector2(slotW, slotH));
+    addTypeWithWatcher(
+        'Head', Vector2(centerX - typeW / 2, baseY), Vector2(typeW, typeH));
     // Chest (center)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Chest',
-        Vector2(centerX - slotW / 2, baseY + slotH + h * 0.01),
-        Vector2(slotW, slotH));
+        Vector2(centerX - typeW / 2, baseY + typeH + h * 0.01),
+        Vector2(typeW, typeH));
     // Belt (above pants)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Belt',
-        Vector2(centerX - slotW / 2, baseY + 2 * (slotH + h * 0.01)),
-        Vector2(slotW, accH));
+        Vector2(centerX - typeW / 2, baseY + 2 * (typeH + h * 0.01)),
+        Vector2(typeW, accH));
     // Pants (below belt)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Pants',
-        Vector2(centerX - slotW / 2,
-            baseY + 2 * (slotH + h * 0.01) + accH + h * 0.01),
-        Vector2(slotW, slotH));
+        Vector2(centerX - typeW / 2,
+            baseY + 2 * (typeH + h * 0.01) + accH + h * 0.01),
+        Vector2(typeW, typeH));
     // Shoes (bottom center)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Shoes',
-        Vector2(centerX - slotW / 2, baseY + 4 * (slotH + h * 0.01)),
-        Vector2(slotW, accH));
+        Vector2(centerX - typeW / 2, baseY + 4 * (typeH + h * 0.01)),
+        Vector2(typeW, accH));
     // Weapon (left of chest)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Weapon',
-        Vector2(centerX - slotW - w * 0.08, baseY + slotH + h * 0.01),
-        Vector2(slotW, slotH));
+        Vector2(centerX - typeW - w * 0.08, baseY + typeH + h * 0.01),
+        Vector2(typeW, typeH));
     // Offhand (right of chest)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Offhand',
-        Vector2(centerX + w * 0.08, baseY + slotH + h * 0.01),
-        Vector2(slotW, slotH));
+        Vector2(centerX + w * 0.08, baseY + typeH + h * 0.01),
+        Vector2(typeW, typeH));
     // Accessory 1 (left of pants)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Accessory 1',
-        Vector2(centerX - slotW - w * 0.08, baseY + 2 * (slotH + h * 0.01)),
+        Vector2(centerX - typeW - w * 0.08, baseY + 2 * (typeH + h * 0.01)),
         Vector2(accW, accH));
     // Accessory 2 (right of pants)
-    addSlotWithWatcher(
+    addTypeWithWatcher(
         'Accessory 2',
-        Vector2(centerX + w * 0.08, baseY + 2 * (slotH + h * 0.01)),
+        Vector2(centerX + w * 0.08, baseY + 2 * (typeH + h * 0.01)),
         Vector2(accW, accH));
   }
 
-  String getSlotEmoji(String slot) {
-    switch (slot) {
+  String getTypeEmoji(String type) {
+    switch (type) {
       case 'Head':
         return '🪖';
       case 'Chest':
@@ -214,29 +212,29 @@ class EquipmentPanel extends BasePanel {
     }
   }
 
-  String getSlotDisplayName(String slot) {
-    if (slot == 'Accessory 1') return 'Acc 1';
-    if (slot == 'Accessory 2') return 'Acc 2';
-    return slot;
+  String getTypeDisplayName(String type) {
+    if (type == 'Accessory 1') return 'Acc 1';
+    if (type == 'Accessory 2') return 'Acc 2';
+    return type;
   }
 
-  PositionComponent _buildSlot(
-      String slotLabel, Vector2 position, Vector2 size) {
-    final slot = PositionComponent(
+  PositionComponent _buildType(
+      String typeLabel, Vector2 position, Vector2 size) {
+    final type = PositionComponent(
       position: position,
       size: size,
     );
 
     // Add background
-    slot.add(RectangleComponent(
+    type.add(RectangleComponent(
       size: size,
       paint: material.Paint()..color = material.Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
     ));
 
     // Add emoji
-    slot.add(TextComponent(
-      text: getSlotEmoji(slotLabel),
+    type.add(TextComponent(
+      text: getTypeEmoji(typeLabel),
       textRenderer: TextPaint(
         style: const material.TextStyle(
           color: material.Colors.white,
@@ -248,8 +246,8 @@ class EquipmentPanel extends BasePanel {
     ));
 
     // Add label
-    slot.add(TextComponent(
-      text: getSlotDisplayName(slotLabel),
+    type.add(TextComponent(
+      text: getTypeDisplayName(typeLabel),
       textRenderer: TextPaint(
         style: const material.TextStyle(
           color: material.Colors.white,
@@ -262,127 +260,52 @@ class EquipmentPanel extends BasePanel {
     ));
 
     // Add tap handling
-    slot.add(TapHandler(
-      slotLabel: slotLabel,
+    type.add(TapHandler(
+      type: typeLabel,
       position: Vector2.zero(),
       size: size,
-      onTap: (String slot) {
-        final equippedItem = getEquipmentNameForSlot(slot);
-        if (equippedItem != null) {
-          // Show equipment details panel overlay
-          final equipment = equipmentData?[equippedItem];
-          if (equipment != null) {
-            _showDetailPanel(equipment, slot);
-          }
-        } else {
-          // Show inventory for this slot
-          SceneManager().pushScene('inventory', options: {
-            'player': currentPlayer,
-            'slot': slot,
-          });
-        }
+      onTap: (String type) {
+        // Show inventory for this type
+        SceneManager().pushScene('inventory', options: {
+          'player': currentPlayer,
+          'slot': type,
+        });
       },
     ));
 
-    return slot;
+    return type;
   }
 
-  void _showDetailPanel(EquipmentData equipment, String slot) {
-    // Remove any existing detail panel
-    _detailPanel?.removeFromParent();
-    _detailPanel = EquipmentDetailPanel(
-      equipment: equipment,
-      position: Vector2(size.x / 2 - 150, size.y / 2 - 100),
-      size: Vector2(300, 200),
-    );
-    add(_detailPanel!);
-  }
-
-  String? getEquipmentNameForSlot(String slot) {
+  String? getEquipmentNameForType(String type) {
     if (currentPlayer == null) return null;
-    return currentPlayer!.equipment[slot];
+    return currentPlayer!.equipment[type];
   }
 
   @override
   void updateUI() {
     if (currentPlayer == null) return;
 
-    // Log the current equipment for debugging
-    GameLogger.info(LogCategory.game,
-        '[EQUIP_PANEL] Player equipment: \\${currentPlayer!.equipment}');
-
-    // Update each slot with its equipped item
-    for (final slot in slotComponents.keys) {
-      final slotComp = slotComponents[slot];
-      if (slotComp != null) {
-        // Remove any existing item text
-        slotComp.children.removeWhere((child) =>
-            child is TextComponent &&
-            child.text != getSlotEmoji(slot) &&
-            child.text != getSlotDisplayName(slot));
-
-        // Add the equipped item name if there is one
-        final equippedItem = getEquipmentNameForSlot(slot);
-        if (equippedItem != null) {
-          slotComp.add(TextComponent(
-            text: equippedItem,
-            textRenderer: TextPaint(
-              style: const material.TextStyle(
-                color: material.Colors.white,
-                fontSize: 10,
-                fontWeight: material.FontWeight.bold,
-              ),
-            ),
-            anchor: Anchor.topCenter,
-            position: Vector2(slotComp.size.x / 2, 4),
-          ));
-        }
+    // Update each type component
+    for (final type in typeComponents.keys) {
+      final equipmentName = getEquipmentNameForType(type);
+      final typeComp = typeComponents[type];
+      if (typeComp != null) {
+        // Update background color based on whether equipment is equipped
+        final background = typeComp.children.first as RectangleComponent;
+        background.paint.color = equipmentName != null
+            ? material.Colors.green.withAlpha(217)
+            : material.Colors.black.withAlpha(217);
       }
     }
   }
 
-  Future<void> _loadDefaultEquipment() async {
+  void _loadDefaultEquipment() {
     if (currentPlayer == null) return;
 
-    final playersCsv =
-        DataController.instance.get<List<List<dynamic>>>('playersCsv');
-    if (playersCsv == null) {
-      GameLogger.error(
-          LogCategory.game, '[EQUIP_PANEL] No players CSV data found');
-      return;
-    }
+    // Clear current equipment
+    currentPlayer!.equipment = {};
 
-    // Find the player's row in the CSV
-    final row = playersCsv.firstWhere(
-      (r) =>
-          r.isNotEmpty &&
-          r[0].toString().trim().toLowerCase() ==
-              currentPlayer!.name.trim().toLowerCase(),
-      orElse: () => [],
-    );
-
-    if (row.isEmpty) {
-      GameLogger.error(LogCategory.game,
-          '[EQUIP_PANEL] No matching row found for player: ${currentPlayer!.name}');
-      return;
-    }
-
-    // Get default equipment from CSV (column 9)
-    final defaultEquipmentStr = row.length > 9 ? (row[9] as String? ?? '') : '';
-    if (defaultEquipmentStr.isEmpty) {
-      GameLogger.error(LogCategory.game,
-          '[EQUIP_PANEL] No default equipment found for player: ${currentPlayer!.name}');
-      return;
-    }
-
-    // Parse default equipment list
-    final defaultEquipmentList = defaultEquipmentStr
-        .split('|')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    // Get equipment data
+    // Load default equipment from CSV
     final equipmentData = DataController.instance
         .get<Map<String, EquipmentData>>('equipmentData');
     if (equipmentData == null) {
@@ -391,29 +314,47 @@ class EquipmentPanel extends BasePanel {
       return;
     }
 
-    // Create equipment map
-    final Map<String, String> equipmentMap = {};
-    for (final eqName in defaultEquipmentList) {
-      final eq = equipmentData[eqName];
-      if (eq != null) {
-        equipmentMap[eq.slot] = eqName;
+    // Load default equipment for each type
+    for (final type in mainTypes) {
+      final defaultEquipment = equipmentData.values.firstWhere(
+        (e) => e.type.toLowerCase() == type.toLowerCase(),
+        orElse: () => EquipmentData(
+          name: '',
+          type: type,
+          description: '',
+          rarity: '',
+          cards: [],
+        ),
+      );
+      if (defaultEquipment.name.isNotEmpty) {
+        currentPlayer!.equip(type, defaultEquipment.name);
       }
     }
 
-    // Update player's equipment
-    currentPlayer!.equipment = equipmentMap;
-    DataController.instance.set('selectedPlayer', currentPlayer);
+    // Load default accessories
+    for (final type in accessoryTypes) {
+      final defaultEquipment = equipmentData.values.firstWhere(
+        (e) => e.type.toLowerCase() == 'accessory',
+        orElse: () => EquipmentData(
+          name: '',
+          type: 'accessory',
+          description: '',
+          rarity: '',
+          cards: [],
+        ),
+      );
+      if (defaultEquipment.name.isNotEmpty) {
+        currentPlayer!.equip(type, defaultEquipment.name);
+      }
+    }
 
-    // Log the current equipment after loading defaults
-    GameLogger.info(LogCategory.game,
-        '[EQUIP_PANEL] Player equipment after loading defaults: \\${currentPlayer!.equipment}');
+    // Save equipment to preferences
+    final prefs = SharedPreferences.getInstance();
+    prefs.then((prefs) {
+      prefs.setString('playerEquipment:${currentPlayer!.name}',
+          jsonEncode(currentPlayer!.equipment));
+    });
 
-    // Save to SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(
-        'playerEquipment:${currentPlayer!.name}', jsonEncode(equipmentMap));
-
-    GameLogger.info(LogCategory.game,
-        '[EQUIP_PANEL] Loaded default equipment for ${currentPlayer!.name}: $equipmentMap');
+    updateUI();
   }
 }

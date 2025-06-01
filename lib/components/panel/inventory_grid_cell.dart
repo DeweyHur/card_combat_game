@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/equipment_loader.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 class InventoryGridCell extends PositionComponent with TapCallbacks {
   final EquipmentData equipment;
@@ -13,12 +14,22 @@ class InventoryGridCell extends PositionComponent with TapCallbacks {
     'weapon': '⚔️',
     'armor': '🛡️',
     'head': '⛑️',
+    'helmet': '⛑️',
+    'hat': '🎩',
+    'chest': '🦺',
+    'robe': '👘',
+    'pants': '👖',
+    'leggings': '👖',
+    'shoes': '👢',
     'boots': '👢',
+    'gauntlets': '🧤',
     'gloves': '🧤',
     'ring': '💍',
     'amulet': '📿',
     'shield': '🛡️',
     'accessory': '✨',
+    'charm': '✨',
+    'manual': '📖',
   };
 
   InventoryGridCell({
@@ -33,42 +44,55 @@ class InventoryGridCell extends PositionComponent with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add cell background
-    add(RectangleComponent(
+    // Add background
+    final background = RectangleComponent(
       size: size,
       paint: Paint()
         ..color = isEquipped
-            ? Colors.blueAccent.withAlpha(217)
-            : Colors.white.withAlpha(32),
+            ? Colors.green.withAlpha(217)
+            : Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
-    ));
+    );
+    add(background);
 
-    // Add emoji icon
+    // Add emoji
     final emoji = _typeEmojis[equipment.type.toLowerCase()] ?? '❓';
-    add(TextComponent(
+    GameLogger.info(
+      LogCategory.game,
+      '[INV_CELL] Equipment: ${equipment.name}, Type: ${equipment.type}, Selected Emoji: $emoji',
+    );
+    GameLogger.info(
+      LogCategory.game,
+      '[INV_CELL] Available emoji mappings: ${_typeEmojis.entries.map((e) => '${e.key}: ${e.value}').join(", ")}',
+    );
+
+    final emojiText = TextComponent(
       text: emoji,
       textRenderer: TextPaint(
         style: const TextStyle(
+          color: Colors.white,
           fontSize: 24,
         ),
       ),
       anchor: Anchor.center,
-      position: Vector2(size.x / 2, size.y / 2 - 10),
-    ));
+      position: Vector2(size.x / 2, size.y / 2),
+    );
+    add(emojiText);
 
-    // Add equipment name
-    add(TextComponent(
+    // Add name
+    final nameText = TextComponent(
       text: equipment.name,
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 16,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.center,
-      position: Vector2(size.x / 2, size.y / 2 + 15),
-    ));
+      anchor: Anchor.bottomCenter,
+      position: Vector2(size.x / 2, size.y - 4),
+    );
+    add(nameText);
   }
 
   @override
