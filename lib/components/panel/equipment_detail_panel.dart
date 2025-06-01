@@ -7,8 +7,10 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 
-class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
+class EquipmentDetailPanel extends PositionComponent
+    with TapCallbacks, VerticalStackMixin {
   EquipmentData equipment;
   SimpleButtonComponent? actionButton;
   SimpleButtonComponent? inventoryButton;
@@ -24,11 +26,12 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
     await super.onLoad();
 
     // Add background
-    add(RectangleComponent(
+    final background = RectangleComponent(
       size: size,
       paint: Paint()..color = Colors.black.withAlpha(217),
       anchor: Anchor.topLeft,
-    ));
+    );
+    registerVerticalStackComponent('background', background, size.y);
 
     // Add equipment details
     final player = DataController.instance.get<GameCharacter>('selectedPlayer');
@@ -40,7 +43,7 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
     final isEquipped = player.equipment[equipment.slot] == equipment.name;
 
     // Add name
-    add(TextComponent(
+    final nameText = TextComponent(
       text: equipment.name,
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -51,10 +54,11 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(20, 20),
-    ));
+    );
+    registerVerticalStackComponent('name', nameText, 40);
 
     // Add type
-    add(TextComponent(
+    final typeText = TextComponent(
       text: 'Type: ${equipment.type}',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -64,10 +68,11 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(20, 60),
-    ));
+    );
+    registerVerticalStackComponent('type', typeText, 30);
 
     // Add slot
-    add(TextComponent(
+    final slotText = TextComponent(
       text: 'Slot: ${equipment.slot}',
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -77,11 +82,12 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
       ),
       anchor: Anchor.topLeft,
       position: Vector2(20, 90),
-    ));
+    );
+    registerVerticalStackComponent('slot', slotText, 30);
 
     // Add handedness if not empty
     if (equipment.handedness.isNotEmpty) {
-      add(TextComponent(
+      final handednessText = TextComponent(
         text: 'Handedness: ${equipment.handedness}',
         textRenderer: TextPaint(
           style: const TextStyle(
@@ -91,12 +97,13 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
         ),
         anchor: Anchor.topLeft,
         position: Vector2(20, 120),
-      ));
+      );
+      registerVerticalStackComponent('handedness', handednessText, 30);
     }
 
     // Add cards if any
     if (equipment.cards.isNotEmpty) {
-      add(TextComponent(
+      final cardsHeader = TextComponent(
         text: 'Cards:',
         textRenderer: TextPaint(
           style: const TextStyle(
@@ -107,10 +114,11 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
         ),
         anchor: Anchor.topLeft,
         position: Vector2(20, 150),
-      ));
+      );
+      registerVerticalStackComponent('cards_header', cardsHeader, 30);
 
       for (int i = 0; i < equipment.cards.length; i++) {
-        add(TextComponent(
+        final cardText = TextComponent(
           text: '• ${equipment.cards[i]}',
           textRenderer: TextPaint(
             style: const TextStyle(
@@ -120,7 +128,8 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
           ),
           anchor: Anchor.topLeft,
           position: Vector2(40, 180 + i * 25),
-        ));
+        );
+        registerVerticalStackComponent('card_$i', cardText, 25);
       }
     }
 
@@ -131,7 +140,9 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
 
   void _updateActionButtons(bool isEquipped) {
     // Remove existing button if any
-    actionButton?.removeFromParent();
+    if (actionButton != null) {
+      hideVerticalStackComponent('action_button');
+    }
 
     // Create new button
     actionButton = SimpleButtonComponent.text(
@@ -151,44 +162,65 @@ class EquipmentDetailPanel extends PositionComponent with TapCallbacks {
         } else {
           player.equip(equipment.slot, equipment.name);
         }
-
-        DataController.instance.set('selectedPlayer', player);
-        _updateActionButtons(!isEquipped);
+        // Return to previous scene after equipping/unequipping
+        SceneManager().popScene();
       },
-      position: Vector2(size.x / 2, size.y - 100),
     );
-    add(actionButton!);
+    registerVerticalStackComponent('action_button', actionButton!, 50);
   }
 
   void _addInventoryButton() {
-    inventoryButton = SimpleButtonComponent.text(
-      text: 'Change Equipment',
-      size: Vector2(200, 50),
-      color: Colors.blue,
-      onPressed: () {
-        final selectedPlayer =
-            DataController.instance.get<GameCharacter>('selectedPlayer');
-        if (selectedPlayer != null && equipment.slot.isNotEmpty) {
-          SceneManager().pushScene('inventory', options: {
-            'player': selectedPlayer,
-            'slot': equipment.slot,
-          });
-        }
-      },
-      position: Vector2(size.x / 2, size.y - 40),
-    );
-    add(inventoryButton!);
+    // Only show inventory button if we're not already in the inventory scene
+    final inventoryPlayer =
+        DataController.instance.get<GameCharacter>('inventory.player');
+    final inventorySlot = DataController.instance.get<String>('inventory.slot');
+
+    if (inventoryPlayer == null || inventorySlot == null) {
+      inventoryButton = SimpleButtonComponent.text(
+        text: 'Change Equipment',
+        size: Vector2(200, 50),
+        color: Colors.blue,
+        onPressed: () {
+          final selectedPlayer =
+              DataController.instance.get<GameCharacter>('selectedPlayer');
+          if (selectedPlayer != null && equipment.slot.isNotEmpty) {
+            SceneManager().pushScene('inventory', options: {
+              'player': selectedPlayer,
+              'slot': equipment.slot,
+            });
+          }
+        },
+      );
+      registerVerticalStackComponent('inventory_button', inventoryButton!, 50);
+    }
 
     // Add a close button in the top right
-    add(SimpleButtonComponent.text(
+    final closeButton = SimpleButtonComponent.text(
       text: 'X',
       size: Vector2(40, 40),
       color: Colors.grey.shade800,
       onPressed: () {
-        removeFromParent();
+        hideVerticalStackComponent('background');
+        hideVerticalStackComponent('name');
+        hideVerticalStackComponent('type');
+        hideVerticalStackComponent('slot');
+        if (equipment.handedness.isNotEmpty) {
+          hideVerticalStackComponent('handedness');
+        }
+        if (equipment.cards.isNotEmpty) {
+          hideVerticalStackComponent('cards_header');
+          for (int i = 0; i < equipment.cards.length; i++) {
+            hideVerticalStackComponent('card_$i');
+          }
+        }
+        hideVerticalStackComponent('action_button');
+        if (inventoryPlayer == null || inventorySlot == null) {
+          hideVerticalStackComponent('inventory_button');
+        }
+        hideVerticalStackComponent('close_button');
       },
-      position: Vector2(size.x - 50, 10),
-    ));
+    );
+    registerVerticalStackComponent('close_button', closeButton, 40);
   }
 
   void updateEquipment(EquipmentData newEquipment) {

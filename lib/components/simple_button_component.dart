@@ -13,7 +13,7 @@ class SimpleButtonComponent extends PositionComponent with TapCallbacks {
     this.onPressed,
     Vector2? position,
     Vector2? size,
-  }) : super(position: position, size: size, anchor: Anchor.center);
+  }) : super(position: position, size: size, anchor: Anchor.topCenter);
 
   factory SimpleButtonComponent.text({
     required String text,
@@ -25,7 +25,7 @@ class SimpleButtonComponent extends PositionComponent with TapCallbacks {
     final button = RectangleComponent(
       size: size,
       paint: Paint()..color = color,
-      anchor: Anchor.center,
+      anchor: Anchor.topCenter,
     );
 
     final label = TextComponent(
@@ -36,8 +36,8 @@ class SimpleButtonComponent extends PositionComponent with TapCallbacks {
           fontSize: 20,
         ),
       ),
-      anchor: Anchor.center,
-      position: size / 2,
+      anchor: Anchor.topCenter,
+      position: Vector2(size.x / 2, size.y / 2),
     );
 
     return SimpleButtonComponent(
@@ -52,7 +52,7 @@ class SimpleButtonComponent extends PositionComponent with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    button.position = size / 2;
+    button.position = Vector2(size.x / 2, size.y / 2);
     add(button);
     add(label);
   }
