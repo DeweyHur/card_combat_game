@@ -276,7 +276,6 @@ class EquipmentPanel extends BasePanel {
           }
         } else {
           // Show inventory for this slot
-          DataController.instance.set('selectedEquipmentName', slot);
           SceneManager().pushScene('inventory', options: {
             'player': currentPlayer,
             'slot': slot,

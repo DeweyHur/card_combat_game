@@ -16,6 +16,7 @@ import 'package:card_combat_app/scenes/expedition_scene.dart';
 import 'package:card_combat_app/scenes/quest_event_scene.dart';
 import 'package:card_combat_app/scenes/random_event_scene.dart';
 import 'package:card_combat_app/scenes/camp_event_scene.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 import 'base_scene.dart';
 
 class SceneManager {
@@ -69,6 +70,19 @@ class SceneManager {
     GameLogger.info(LogCategory.game, 'Registered scene: $name');
   }
 
+  void _registerSceneData(String sceneName, Map<String, dynamic>? options) {
+    if (options == null) return;
+
+    // Register each option with the scene
+    for (final entry in options.entries) {
+      DataController.instance.setSceneData(sceneName, entry.key, entry.value);
+    }
+  }
+
+  void _cleanupSceneData(String sceneName) {
+    DataController.instance.cleanupSceneData(sceneName);
+  }
+
   void pushScene(String name, {Map<String, dynamic>? options}) {
     if (_game == null) {
       GameLogger.error(
@@ -92,9 +106,13 @@ class SceneManager {
           .key;
       if (currentName.isNotEmpty) {
         _sceneStack.add(currentName);
+        GameLogger.debug(
+            LogCategory.game, 'Pushing current scene to stack: $currentName');
       }
+      // Don't clean up data when transitioning between scenes
       _game!.remove(currentScene);
     }
+    _registerSceneData(name, options);
     final newScene = _scenes[name]!(options);
     _game!.add(newScene);
     GameLogger.info(
@@ -114,12 +132,27 @@ class SceneManager {
     }
     final currentScene = _game!.children.whereType<BaseScene>().firstOrNull;
     if (currentScene != null) {
+      // Clean up data for the current scene before removing it
+      final currentName = _scenes.entries
+          .firstWhere(
+            (entry) =>
+                currentScene.runtimeType == entry.value(null).runtimeType,
+            orElse: () =>
+                MapEntry('', (options) => throw Exception('No scene found')),
+          )
+          .key;
+      if (currentName.isNotEmpty) {
+        GameLogger.debug(LogCategory.game,
+            'Cleaning up data for scene being popped: $currentName');
+        _cleanupSceneData(currentName);
+      }
       _game!.remove(currentScene);
     }
     final prevSceneName = _sceneStack.removeLast();
     final prevScene = _scenes[prevSceneName]?.call(options);
     if (prevScene != null) {
       _game!.add(prevScene);
+      _registerSceneData(prevSceneName, options);
       GameLogger.info(LogCategory.game,
           'Popped to scene: $prevSceneName (stack: $_sceneStack)');
       GameLogger.debug(LogCategory.game, 'Scene stack after pop: $_sceneStack');
@@ -149,6 +182,7 @@ class SceneManager {
     // Add the new scene
     final newScene = _scenes[name]!(options);
     _game!.add(newScene);
+    _registerSceneData(name, options);
     GameLogger.info(LogCategory.game, 'Moved to scene: $name (stack cleared)');
     GameLogger.debug(LogCategory.game, 'Scene stack after move: $_sceneStack');
   }

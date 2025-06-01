@@ -10,11 +10,101 @@ class DataController {
   final Map<String, dynamic> _data = {};
   final Map<String, List<Function(dynamic)>> _watchers = {};
   final Map<String, StreamController<dynamic>> _streamControllers = {};
+  final Map<String, Map<String, dynamic>> _sceneData = {};
 
   DataController._internal();
 
+  // Get all keys in the data store
+  Set<String> get keys => _data.keys.toSet();
+
   // Get value for a key
   T? get<T>(String key) => _data[key] as T?;
+
+  // Get scene-specific value
+  T? getSceneData<T>(String sceneName, String key) {
+    final sceneData = _sceneData[sceneName];
+    if (sceneData == null) return null;
+    return sceneData[key] as T?;
+  }
+
+  // Set scene-specific value
+  void setSceneData<T>(String sceneName, String key, T value) {
+    if (!_sceneData.containsKey(sceneName)) {
+      _sceneData[sceneName] = {};
+      GameLogger.debug(
+          LogCategory.data, 'Created new scene data map for: $sceneName');
+    }
+    final oldValue = _sceneData[sceneName]![key];
+    _sceneData[sceneName]![key] = value;
+
+    // Notify watchers for the full key (scene.key)
+    final fullKey = '$sceneName.$key';
+    if (_watchers.containsKey(fullKey)) {
+      for (final watcher in _watchers[fullKey]!) {
+        watcher(value);
+      }
+    }
+
+    // Add to stream if it exists
+    if (_streamControllers.containsKey(fullKey)) {
+      _streamControllers[fullKey]!.add(value);
+    }
+
+    String serialize(dynamic v) {
+      if (v == null) return 'null';
+      if (v is List) {
+        return jsonEncode(v.map((e) {
+          if (e is GameCharacter) return e.toJson();
+          if (e is EquipmentData) return e.toJson();
+          return e;
+        }).toList());
+      }
+      if (v is Map) {
+        return jsonEncode(v.map((key, value) {
+          if (value is GameCharacter) return MapEntry(key, value.toJson());
+          if (value is EquipmentData) return MapEntry(key, value.toJson());
+          return MapEntry(key, value);
+        }));
+      }
+      if (v is GameCharacter) return v.toJson().toString();
+      if (v is EquipmentData) return v.toJson().toString();
+      return v.toString();
+    }
+
+    GameLogger.debug(LogCategory.data,
+        'Scene data updated: $sceneName.$key = ${serialize(value)} (was: ${serialize(oldValue)})');
+  }
+
+  // Clean up scene data
+  void cleanupSceneData(String sceneName) {
+    if (_sceneData.containsKey(sceneName)) {
+      GameLogger.debug(
+          LogCategory.data, 'Starting cleanup for scene: $sceneName');
+      final sceneData = _sceneData[sceneName]!;
+      for (final key in sceneData.keys) {
+        final fullKey = '$sceneName.$key';
+        GameLogger.debug(LogCategory.data, 'Cleaning up key: $fullKey');
+        // Remove watchers
+        if (_watchers.containsKey(fullKey)) {
+          _watchers.remove(fullKey);
+          GameLogger.debug(LogCategory.data, 'Removed watchers for: $fullKey');
+        }
+        // Close and remove stream controllers
+        if (_streamControllers.containsKey(fullKey)) {
+          _streamControllers[fullKey]!.close();
+          _streamControllers.remove(fullKey);
+          GameLogger.debug(LogCategory.data,
+              'Closed and removed stream controller for: $fullKey');
+        }
+      }
+      _sceneData.remove(sceneName);
+      GameLogger.debug(
+          LogCategory.data, 'Completed cleanup for scene: $sceneName');
+    } else {
+      GameLogger.debug(
+          LogCategory.data, 'No data found to cleanup for scene: $sceneName');
+    }
+  }
 
   // Set value for a key and notify watchers
   void set<T>(String key, T value) {
