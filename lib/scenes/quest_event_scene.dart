@@ -8,15 +8,15 @@ import 'package:card_combat_app/models/quest_data.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
 
 class QuestEventScene extends BaseScene {
-  late final Player player;
-  late final QuestData quest;
+  late final PlayerRun player;
+  late final QuestRun quest;
   bool hasChosen = false;
   final Random _random = Random();
 
   QuestEventScene({required Map<String, dynamic> options})
       : super(sceneBackgroundColor: material.Colors.brown.shade200) {
-    player = options['player'] as Player;
-    quest = options['quest'] as QuestData;
+    player = options['player'] as PlayerRun;
+    quest = options['quest'] as QuestRun;
   }
 
   @override
@@ -32,7 +32,7 @@ class QuestEventScene extends BaseScene {
 
     // Add title
     add(TextComponent(
-      text: quest.title,
+      text: quest.template.title,
       textRenderer: TextPaint(
         style: const material.TextStyle(
           color: material.Colors.white,
@@ -46,7 +46,7 @@ class QuestEventScene extends BaseScene {
 
     // Add description
     add(TextComponent(
-      text: quest.description,
+      text: quest.template.description,
       textRenderer: TextPaint(
         style: const material.TextStyle(
           color: material.Colors.white,
@@ -58,8 +58,8 @@ class QuestEventScene extends BaseScene {
     ));
 
     // Add choices
-    for (int i = 0; i < quest.choices.length; i++) {
-      final choice = quest.choices[i];
+    for (int i = 0; i < quest.template.choices.length; i++) {
+      final choice = quest.template.choices[i];
       add(SimpleButtonComponent.text(
         text: choice.text,
         size: Vector2(300, 50),
@@ -67,11 +67,45 @@ class QuestEventScene extends BaseScene {
         onPressed: () {
           if (!hasChosen) {
             hasChosen = true;
-            final outcome = choice.outcome;
-            final isSuccess = _random.nextDouble() < outcome.successChance;
-            final message = isSuccess
-                ? outcome.successReward(player)
-                : outcome.failurePenalty(player);
+            final isSuccess = _random.nextDouble() < choice.successChance;
+            String message;
+            if (isSuccess) {
+              // Apply success reward
+              switch (choice.successRewardType) {
+                case 'equipment':
+                  // You may want to implement equipment logic here
+                  message =
+                      'You gained equipment: ${choice.successRewardValue}';
+                  break;
+                case 'health':
+                  final amount = int.tryParse(choice.successRewardValue) ?? 0;
+                  player.heal(amount);
+                  message = 'You healed $amount health!';
+                  break;
+                case 'status':
+                  message = 'Status effect: ${choice.successRewardValue}';
+                  break;
+                default:
+                  message = 'Success!';
+              }
+            } else {
+              // Apply failure penalty
+              switch (choice.failurePenaltyType) {
+                case 'equipment':
+                  message = 'You lost equipment: ${choice.failurePenaltyValue}';
+                  break;
+                case 'health':
+                  final amount = int.tryParse(choice.failurePenaltyValue) ?? 0;
+                  player.takeDamage(amount);
+                  message = 'You lost $amount health!';
+                  break;
+                case 'status':
+                  message = 'Status effect: ${choice.failurePenaltyValue}';
+                  break;
+                default:
+                  message = 'Failure!';
+              }
+            }
 
             // Show outcome message
             add(TextComponent(

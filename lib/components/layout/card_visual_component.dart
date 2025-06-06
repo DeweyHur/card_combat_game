@@ -1,13 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Card;
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/card.dart';
 
 class CardVisualComponent extends PositionComponent
     with TapCallbacks, HasGameReference, HasVisibility {
-  final GameCard cardData;
+  final CardRun cardData;
   final bool enabled;
-  final Function(GameCard) onCardPlayed;
+  final Function(CardRun) onCardPlayed;
   static const double cardWidth = 70.0;
   static const double cardHeight = 90.0;
   static const double cardSpacing = 8.0;
@@ -26,122 +26,113 @@ class CardVisualComponent extends PositionComponent
         );
 
   @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-
-    // Card background
-    final backgroundPaint = Paint()
-      ..color = enabled ? Colors.white : Colors.grey
-      ..style = PaintingStyle.fill;
-    final cardBackground = RectangleComponent(
-      size: size,
-      paint: backgroundPaint,
-      priority: 0,
-    );
-    add(cardBackground);
-
-    // Card border
-    final borderPaint = Paint()
-      ..color = _getCardColor()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    final cardBorder = RectangleComponent(
-      size: size,
-      paint: borderPaint,
-      priority: 1,
-    );
-    add(cardBorder);
-
-    // Card cost (left bottom)
-    final costText = TextComponent(
-      text: '⚡${cardData.cost}',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.orange,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      position: Vector2(8, size.y - 8),
-      anchor: Anchor.bottomLeft,
-      priority: 2,
-    );
-    add(costText);
-
-    // Large emoji in the center
-    final emoji = _getCardEmoji();
-    final emojiText = TextComponent(
-      text: emoji,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 48,
-        ),
-      ),
-      position: Vector2(size.x / 2, size.y / 2 - 8),
-      anchor: Anchor.center,
-      priority: 2,
-    );
-    add(emojiText);
-
-    // Card value (bottom right)
-    if (cardData.type == CardType.attack ||
-        cardData.type == CardType.heal ||
-        cardData.type == CardType.shield) {
-      final valueText = TextComponent(
-        text: cardData.value.toString(),
-        textRenderer: TextPaint(
-          style: TextStyle(
-            color: _getCardColor(),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        position: Vector2(size.x - 8, size.y - 8),
-        anchor: Anchor.bottomRight,
-        priority: 3,
-      );
-      add(valueText);
-    }
-  }
-
-  Color _getCardColor() {
-    switch (cardData.type) {
-      case CardType.attack:
-        return Colors.red;
-      case CardType.heal:
-        return Colors.green;
-      case CardType.statusEffect:
-        return Colors.purple;
-      case CardType.cure:
-        return Colors.blue;
-      case CardType.shield:
-        return Colors.blueGrey;
-      case CardType.shieldAttack:
-        return Colors.amber;
-    }
-  }
-
-  String _getCardEmoji() {
-    switch (cardData.type) {
-      case CardType.attack:
-        return '💥';
-      case CardType.heal:
-        return '💚';
-      case CardType.statusEffect:
-        return '🌀';
-      case CardType.cure:
-        return '✨';
-      case CardType.shield:
-        return '🛡️';
-      case CardType.shieldAttack:
-        return '🔰';
+  void onTapDown(TapDownEvent event) {
+    if (enabled) {
+      onCardPlayed(cardData);
     }
   }
 
   @override
-  void onTapDown(TapDownEvent event) {
-    if (enabled) {
-      onCardPlayed(cardData);
+  void render(Canvas canvas) {
+    // Draw card background
+    final paint = Paint()
+      ..color = _getCardColor()
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.x, size.y),
+        const Radius.circular(8),
+      ),
+      paint,
+    );
+
+    // Draw card border
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.x, size.y),
+        const Radius.circular(8),
+      ),
+      borderPaint,
+    );
+
+    // Draw card name
+    final nameText = TextPaint(
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    nameText.render(
+      canvas,
+      cardData.name,
+      Vector2(size.x / 2, 10),
+      anchor: Anchor.topCenter,
+    );
+
+    // Draw card cost
+    final costText = TextPaint(
+      style: const TextStyle(
+        color: Colors.yellow,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    costText.render(
+      canvas,
+      '${cardData.cost}',
+      Vector2(15, 15),
+      anchor: Anchor.topLeft,
+    );
+
+    // Draw card value
+    final valueText = TextPaint(
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    valueText.render(
+      canvas,
+      '${cardData.value}',
+      Vector2(size.x / 2, size.y - 20),
+      anchor: Anchor.bottomCenter,
+    );
+
+    // Draw card type
+    final typeText = TextPaint(
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 10,
+      ),
+    );
+    typeText.render(
+      canvas,
+      cardData.type.toString().split('.').last.toUpperCase(),
+      Vector2(size.x / 2, size.y - 5),
+      anchor: Anchor.bottomCenter,
+    );
+  }
+
+  Color _getCardColor() {
+    switch (cardData.color.toLowerCase()) {
+      case 'red':
+        return Colors.red.shade900;
+      case 'blue':
+        return Colors.blue.shade900;
+      case 'green':
+        return Colors.green.shade900;
+      case 'purple':
+        return Colors.purple.shade900;
+      case 'orange':
+        return Colors.orange.shade900;
+      default:
+        return Colors.blue.shade900;
     }
   }
 }

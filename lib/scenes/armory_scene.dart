@@ -5,10 +5,13 @@ import 'package:card_combat_app/components/layout/armory_scene_layout.dart';
 import 'base_scene.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:card_combat_app/managers/static_data_manager.dart';
 
 class ArmoryScene extends BaseScene with TapCallbacks {
   late final ArmorySceneLayout _layout;
+  static const String _lastSelectedPlayerKey = 'lastSelectedPlayer';
 
   ArmoryScene({Map<String, dynamic>? options})
       : super(sceneBackgroundColor: const Color(0xFF222244), options: options);
@@ -16,16 +19,53 @@ class ArmoryScene extends BaseScene with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final selectedPlayer =
-        DataController.instance.get<GameCharacter>('selectedPlayer');
-    if (selectedPlayer == null) {
-      // TODO: Handle case when no player is selected
-      return;
+
+    // Try to get the last selected player from local storage
+    final prefs = await SharedPreferences.getInstance();
+    String? lastSelectedPlayerName = prefs.getString(_lastSelectedPlayerKey);
+
+    // Get the player setup from DataController or use the last selected player
+    PlayerSetup? playerSetup =
+        DataController.instance.get<PlayerSetup>('selectedPlayerSetup');
+
+    if (playerSetup == null) {
+      // If no player setup is selected, try to get the last selected player
+      if (lastSelectedPlayerName != null) {
+        final template =
+            StaticDataManager.findPlayerTemplate(lastSelectedPlayerName);
+        if (template != null) {
+          playerSetup = PlayerSetup(template);
+        }
+      }
+
+      // If still no player setup, use the first player from templates
+      if (playerSetup == null) {
+        final templates = StaticDataManager.playerTemplates;
+        if (templates.isNotEmpty) {
+          playerSetup = PlayerSetup(templates.first);
+        } else {
+          GameLogger.error(
+              LogCategory.game, '[ARMORY] No player templates available');
+          return;
+        }
+      }
+
+      // Save the player setup to DataController and local storage
+      DataController.instance.set('selectedPlayerSetup', playerSetup);
+      await prefs.setString(_lastSelectedPlayerKey, playerSetup.template.name);
+
+      GameLogger.info(LogCategory.game,
+          '[ARMORY] No player setup selected, using: ${playerSetup.template.name}');
+    } else {
+      // Save the player setup to local storage
+      await prefs.setString(_lastSelectedPlayerKey, playerSetup.template.name);
+      GameLogger.info(LogCategory.game,
+          '[ARMORY] Using selected player setup: ${playerSetup.template.name}');
     }
+
     _layout = ArmorySceneLayout(
-      player: selectedPlayer,
-      position: Vector2.zero(),
-      size: Vector2(0, 0), // Initialize with zero size
+      playerSetup: playerSetup,
+      options: options,
     );
     add(_layout);
   }
@@ -34,22 +74,17 @@ class ArmoryScene extends BaseScene with TapCallbacks {
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
     _layout.size = size; // Update layout size when game is resized
-    _layout.onGameResize(size);
   }
 
   @override
   void onMount() {
     super.onMount();
-    // Log the current state of the selected player when the scene is mounted
-    final currentPlayer =
-        DataController.instance.get<GameCharacter>('selectedPlayer');
+    // Log the current state of the selected player setup when the scene is mounted
+    final currentSetup =
+        DataController.instance.get<PlayerSetup>('selectedPlayerSetup');
     GameLogger.info(LogCategory.game,
-        '[ARMORY] Scene mounted with player: ${currentPlayer?.name}');
+        '[ARMORY] Scene mounted with player setup: ${currentSetup?.template.name}');
     GameLogger.info(LogCategory.game,
-        '[ARMORY] Player stats - Health: ${currentPlayer?.maxHealth}, Attack: ${currentPlayer?.attack}, Defense: ${currentPlayer?.defense}');
-    GameLogger.info(LogCategory.game,
-        '[ARMORY] Player deck size: ${currentPlayer?.deck.length}');
-    GameLogger.info(LogCategory.game,
-        '[ARMORY] Player equipment: ${currentPlayer?.equipment}');
+        '[ARMORY] Player template stats - Health: ${currentSetup?.template.maxHealth}, Attack: ${currentSetup?.template.attack}, Defense: ${currentSetup?.template.defense}');
   }
 }

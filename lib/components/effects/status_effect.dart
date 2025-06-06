@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/effects/fading_text_component.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class StatusEffectComponent extends PositionComponent {
   final StatusEffect effect;
@@ -54,6 +54,8 @@ class StatusEffectComponent extends PositionComponent {
         return Colors.blue;
       case StatusEffect.none:
         return Colors.grey;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -67,6 +69,8 @@ class StatusEffectComponent extends PositionComponent {
         return 'FREEZE';
       case StatusEffect.none:
         return 'NONE';
+      default:
+        return 'STATUS';
     }
   }
 

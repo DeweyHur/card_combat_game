@@ -1,63 +1,105 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material;
+import 'package:card_combat_app/models/enemy.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
-import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/components/action_with_emoji_component.dart';
-import 'package:card_combat_app/components/panel/base_enemy_panel.dart';
+import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
+import 'package:flutter/foundation.dart';
 
-class EnemyCombatPanel extends BaseEnemyPanel {
+class EnemyCombatPanel extends BasePanel
+    with ShakeMixin
+    implements CombatWatcher {
+  late final CombatManager combatManager;
+  late final EnemyRun enemy;
+
   TextComponent? actionText;
   TextComponent statusEffectText = TextComponent(
     text: '',
     textRenderer: TextPaint(
-      style: const TextStyle(
-          color: Colors.purple, fontSize: 16, fontWeight: FontWeight.bold),
+      style: const material.TextStyle(
+        color: material.Colors.white,
+        fontSize: 16,
+      ),
     ),
   );
+
+  EnemyCombatPanel({required this.enemy});
+
+  void initialize(CombatManager combatManager) {
+    this.combatManager = combatManager;
+    updateUI();
+  }
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    registerVerticalStackComponent('statusEffectText', statusEffectText, 24);
 
-    // You may want to implement a getNextAction method for GameCharacter
-    final action = enemy.deck.isNotEmpty ? enemy.deck.first : null;
-    final initialAction =
-        action != null ? ActionWithEmojiComponent.format(enemy, action) : '';
+    // Initialize with empty action text
     actionText = TextComponent(
-      text: 'Next Action: $initialAction\n${action?.description ?? ''}',
+      text: 'Next Action: Waiting...',
       textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
+        style: const material.TextStyle(
+          color: material.Colors.white,
           fontSize: 16,
         ),
       ),
     );
     registerVerticalStackComponent('actionText', actionText!, 20);
+    registerVerticalStackComponent('statusEffectText', statusEffectText, 24);
+
+    // Add name and emoji
+    final nameEmojiText = TextComponent(
+      text: '${enemy.emoji} ${enemy.name}',
+      textRenderer: TextPaint(
+        style: const material.TextStyle(
+          color: material.Colors.white,
+          fontSize: 24,
+          fontWeight: material.FontWeight.bold,
+        ),
+      ),
+    );
+    registerVerticalStackComponent('nameEmoji', nameEmojiText, 30);
+
+    // Add health text
+    final healthText = TextComponent(
+      text: 'HP: ${enemy.currentHealth}/${enemy.maxHealth}',
+      textRenderer: TextPaint(
+        style: const material.TextStyle(
+          color: material.Colors.white,
+          fontSize: 20,
+        ),
+      ),
+    );
+    registerVerticalStackComponent('health', healthText, 30);
+
+    GameLogger.debug(
+        LogCategory.ui, 'EnemyCombatPanel loaded for ${enemy.name}');
   }
 
   void updateActionWithDescription(String action, String description) {
-    if (isLoaded && actionText != null) {
+    if (actionText != null) {
       actionText!.text = 'Next Action: $action\n$description';
-    }
-  }
-
-  void updateAction(String action) {
-    // Deprecated: use updateActionWithDescription instead for description support
-    if (isLoaded && actionText != null) {
-      actionText!.text = 'Next Action: $action';
     }
   }
 
   @override
   void updateUI() {
-    super.updateUI();
-    // Update status effect text for all effects
+    // Update health text
+    final healthText = children.whereType<TextComponent>().firstWhere(
+          (component) => component.text.startsWith('HP:'),
+          orElse: () => TextComponent(text: ''),
+        );
+    healthText.text = 'HP: ${enemy.currentHealth}/${enemy.maxHealth}';
+
+    // Update status effect text
     if (enemy.statusEffects.isNotEmpty) {
       final effectStrings = enemy.statusEffects.entries.map((entry) {
         final effect = entry.key;
         final duration = entry.value;
-        String emoji;
+        String emoji = '';
         switch (effect) {
           case StatusEffect.poison:
             emoji = '☠️';
@@ -71,38 +113,60 @@ class EnemyCombatPanel extends BaseEnemyPanel {
           case StatusEffect.none:
             emoji = '';
             break;
+          case StatusEffect.stun:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.vulnerable:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.weak:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.strength:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.dexterity:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.regeneration:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.shield:
+            // TODO: Handle this case.
+            throw UnimplementedError();
         }
         return '$emoji ${effect.toString().split('.').last.toUpperCase()} x$duration';
       }).join('   ');
       statusEffectText.text = effectStrings;
     } else {
-      statusEffectText.text = 'No Status Effect';
+      statusEffectText.text = '';
     }
   }
 
-  @override
   void onCombatEvent(CombatEvent event) {
     if (event.target == enemy) {
       if (event.type == CombatEventType.damage ||
           event.type == CombatEventType.heal ||
           event.type == CombatEventType.status) {
         showEffectForCard(event.card, () {
-          updateHealth();
+          updateUI();
         });
-        shakeForType(event.card.type);
-      } else if (event.type == CombatEventType.cure) {
-        updateHealth();
+        if (event.card?.type != null) {
+          shakeForType(event.card!.type);
+        }
+      } else if (event.type == CombatEventType.heal) {
+        updateUI();
       }
     }
   }
 
-  void showDotEffect(StatusEffect effect, int value) {
-    final dot = GameEffects.createDoTEffect(
+  void showEffectForCard(dynamic card, VoidCallback onComplete) {
+    final effect = GameEffects.createCardEffect(
+      card.type,
       Vector2(size.x / 2 - 50, size.y / 2 - 50),
-      effect,
-      value,
-      onComplete: () {},
-    )..priority = 200;
-    add(dot);
+      Vector2(100, 100),
+      onComplete: onComplete,
+    )..priority = 100;
+    add(effect);
   }
 }

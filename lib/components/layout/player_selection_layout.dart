@@ -1,20 +1,27 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/components/panel/player_detail_panel.dart';
+import 'package:card_combat_app/components/panel/player_run_detail_panel.dart';
 import 'package:card_combat_app/components/panel/player_selection_panel.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
+import 'package:card_combat_app/models/player.dart';
 
 class PlayerSelectionLayout extends PositionComponent
     with HasGameReference, TapCallbacks, VerticalStackMixin {
-  late PlayerDetailPanel detailPanel;
+  late PlayerRunDetailPanel detailPanel;
   late PlayerSelectionPanel selectionPanel;
   late PositionComponent battleButton;
   late PositionComponent backButton;
 
-  PlayerSelectionLayout() : super(anchor: Anchor.topLeft);
+  final List<PlayerRun> playerRuns;
+  final Function(PlayerRun) onPlayerSelected;
+
+  PlayerSelectionLayout({
+    required this.playerRuns,
+    required this.onPlayerSelected,
+  }) : super(anchor: Anchor.topLeft);
 
   @override
   Future<void> onLoad() async {
@@ -25,9 +32,15 @@ class PlayerSelectionLayout extends PositionComponent
     // Set size from gameRef
     size = findGame()!.size;
 
-    // Now it's safe to construct detailPanel
-    detailPanel = PlayerDetailPanel();
-    selectionPanel = PlayerSelectionPanel();
+    // Create detail panel
+    detailPanel = PlayerRunDetailPanel();
+    selectionPanel = PlayerSelectionPanel(
+      playerRuns: playerRuns,
+      onPlayerSelected: (playerRun) {
+        detailPanel.updatePlayer(playerRun);
+        onPlayerSelected(playerRun);
+      },
+    );
 
     registerVerticalStackComponent(
         'selectText',
@@ -76,13 +89,13 @@ class PlayerSelectionLayout extends PositionComponent
     add(backButton);
 
     battleButton = PositionComponent(
-      size: Vector2(200, 48),
-      position: Vector2(size.x - 220, buttonY),
+      size: Vector2(160, 48),
+      position: Vector2(size.x - 180, buttonY),
       anchor: Anchor.topLeft,
     )
       ..add(RectangleComponent(
-        size: Vector2(200, 48),
-        paint: Paint()..color = Colors.blue,
+        size: Vector2(160, 48),
+        paint: Paint()..color = Colors.green,
         anchor: Anchor.topLeft,
       ))
       ..add(
@@ -90,13 +103,13 @@ class PlayerSelectionLayout extends PositionComponent
           text: 'Start Battle',
           textRenderer: TextPaint(
             style: const TextStyle(
-              fontSize: 24,
               color: Colors.white,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
           anchor: Anchor.center,
-          position: Vector2(100, 24),
+          position: Vector2(80, 24),
         ),
       );
     add(battleButton);
@@ -107,16 +120,12 @@ class PlayerSelectionLayout extends PositionComponent
 
   @override
   void onTapDown(TapDownEvent event) {
-    super.onTapDown(event);
-    if (battleButton.toRect().contains(event.localPosition.toOffset())) {
-      GameLogger.debug(LogCategory.ui, 'Start Battle button pressed');
-      // Just push the combat scene
-      SceneManager().pushScene('outpost');
-    }
-    // Handle Back button
-    if (backButton.toRect().contains(event.localPosition.toOffset())) {
-      GameLogger.debug(LogCategory.ui, 'Back button pressed');
-      SceneManager().moveScene('title');
+    final pos = event.canvasPosition;
+    if (backButton.toRect().contains(pos.toOffset())) {
+      SceneManager().popScene();
+    } else if (battleButton.toRect().contains(pos.toOffset())) {
+      // Handle battle button tap
+      GameLogger.debug(LogCategory.ui, 'Battle button tapped');
     }
   }
 }

@@ -1,11 +1,10 @@
+import 'package:card_combat_app/models/equipment.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/equipment_loader.dart';
-import 'package:card_combat_app/utils/game_logger.dart';
 
 class InventoryGridCell extends PositionComponent with TapCallbacks {
-  final EquipmentData equipment;
+  final EquipmentTemplate equipment;
   final bool isEquipped;
   final VoidCallback onTap;
 
@@ -44,55 +43,63 @@ class InventoryGridCell extends PositionComponent with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add background
-    final background = RectangleComponent(
+    // Background
+    add(RectangleComponent(
       size: size,
       paint: Paint()
         ..color = isEquipped
-            ? Colors.green.withAlpha(217)
-            : Colors.black.withAlpha(217),
-      anchor: Anchor.topLeft,
-    );
-    add(background);
+            ? Colors.green.withAlpha(77)
+            : Colors.black.withAlpha(77),
+    ));
 
-    // Add emoji
-    final emoji = _typeEmojis[equipment.type.toLowerCase()] ?? '❓';
-    GameLogger.info(
-      LogCategory.game,
-      '[INV_CELL] Equipment: ${equipment.name}, Type: ${equipment.type}, Selected Emoji: $emoji',
-    );
-    GameLogger.info(
-      LogCategory.game,
-      '[INV_CELL] Available emoji mappings: ${_typeEmojis.entries.map((e) => '${e.key}: ${e.value}').join(", ")}',
-    );
+    // Border
+    add(RectangleComponent(
+      size: size,
+      paint: Paint()
+        ..color = Colors.white.withAlpha(77)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    ));
 
-    final emojiText = TextComponent(
-      text: emoji,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-        ),
-      ),
-      anchor: Anchor.center,
-      position: Vector2(size.x / 2, size.y / 2),
-    );
-    add(emojiText);
-
-    // Add name
-    final nameText = TextComponent(
+    // Equipment name
+    add(TextComponent(
       text: equipment.name,
       textRenderer: TextPaint(
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.bottomCenter,
-      position: Vector2(size.x / 2, size.y - 4),
-    );
-    add(nameText);
+      position: Vector2(size.x / 2, size.y * 0.3),
+      anchor: Anchor.center,
+    ));
+
+    // Equipment type
+    add(TextComponent(
+      text: equipment.type,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+        ),
+      ),
+      position: Vector2(size.x / 2, size.y * 0.5),
+      anchor: Anchor.center,
+    ));
+
+    // Equipment rarity
+    add(TextComponent(
+      text: equipment.rarity,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+        ),
+      ),
+      position: Vector2(size.x / 2, size.y * 0.7),
+      anchor: Anchor.center,
+    ));
   }
 
   @override

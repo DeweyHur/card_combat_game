@@ -3,11 +3,13 @@ import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'base_scene.dart';
 import 'package:flame/events.dart';
-import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/enemy.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
 
 class GameResultScene extends BaseScene with TapCallbacks {
   String result = '';
-  GameCharacter? nextEnemy;
+  EnemyRun? nextEnemy;
   List<Map<String, dynamic>> upgradeHistory = [];
 
   GameResultScene({Map<String, dynamic>? options})
@@ -19,7 +21,7 @@ class GameResultScene extends BaseScene with TapCallbacks {
     result = DataController.instance.get<String>('gameResult') ?? '';
     if (result == 'Victory') {
       // Get the next enemy from DataController
-      nextEnemy = DataController.instance.get<GameCharacter>('nextEnemy');
+      nextEnemy = DataController.instance.get<EnemyRun>('nextEnemy');
       // Get upgrade history
       upgradeHistory = DataController.instance
               .get<List<Map<String, dynamic>>>('upgradeHistory') ??
@@ -197,53 +199,50 @@ class GameResultScene extends BaseScene with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    final size = this.size;
     final pos = Offset(event.canvasPosition.x, event.canvasPosition.y);
+    final size = this.size;
     final buttonY = result == 'Victory' ? 0.7 : 0.6;
 
-    // Check Continue button (only for victory)
+    // Continue button (only for victory)
     if (result == 'Victory') {
-      const continueText = 'Continue';
-      final continuePainter = TextPainter(
-        text: const TextSpan(
-          text: continueText,
-          style: TextStyle(
-            fontSize: 24,
-            color: Colors.white,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
       final continueRect = Rect.fromCenter(
         center: Offset(size.x / 2, size.y * buttonY),
-        width: continuePainter.width + 40,
+        width: 200,
         height: 60,
       );
       if (continueRect.contains(pos)) {
-        SceneManager().pushScene('card_upgrade');
+        // Return to player selection
+        SceneManager().pushScene('player_selection');
         return;
       }
     }
 
-    // Check Return to Main Menu button
-    const menuText = 'Return to Main Menu';
-    final menuPainter = TextPainter(
-      text: const TextSpan(
-        text: menuText,
-        style: TextStyle(
-          fontSize: 24,
-          color: Colors.white,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+    // Return to Main Menu button
     final menuRect = Rect.fromCenter(
       center: Offset(size.x / 2, size.y * (buttonY + 0.15)),
-      width: menuPainter.width + 40,
+      width: 300,
       height: 60,
     );
     if (menuRect.contains(pos)) {
-      SceneManager().moveScene('title');
+      // Return to main menu
+      SceneManager().pushScene('main_menu');
     }
+  }
+
+  void _handleVictory() {
+    // Update player stats
+    final playerRun = DataController.instance.get<PlayerRun>('selectedPlayer');
+    if (playerRun != null) {
+      playerRun.wins++;
+      DataController.instance.set('selectedPlayer', playerRun);
+      GameLogger.info(
+          LogCategory.game, 'Updated player wins: ${playerRun.wins}');
+    }
+
+    // Show victory message
+    SceneManager().pushScene('game_result', options: {
+      'result': 'Victory',
+      'message': 'You won the battle!',
+    });
   }
 }

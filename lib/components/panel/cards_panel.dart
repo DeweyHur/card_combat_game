@@ -1,22 +1,22 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/panel/card_detail_panel.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/layout/card_visual_component.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:card_combat_app/models/card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 
 class CardsPanel extends BasePanel {
   final TextComponent cardAreaText;
-  final GameCharacter player;
-  void Function(GameCard card)? onCardPlayed;
+  final PlayerRun player;
+  void Function(CardRun card)? onCardPlayed;
 
   List<CardVisualComponent> cardVisuals = [];
   List<bool> cardVisualsVisible = [];
-  GameCard? selectedCard;
+  CardRun? selectedCard;
   SimpleButtonComponent? playButton;
   CardDetailPanel? cardDetailPanel;
   SimpleButtonComponent? endTurnButton;

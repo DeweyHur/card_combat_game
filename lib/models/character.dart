@@ -1,5 +1,5 @@
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'game_card.dart';
 
 abstract class Character {
   final String name;
@@ -11,6 +11,7 @@ abstract class Character {
   final String color;
   StatusEffect? statusEffect;
   int? statusDuration;
+
   /// Shield can grow without limit and absorbs damage before HP.
   int shield = 0;
 
@@ -28,25 +29,30 @@ abstract class Character {
     if (!bypassShield && shield > 0) {
       if (shield >= damage) {
         shield -= damage;
-        GameLogger.info(LogCategory.combat, '$name loses $damage shield. Shield: $shield');
+        GameLogger.info(
+            LogCategory.combat, '$name loses $damage shield. Shield: $shield');
         return;
       } else {
         int remaining = damage - shield;
-        GameLogger.info(LogCategory.combat, '$name loses $shield shield. Shield: 0');
+        GameLogger.info(
+            LogCategory.combat, '$name loses $shield shield. Shield: 0');
         shield = 0;
         currentHealth = (currentHealth - remaining).clamp(0, maxHealth);
-        GameLogger.info(LogCategory.combat, '$name takes $remaining damage. Health: $currentHealth/$maxHealth');
+        GameLogger.info(LogCategory.combat,
+            '$name takes $remaining damage. Health: $currentHealth/$maxHealth');
         return;
       }
     }
     // If bypassShield or no shield
     currentHealth = (currentHealth - damage).clamp(0, maxHealth);
-    GameLogger.info(LogCategory.combat, '$name takes $damage damage. Health: $currentHealth/$maxHealth');
+    GameLogger.info(LogCategory.combat,
+        '$name takes $damage damage. Health: $currentHealth/$maxHealth');
   }
 
   void heal(int amount) {
     currentHealth = (currentHealth + amount).clamp(0, maxHealth);
-    GameLogger.info(LogCategory.combat, '$name heals for $amount. Health: $currentHealth/$maxHealth');
+    GameLogger.info(LogCategory.combat,
+        '$name heals for $amount. Health: $currentHealth/$maxHealth');
   }
 
   void addStatusEffect(StatusEffect effect, int amount) {
@@ -58,11 +64,13 @@ abstract class Character {
         statusEffect = StatusEffect.poison;
         statusDuration = amount;
       }
-      GameLogger.info(LogCategory.combat, '[32m$name[0m is poisoned for $statusDuration');
+      GameLogger.info(
+          LogCategory.combat, '[32m$name[0m is poisoned for $statusDuration');
     } else {
       statusEffect = effect;
       statusDuration = amount;
-      GameLogger.info(LogCategory.combat, '[32m$name[0m is affected by $effect for $amount turns');
+      GameLogger.info(LogCategory.combat,
+          '[32m$name[0m is affected by $effect for $amount turns');
     }
   }
 
@@ -94,15 +102,18 @@ abstract class Character {
         case StatusEffect.poison:
           if (statusDuration! > 0) {
             // Poison damage bypasses shield
-            currentHealth = (currentHealth - statusDuration!).clamp(0, maxHealth);
-            GameLogger.info(LogCategory.combat, '[32m$name[0m takes ${statusDuration!} poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
+            currentHealth =
+                (currentHealth - statusDuration!).clamp(0, maxHealth);
+            GameLogger.info(LogCategory.combat,
+                '[32m$name[0m takes ${statusDuration!} poison damage (bypasses shield). Health: $currentHealth/$maxHealth');
             statusDuration = statusDuration! - 1;
             if (statusDuration! <= 0) removeStatusEffect();
           }
           break;
         case StatusEffect.burn:
           takeDamage(3);
-          GameLogger.info(LogCategory.combat, '[32m$name[0m takes 3 burn damage');
+          GameLogger.info(
+              LogCategory.combat, '[32m$name[0m takes 3 burn damage');
           statusDuration = statusDuration! - 1;
           if (statusDuration! <= 0) removeStatusEffect();
           break;
@@ -114,6 +125,27 @@ abstract class Character {
           break;
         case StatusEffect.none:
           break;
+        case StatusEffect.stun:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.vulnerable:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.weak:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.strength:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.dexterity:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.regeneration:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case StatusEffect.shield:
+          // TODO: Handle this case.
+          throw UnimplementedError();
       }
     }
   }
@@ -123,6 +155,7 @@ abstract class Character {
   /// Increase shield by [amount].
   void addShield(int amount) {
     shield += amount;
-    GameLogger.info(LogCategory.combat, '$name gains $amount shield. Shield: $shield');
+    GameLogger.info(
+        LogCategory.combat, '$name gains $amount shield. Shield: $shield');
   }
-} 
+}

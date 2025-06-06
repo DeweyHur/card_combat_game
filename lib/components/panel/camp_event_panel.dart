@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart' as material;
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'dart:ui';
+import 'dart:ui'; // Not used directly
 import 'package:card_combat_app/models/player.dart';
-import 'package:card_combat_app/models/card.dart';
+// import 'package:card_combat_app/models/card.dart'; // Not needed, use GameCard
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
-import 'package:card_combat_app/components/panel/card_upgrade_panel.dart';
 import 'package:card_combat_app/components/panel/deck_view_panel.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
 
 class CampEventPanel extends PositionComponent with TapCallbacks {
-  final Player player;
-  final List<Card> playerCards;
+  final PlayerRun player;
+  final List<GameCard> playerCards;
   bool hasRested = false;
-  bool hasUpgraded = false;
   bool hasRemovedCard = false;
 
   CampEventPanel({
@@ -82,29 +80,22 @@ class CampEventPanel extends PositionComponent with TapCallbacks {
       position: Vector2(size.x * 0.125, size.y * 0.333),
     ));
 
-    // Upgrade Button
+    // View/Remove Cards Button
     add(SimpleButtonComponent.text(
-      text: 'Upgrade a Card',
+      text: 'View/Remove Cards',
       size: Vector2(size.x * 0.375, size.y * 0.083),
-      color: material.Colors.blue,
+      color: material.Colors.orange,
       onPressed: () {
-        if (!hasUpgraded && playerCards.isNotEmpty) {
-          final card = playerCards.first;
-          final gameCard = GameCard(
-            name: card.name,
-            description: card.description,
-            type: CardType.attack, // Default to attack type
-            value: 10, // Default value
-            cost: 1, // Default cost
-          );
-          late final CardUpgradePanel panel;
-          panel = CardUpgradePanel(
-            card: gameCard,
-            onUpgrade: (upgradedCard) {
-              hasUpgraded = true;
+        if (!hasRemovedCard && playerCards.length > 1) {
+          late final DeckViewPanel panel;
+          panel = DeckViewPanel(
+            cards: List<GameCard>.from(playerCards),
+            onCardRemoved: (removedCard) {
+              playerCards.removeWhere((card) => card.name == removedCard.name);
+              hasRemovedCard = true;
               panel.removeFromParent();
             },
-            onCancel: () {
+            onClose: () {
               panel.removeFromParent();
             },
             position: Vector2(size.x * 0.125, size.y * 0.467),
@@ -116,54 +107,13 @@ class CampEventPanel extends PositionComponent with TapCallbacks {
       position: Vector2(size.x * 0.125, size.y * 0.467),
     ));
 
-    // View/Remove Cards Button
-    add(SimpleButtonComponent.text(
-      text: 'View/Remove Cards',
-      size: Vector2(size.x * 0.375, size.y * 0.083),
-      color: material.Colors.orange,
-      onPressed: () {
-        if (!hasRemovedCard && playerCards.length > 1) {
-          final gameCards = playerCards
-              .map((card) => GameCard(
-                    name: card.name,
-                    description: card.description,
-                    type: CardType.attack, // Default to attack type
-                    value: 10, // Default value
-                    cost: 1, // Default cost
-                  ))
-              .toList();
-          late final DeckViewPanel panel;
-          panel = DeckViewPanel(
-            cards: gameCards,
-            onCardRemoved: (removedCard) {
-              final cardToRemove = playerCards.firstWhere(
-                (card) => card.name == removedCard.name,
-                orElse: () => playerCards.first,
-              );
-              player.deck.removeCard(cardToRemove);
-              playerCards.remove(cardToRemove);
-              hasRemovedCard = true;
-              panel.removeFromParent();
-            },
-            onClose: () {
-              panel.removeFromParent();
-            },
-            position: Vector2(size.x * 0.125, size.y * 0.6),
-            size: Vector2(size.x * 0.75, size.y * 0.667),
-          );
-          add(panel);
-        }
-      },
-      position: Vector2(size.x * 0.125, size.y * 0.6),
-    ));
-
     // Continue Button
     add(SimpleButtonComponent.text(
       text: 'Continue',
       size: Vector2(size.x * 0.375, size.y * 0.083),
       color: material.Colors.purple,
       onPressed: () => SceneManager().popScene(),
-      position: Vector2(size.x * 0.125, size.y * 0.733),
+      position: Vector2(size.x * 0.125, size.y * 0.6),
     ));
   }
 

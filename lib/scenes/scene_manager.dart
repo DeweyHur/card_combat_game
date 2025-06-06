@@ -4,7 +4,6 @@ import 'package:card_combat_app/scenes/title_scene.dart';
 import 'package:card_combat_app/scenes/player_selection_scene.dart';
 import 'package:card_combat_app/scenes/combat_scene.dart';
 import 'package:card_combat_app/scenes/game_result_scene.dart';
-import 'package:card_combat_app/scenes/card_upgrade_scene.dart';
 import 'package:card_combat_app/scenes/armory_scene.dart';
 import 'package:card_combat_app/scenes/inventory_scene.dart';
 import 'package:card_combat_app/scenes/map_scene.dart';
@@ -18,6 +17,7 @@ import 'package:card_combat_app/scenes/random_event_scene.dart';
 import 'package:card_combat_app/scenes/camp_event_scene.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'base_scene.dart';
+import 'package:card_combat_app/models/player.dart';
 
 class SceneManager {
   static final SceneManager _instance = SceneManager._internal();
@@ -44,8 +44,6 @@ class SceneManager {
     registerScene(
         'game_result', (options) => GameResultScene(options: options ?? {}));
     registerScene(
-        'card_upgrade', (options) => CardUpgradeScene(options: options ?? {}));
-    registerScene(
         'equipment', (options) => ArmoryScene(options: options ?? {}));
     registerScene(
         'inventory', (options) => InventoryScene(options: options ?? {}));
@@ -70,17 +68,37 @@ class SceneManager {
     GameLogger.info(LogCategory.game, 'Registered scene: $name');
   }
 
+  /// Helper to map common option keys to DataController keys for Run types
+  void _mapRunOptionsToDataController(
+      String sceneName, Map<String, dynamic>? options) {
+    if (options == null) return;
+    // Example: always map 'player' to 'currentPlayerRun' if present
+    if (options.containsKey('player')) {
+      DataController.instance
+          .set<PlayerRun>('currentPlayerRun', options['player']);
+    }
+    if (options.containsKey('enemy')) {
+      DataController.instance.set('currentEnemyRun', options['enemy']);
+    }
+    if (options.containsKey('quest')) {
+      DataController.instance.set('currentQuestRun', options['quest']);
+    }
+    // Add more mappings as needed for your game
+  }
+
   void _registerSceneData(String sceneName, Map<String, dynamic>? options) {
     if (options == null) return;
-
     // Register each option with the scene
     for (final entry in options.entries) {
       DataController.instance.setSceneData(sceneName, entry.key, entry.value);
     }
+    // Map common Run types to global keys
+    _mapRunOptionsToDataController(sceneName, options);
   }
 
   void _cleanupSceneData(String sceneName) {
-    DataController.instance.cleanupSceneData(sceneName);
+    DataController.instance.removeSceneData(sceneName);
+    // Do not clear global Run data here; only scene-specific data is cleaned up
   }
 
   void pushScene(String name, {Map<String, dynamic>? options}) {

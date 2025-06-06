@@ -1,23 +1,24 @@
+import 'package:card_combat_app/models/enemy.dart';
+import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/name_emoji_interface.dart';
 
-class ActionWithEmojiComponent extends StatelessWidget {
-  final GameCharacter enemy;
+class ActionWithEmojiComponent extends Component {
+  final EnemyRun enemy;
   final GameCard action;
-  final TextStyle? style;
+  late TextComponent textComponent;
 
-  const ActionWithEmojiComponent({
-    Key? key,
+  ActionWithEmojiComponent({
     required this.enemy,
     required this.action,
-    this.style,
-  }) : super(key: key);
+  });
 
-  static String format(GameCharacter enemy, GameCard action) {
+  static String format(EnemyRun enemy, GameCard action) {
     final buffer = StringBuffer();
     // Enemy emoji
-    buffer.write('${enemy.emoji} ');
+    buffer.write('${(enemy as NameEmojiInterface).emoji} ');
     // Action type emoji
     switch (action.type) {
       case CardType.attack:
@@ -47,7 +48,8 @@ class ActionWithEmojiComponent extends StatelessWidget {
       buffer.write(' (${action.value})');
     }
     // Status effect emoji
-    if (action.type == CardType.statusEffect && action.statusEffectToApply != null) {
+    if (action.type == CardType.statusEffect &&
+        action.statusEffectToApply != null) {
       buffer.write(' ');
       switch (action.statusEffectToApply) {
         case StatusEffect.poison:
@@ -62,6 +64,8 @@ class ActionWithEmojiComponent extends StatelessWidget {
         case StatusEffect.none:
         case null:
           break;
+        default:
+          break;
       }
       if (action.statusDuration != null) {
         buffer.write(' x${action.statusDuration}');
@@ -71,10 +75,17 @@ class ActionWithEmojiComponent extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      format(enemy, action),
-      style: style ?? const TextStyle(fontSize: 16),
+  Future<void> onLoad() async {
+    await super.onLoad();
+    textComponent = TextComponent(
+      text: format(enemy, action),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.white,
+        ),
+      ),
     );
+    add(textComponent);
   }
-} 
+}

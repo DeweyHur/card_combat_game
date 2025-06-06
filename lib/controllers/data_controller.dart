@@ -1,9 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/models/equipment_loader.dart';
-import 'package:card_combat_app/models/card_loader.dart';
 
 class DataController {
   static final DataController instance = DataController._internal();
@@ -17,8 +13,19 @@ class DataController {
   // Get all keys in the data store
   Set<String> get keys => _data.keys.toSet();
 
-  // Get value for a key
-  T? get<T>(String key) => _data[key] as T?;
+  // Get value for a key, supporting nested paths
+  T? get<T>(String key) {
+    final parts = key.split('.');
+    dynamic current = _data;
+
+    for (final part in parts) {
+      if (current is! Map) return null;
+      current = current[part];
+      if (current == null) return null;
+    }
+
+    return current as T?;
+  }
 
   // Get scene-specific value
   T? getSceneData<T>(String sceneName, String key) {
@@ -34,7 +41,6 @@ class DataController {
       GameLogger.debug(
           LogCategory.data, 'Created new scene data map for: $sceneName');
     }
-    final oldValue = _sceneData[sceneName]![key];
     _sceneData[sceneName]![key] = value;
 
     // Notify watchers for the full key (scene.key)
@@ -49,110 +55,43 @@ class DataController {
     if (_streamControllers.containsKey(fullKey)) {
       _streamControllers[fullKey]!.add(value);
     }
-
-    String serialize(dynamic v) {
-      if (v == null) return 'null';
-      if (v is List) {
-        return jsonEncode(v.map((e) {
-          if (e is GameCharacter) return e.toJson();
-          if (e is EquipmentData) return e.toJson();
-          return e;
-        }).toList());
-      }
-      if (v is Map) {
-        return jsonEncode(v.map((key, value) {
-          if (value is GameCharacter) return MapEntry(key, value.toJson());
-          if (value is EquipmentData) return MapEntry(key, value.toJson());
-          return MapEntry(key, value);
-        }));
-      }
-      if (v is GameCharacter) return v.toJson().toString();
-      if (v is EquipmentData) return v.toJson().toString();
-      return v.toString();
-    }
-
-    GameLogger.debug(LogCategory.data,
-        'Scene data updated: $sceneName.$key = ${serialize(value)} (was: ${serialize(oldValue)})');
   }
 
-  // Clean up scene data
-  void cleanupSceneData(String sceneName) {
-    if (_sceneData.containsKey(sceneName)) {
-      GameLogger.debug(
-          LogCategory.data, 'Starting cleanup for scene: $sceneName');
-      final sceneData = _sceneData[sceneName]!;
-      for (final key in sceneData.keys) {
-        final fullKey = '$sceneName.$key';
-        GameLogger.debug(LogCategory.data, 'Cleaning up key: $fullKey');
-        // Remove watchers
-        if (_watchers.containsKey(fullKey)) {
-          _watchers.remove(fullKey);
-          GameLogger.debug(LogCategory.data, 'Removed watchers for: $fullKey');
-        }
-        // Close and remove stream controllers
-        if (_streamControllers.containsKey(fullKey)) {
-          _streamControllers[fullKey]!.close();
-          _streamControllers.remove(fullKey);
-          GameLogger.debug(LogCategory.data,
-              'Closed and removed stream controller for: $fullKey');
-        }
-      }
-      _sceneData.remove(sceneName);
-      GameLogger.debug(
-          LogCategory.data, 'Completed cleanup for scene: $sceneName');
-    } else {
-      GameLogger.debug(
-          LogCategory.data, 'No data found to cleanup for scene: $sceneName');
-    }
-  }
-
-  // Set value for a key and notify watchers
+  // Set value for a key, supporting nested paths
   void set<T>(String key, T value) {
-    final oldValue = _data[key];
-    _data[key] = value;
-
-    // Notify watchers
-    if (_watchers.containsKey(key)) {
-      for (final watcher in _watchers[key]!) {
-        watcher(value);
-      }
+    final parts = key.split('.');
+    if (parts.length == 1) {
+      _data[key] = value;
+      _notifyWatchers(key, value);
+      return;
     }
 
-    // Add to stream if it exists
-    if (_streamControllers.containsKey(key)) {
-      _streamControllers[key]!.add(value);
+    // Build nested structure
+    Map<String, dynamic> current = _data;
+    for (int i = 0; i < parts.length - 1; i++) {
+      final part = parts[i];
+      if (!current.containsKey(part)) {
+        current[part] = <String, dynamic>{};
+      }
+      if (current[part] is! Map) {
+        current[part] = <String, dynamic>{};
+      }
+      current = current[part] as Map<String, dynamic>;
     }
 
-    String serialize(dynamic v) {
-      if (v == null) return 'null';
-      if (v is List) {
-        return jsonEncode(v.map((e) {
-          if (e is GameCharacter) return e.toJson();
-          if (e is EquipmentData) return e.toJson();
-          return e;
-        }).toList());
-      }
-      if (v is Map) {
-        return jsonEncode(v.map((key, value) {
-          if (value is GameCharacter) return MapEntry(key, value.toJson());
-          if (value is EquipmentData) return MapEntry(key, value.toJson());
-          return MapEntry(key, value);
-        }));
-      }
-      if (v is GameCharacter) return v.toJson().toString();
-      if (v is EquipmentData) return v.toJson().toString();
-      return v.toString();
-    }
+    final lastPart = parts.last;
+    current[lastPart] = value;
 
-    GameLogger.debug(LogCategory.data,
-        'Data updated: $key = ${serialize(value)} (was: ${serialize(oldValue)})');
+    // Notify watchers for the full path and any matching wildcard patterns
+    _notifyWatchers(key, value);
+    _notifyWildcardWatchers(key, value);
   }
 
   void update<T>(String key, T value) {
     set(key, value);
   }
 
-  // Watch a key for changes
+  // Watch a key for changes, supporting nested paths and wildcards
   void watch(String key, Function(dynamic) callback) {
     if (!_watchers.containsKey(key)) {
       _watchers[key] = [];
@@ -160,8 +99,9 @@ class DataController {
     _watchers[key]!.add(callback);
 
     // Immediately call with current value if it exists
-    if (_data.containsKey(key)) {
-      callback(_data[key]);
+    final value = get(key);
+    if (value != null) {
+      callback(value);
     }
   }
 
@@ -175,13 +115,46 @@ class DataController {
     }
   }
 
+  // Notify watchers for a specific key
+  void _notifyWatchers(String key, dynamic value) {
+    if (_watchers.containsKey(key)) {
+      for (final watcher in _watchers[key]!) {
+        watcher(value);
+      }
+    }
+
+    // Add to stream if it exists
+    if (_streamControllers.containsKey(key)) {
+      _streamControllers[key]!.add(value);
+    }
+  }
+
+  // Notify watchers for wildcard patterns
+  void _notifyWildcardWatchers(String key, dynamic value) {
+    final parts = key.split('.');
+
+    // Check all possible wildcard patterns
+    for (int i = 0; i < parts.length; i++) {
+      final wildcardKey = [...parts];
+      wildcardKey[i] = '*';
+      final pattern = wildcardKey.join('.');
+
+      if (_watchers.containsKey(pattern)) {
+        for (final watcher in _watchers[pattern]!) {
+          watcher(value);
+        }
+      }
+    }
+  }
+
   // Get a stream for a key
   Stream<dynamic> watchStream(String key) {
     if (!_streamControllers.containsKey(key)) {
       _streamControllers[key] = StreamController<dynamic>.broadcast();
       // Add current value to stream if it exists
-      if (_data.containsKey(key)) {
-        _streamControllers[key]!.add(_data[key]);
+      final value = get(key);
+      if (value != null) {
+        _streamControllers[key]!.add(value);
       }
     }
     return _streamControllers[key]!.stream;
@@ -189,18 +162,40 @@ class DataController {
 
   // Check if a key exists
   bool has(String key) {
-    return _data.containsKey(key);
+    return get(key) != null;
   }
 
   // Remove a key and its watchers
   void remove(String key) {
-    _data.remove(key);
+    final parts = key.split('.');
+    if (parts.length == 1) {
+      _data.remove(key);
+      _watchers.remove(key);
+      if (_streamControllers.containsKey(key)) {
+        _streamControllers[key]!.close();
+        _streamControllers.remove(key);
+      }
+      return;
+    }
+
+    // Remove nested value
+    Map<String, dynamic> current = _data;
+    for (int i = 0; i < parts.length - 1; i++) {
+      final part = parts[i];
+      if (!current.containsKey(part)) return;
+      if (current[part] is! Map) return;
+      current = current[part] as Map<String, dynamic>;
+    }
+
+    final lastPart = parts.last;
+    current.remove(lastPart);
+
+    // Clean up watchers and streams
     _watchers.remove(key);
     if (_streamControllers.containsKey(key)) {
       _streamControllers[key]!.close();
       _streamControllers.remove(key);
     }
-    GameLogger.debug(LogCategory.data, 'Data removed: $key');
   }
 
   // Clear all data and watchers
@@ -219,35 +214,9 @@ class DataController {
     clear();
   }
 
-  void updatePlayersCsvField(int rowIndex, int colIndex, dynamic value) {
-    final playersCsv = get<List<List<dynamic>>>('playersCsv');
-    if (playersCsv == null || rowIndex < 0 || rowIndex >= playersCsv.length) {
-      return;
-    }
-    final oldValue = playersCsv[rowIndex][colIndex];
-    playersCsv[rowIndex][colIndex] = value;
-    set<List<List<dynamic>>>('playersCsv', playersCsv);
-    GameLogger.debug(LogCategory.data,
-        'playersCsv[[38;5;214m$rowIndex[0m][[38;5;214m$colIndex[0m] updated: $oldValue -> $value');
-  }
-
-  /// Get the players CSV data
-  static Future<List<List<dynamic>>?> getPlayersCsv() async {
-    return instance.get<List<List<dynamic>>>('playersCsv');
-  }
-
-  /// Get the equipment data
-  static Future<Map<String, EquipmentData>?> getEquipmentData() async {
-    return instance.get<Map<String, EquipmentData>>('equipmentData');
-  }
-
-  /// Get the card data
-  static Future<CardLoaderResult?> getCardData() async {
-    return instance.get<CardLoaderResult>('cardData');
-  }
-
-  /// Update the selected player
-  static void updateSelectedPlayer(GameCharacter player) {
-    instance.update('selectedPlayer', player);
+  // Remove all data for a specific scene
+  void removeSceneData(String sceneName) {
+    _sceneData.remove(sceneName);
+    GameLogger.debug(LogCategory.data, 'Removed scene data for: $sceneName');
   }
 }

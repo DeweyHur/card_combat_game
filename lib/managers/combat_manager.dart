@@ -1,29 +1,75 @@
-import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:card_combat_app/models/card.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
-import 'package:card_combat_app/managers/sound_manager.dart';
 import 'dart:math';
-import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
-import 'package:card_combat_app/components/panel/player_combat_panel.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/models/enemy.dart';
+import 'package:flutter/foundation.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
 // --- Combat Event System ---
-enum CombatEventType { damage, heal, status, cure }
+enum CombatEventType {
+  damage,
+  heal,
+  shield,
+  status,
+  energy,
+  draw,
+  discard,
+  turnStart,
+  turnEnd,
+  cardPlayed,
+  cardDiscarded,
+  cardDrawn,
+  cardExhausted,
+  cardRefreshed,
+  cardUpgraded,
+  enemyAction,
+  enemyTurn,
+  playerTurn,
+  combatStart,
+  combatEnd,
+  victory,
+  defeat,
+  shieldAttack,
+}
 
 class CombatEvent {
   final CombatEventType type;
+  final GameCharacter source;
   final GameCharacter target;
-  final int value;
-  final String description;
-  final GameCard card;
+  final int? value;
+  final StatusEffect? statusEffect;
+  final int? statusDuration;
+  final CardRun? card;
+  final String? description;
 
   CombatEvent({
     required this.type,
+    required this.source,
     required this.target,
-    required this.value,
-    required this.description,
-    required this.card,
+    this.value,
+    this.statusEffect,
+    this.statusDuration,
+    this.card,
+    this.description,
   });
+
+  @override
+  String toString() {
+    final parts = <String>[];
+    parts.add(type.toString().split('.').last);
+    parts.add('from: ${source.name}');
+    parts.add('to: ${target.name}');
+    if (value != null) parts.add('value: $value');
+    if (statusEffect != null)
+      parts.add('effect: ${statusEffect.toString().split('.').last}');
+    if (statusDuration != null) parts.add('duration: $statusDuration');
+    if (card != null) parts.add('card: ${card!.name}');
+    if (description != null) parts.add('description: $description');
+    return parts.join(', ');
+  }
 }
 
 abstract class CombatWatcher {
@@ -31,16 +77,17 @@ abstract class CombatWatcher {
 }
 // --- End Combat Event System ---
 
-class CombatManager {
+class CombatManager extends ChangeNotifier {
   static final CombatManager _instance = CombatManager._internal();
   factory CombatManager() => _instance;
   CombatManager._internal();
 
-  late GameCharacter player;
-  late GameCharacter enemy;
+  late final PlayerRun player;
+  late final EnemyRun enemy;
+  bool _isCombatOver = false;
   bool isPlayerTurn = true;
   final List<CombatWatcher> _watchers = [];
-  final SoundManager _soundManager = SoundManager();
+  final List<CombatEvent> eventHistory = [];
 
   // Store enemy actions by name for probability-based selection
   Map<String, List<dynamic>>? _enemyActionsByName; // dynamic for EnemyAction
@@ -49,25 +96,33 @@ class CombatManager {
   }
 
   // Store the last picked enemy action for UI
-  GameCard? lastEnemyAction;
+  CardRun? lastEnemyAction;
 
-  void initialize(
-      {required GameCharacter player, required GameCharacter enemy}) {
+  void initialize({required PlayerRun player, required EnemyRun enemy}) {
     this.player = player;
     this.enemy = enemy;
+    _isCombatOver = false;
     isPlayerTurn = true;
     _watchers.clear();
-    _discardHand(player);
-    _drawHand(player);
+    _discardHand(this.player);
+    _drawHand(this.player);
   }
 
   void startCombat() {
-    GameLogger.info(
-        LogCategory.game, 'Starting combat: ${player.name} vs ${enemy.name}');
+    GameLogger.info(LogCategory.combat,
+        'Starting combat between ${player.name} and ${enemy.name}');
     _initializePlayerDeck();
     _discardHand(player);
     _drawHand(player);
-    // Draw initial hand logic can be implemented here if needed
+    _isCombatOver = false;
+    isPlayerTurn = true;
+    eventHistory.clear();
+    _addEvent(
+      CombatEventType.combatStart,
+      source: player,
+      target: enemy,
+    );
+    _startPlayerTurn();
   }
 
   void _initializePlayerDeck() {
@@ -76,23 +131,18 @@ class CombatManager {
   }
 
   void _drawHand(GameCharacter character) {
-    while (character.hand.length < character.handSize) {
-      if (character.deck.isEmpty && character.discardPile.isNotEmpty) {
-        // Move discard pile to deck and shuffle
-        character.deck.addAll(character.discardPile);
-        character.discardPile.clear();
-        character.deck.shuffle();
+    if (character is PlayerRun) {
+      while (character.hand.length < character.handSize &&
+          character.deck.isNotEmpty) {
+        character.hand.add(character.deck.removeAt(0));
       }
-      if (character.deck.isEmpty) {
-        break;
-      }
-      character.hand.add(character.deck.removeAt(0));
     }
   }
 
   void _discardHand(GameCharacter character) {
-    character.discardPile.addAll(character.hand);
-    character.hand.clear();
+    if (character is PlayerRun) {
+      character.hand.clear();
+    }
   }
 
   void addWatcher(CombatWatcher watcher) {
@@ -109,223 +159,354 @@ class CombatManager {
     }
   }
 
-  void playCard(GameCard card) {
-    if (!isPlayerTurn) {
-      GameLogger.warning(LogCategory.game, 'Not player\'s turn');
-      return;
-    }
+  void playCard(CardRun card) {
+    if (!isPlayerTurn || _isCombatOver) return;
+
+    // Check if player has enough energy
     if (player.currentEnergy < card.cost) {
-      GameLogger.warning(
-          LogCategory.game, 'Not enough energy to play this card');
+      GameLogger.info(LogCategory.combat,
+          'Not enough energy to play ${card.name} (${player.currentEnergy}/${card.cost})');
       return;
     }
+
+    // Deduct energy cost
     player.currentEnergy -= card.cost;
-    GameLogger.info(LogCategory.game,
-        'Playing card: \'${card.name}\' (cost: ${card.cost}, remaining energy: ${player.currentEnergy})');
-    _soundManager.playCardSound(card.type);
 
-    // Always move the card from hand to discard pile if present
-    if (player.hand.contains(card)) {
-      player.hand.remove(card);
-      player.discardPile.add(card);
-    }
-
+    // Handle card effects based on type
     switch (card.type) {
       case CardType.attack:
-        enemyTakeDamage(card.value);
+        enemy.takeDamage(card.value);
         _notifyWatchers(CombatEvent(
           type: CombatEventType.damage,
+          source: player,
           target: enemy,
           value: card.value,
-          description:
-              '\u001b[32m${player.name}\u001b[0m dealt ${card.value} damage',
           card: card,
         ));
-        GameLogger.info(LogCategory.game,
-            'Dealt \u001b[31m${card.value}\u001b[0m damage to \u001b[31m${enemy.name}\u001b[0m');
         break;
+
       case CardType.heal:
-        playerHeal(card.value);
+        player.heal(card.value);
         _notifyWatchers(CombatEvent(
           type: CombatEventType.heal,
+          source: player,
           target: player,
           value: card.value,
-          description:
-              '\u001b[32m${player.name}\u001b[0m healed for ${card.value}',
           card: card,
         ));
-        GameLogger.info(LogCategory.game,
-            'Healed \u001b[32m${player.name}\u001b[0m for ${card.value} HP');
         break;
+
       case CardType.statusEffect:
-        if (card.target == "enemy") {
-          applyStatusEffectToEnemy(card);
-        } else if (card.target == "player" || card.target == "self") {
-          applyStatusEffectToPlayer(card);
+        if (card.statusEffectToApply != null && card.statusDuration != null) {
+          enemy.addStatusEffect(
+              card.statusEffectToApply!, card.statusDuration!);
+          _notifyWatchers(CombatEvent(
+            type: CombatEventType.status,
+            source: player,
+            target: enemy,
+            value: card.statusDuration!,
+            statusEffect: card.statusEffectToApply,
+            statusDuration: card.statusDuration,
+            card: card,
+          ));
         }
         break;
-      case CardType.cure:
-        // Implement cure logic as needed
-        break;
+
       case CardType.shield:
-        player.shield += card.value;
-        GameLogger.info(LogCategory.combat,
-            '\u001b[32m${player.name}\u001b[0m gains ${card.value} shield. Shield: \u001b[36m${player.shield}\u001b[0m');
+        player.addShield(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shield,
+          source: player,
+          target: player,
+          value: card.value,
+          card: card,
+        ));
         break;
+
       case CardType.shieldAttack:
-        // Implement shieldAttack logic as needed
+        player.addShield(card.value);
+        enemy.takeDamage(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shieldAttack,
+          source: player,
+          target: enemy,
+          value: card.value,
+          card: card,
+        ));
+        break;
+
+      case CardType.cure:
+        player.clearStatusEffects();
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.status,
+          source: player,
+          target: player,
+          value: 0,
+          card: card,
+        ));
         break;
     }
-    // Do not end player turn automatically after playing a card
+
+    // Move card to discard pile
+    player.hand.remove(card);
+    player.discardPile.add(card);
+    card.exhaust();
+
+    // Check if combat is over
+    if (enemy.currentHealth <= 0) {
+      _isCombatOver = true;
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.damage,
+        source: player,
+        target: enemy,
+        value: 0,
+        card: card,
+      ));
+      _addEvent(
+        CombatEventType.victory,
+        source: player,
+        target: enemy,
+      );
+    } else if (player.currentHealth <= 0) {
+      _isCombatOver = true;
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.damage,
+        source: enemy,
+        target: player,
+        value: 0,
+        card: card,
+      ));
+      _addEvent(
+        CombatEventType.defeat,
+        source: enemy,
+        target: player,
+      );
+    }
   }
 
-  void endPlayerTurn() {
+  void endTurn() {
+    if (_isCombatOver) return;
+
     isPlayerTurn = false;
-    GameLogger.info(LogCategory.game, 'Player turn ended');
+    _notifyWatchers(CombatEvent(
+      type: CombatEventType.energy,
+      source: player,
+      target: player,
+      value: 0,
+      description: '${player.name} ends their turn',
+      card: CardRun(CardSetup(CardTemplate.findByName('End Turn')!)),
+    ));
+
+    // Enemy turn
+    _enemyTurn();
+
+    // Start player's turn
+    isPlayerTurn = true;
+    player.currentEnergy = player.maxEnergy;
+    _notifyWatchers(CombatEvent(
+      type: CombatEventType.energy,
+      source: player,
+      target: player,
+      value: player.maxEnergy,
+      description: '${player.name} starts their turn',
+      card: CardRun(CardSetup(CardTemplate.findByName('Start Turn')!)),
+    ));
+
+    // Draw new hand
     _discardHand(player);
     _drawHand(player);
   }
 
-  void executeEnemyTurn() {
-    if (isPlayerTurn) {
-      GameLogger.warning(
-          LogCategory.game, 'Cannot execute enemy turn during player turn');
+  void _enemyTurn() {
+    if (_isCombatOver) return;
+
+    // Get enemy actions for this enemy
+    final actions = _enemyActionsByName?[enemy.name];
+    if (actions == null || actions.isEmpty) {
+      GameLogger.error(
+          LogCategory.combat, 'No actions found for enemy ${enemy.name}');
       return;
     }
 
-    // Process enemy status effects (e.g., poison)
-    int? poisonValue = enemy.statusEffects[StatusEffect.poison];
-    int? burnValue = enemy.statusEffects[StatusEffect.burn];
-    if (poisonValue != null && poisonValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
-          .showDotEffect(StatusEffect.poison, poisonValue);
-    }
-    if (burnValue != null && burnValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
-          .showDotEffect(StatusEffect.burn, 3); // Burn is always 3
-    }
-    enemy.onTurnStart();
-    GameLogger.info(LogCategory.game, 'Enemy turn starting');
-
-    // 1. Select an action using probability if available
-    if (enemy.deck.isNotEmpty) {
-      final enemyName = enemy.name;
-      GameCard? card;
-      dynamic pickedAction;
-      if (_enemyActionsByName != null &&
-          _enemyActionsByName![enemyName] != null) {
-        final actions = _enemyActionsByName![enemyName]!;
-        // Log all possible actions and their probabilities
-        for (final a in actions) {
-          GameLogger.info(LogCategory.game,
-              'Enemy action option: ${a.actionName} (probability: ${a.probability})');
-        }
-        // Weighted random selection
-        final totalProb =
-            actions.fold<double>(0, (sum, a) => sum + (a.probability ?? 0));
-        if (totalProb > 0) {
-          final random = Random();
-          final rand = random.nextDouble() * totalProb;
-          GameLogger.info(LogCategory.game,
-              'Random value for selection: $rand (totalProb: $totalProb)');
-          double cumulative = 0;
-          for (int i = 0; i < actions.length; i++) {
-            cumulative += actions[i].probability;
-            GameLogger.info(LogCategory.game,
-                'Cumulative probability after ${actions[i].actionName}: $cumulative');
-            if (rand <= cumulative) {
-              pickedAction = actions[i];
-              // Find the corresponding GameCard in the deck by name
-              card = enemy.deck.firstWhere(
-                  (c) => c.name == actions[i].actionName,
-                  orElse: () => enemy.deck.first);
-              break;
-            }
-          }
-        }
+    // Pick a random action based on probability
+    final random = Random();
+    final totalWeight = actions.fold<int>(
+        0, (sum, action) => sum + (action['probability'] as int));
+    var roll = random.nextInt(totalWeight);
+    dynamic selectedAction;
+    for (final action in actions) {
+      roll -= action['probability'] as int;
+      if (roll < 0) {
+        selectedAction = action;
+        break;
       }
-      // Fallback: uniform random
-      card ??= (enemy.deck..shuffle()).first;
-      if (pickedAction != null) {
-        GameLogger.info(LogCategory.game,
-            'Enemy picked action: ${pickedAction.actionName} (probability: ${pickedAction.probability})');
-      } else {
-        GameLogger.info(
-            LogCategory.game, 'Enemy picked action (fallback): ${card.name}');
-      }
+    }
 
-      // Store the picked action for UI
-      lastEnemyAction = card;
+    if (selectedAction == null) {
+      GameLogger.error(LogCategory.combat,
+          'Failed to select action for enemy ${enemy.name}');
+      return;
+    }
 
-      // 2. Apply effect
-      switch (card.type) {
-        case CardType.attack:
-          playerTakeDamage(card.value);
+    // Convert action to CardRun
+    final cardTemplate =
+        CardTemplate.findByName(selectedAction['name'] as String);
+    if (cardTemplate == null) {
+      GameLogger.error(LogCategory.combat,
+          'Card template not found for action: ${selectedAction['name']}');
+      return;
+    }
+    final cardSetup = CardSetup(cardTemplate);
+    final card = CardRun(cardSetup);
+    lastEnemyAction = card;
+
+    // Execute the action
+    switch (card.type) {
+      case CardType.attack:
+        player.takeDamage(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.damage,
+          source: enemy,
+          target: player,
+          value: card.value,
+          description: '${player.name} takes ${card.value} damage',
+          card: card,
+        ));
+        break;
+
+      case CardType.heal:
+        enemy.heal(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.heal,
+          source: enemy,
+          target: enemy,
+          value: card.value,
+          description: '${enemy.name} heals for ${card.value}',
+          card: card,
+        ));
+        break;
+
+      case CardType.statusEffect:
+        if (card.statusEffectToApply != null && card.statusDuration != null) {
+          player.addStatusEffect(
+              card.statusEffectToApply!, card.statusDuration!);
           _notifyWatchers(CombatEvent(
-            type: CombatEventType.damage,
+            type: CombatEventType.status,
+            source: enemy,
             target: player,
-            value: card.value,
-            description: '${enemy.name} dealt ${card.value} damage',
+            value: card.statusDuration!,
+            description:
+                '${player.name} is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns',
             card: card,
           ));
-          GameLogger.info(
-              LogCategory.game, 'Dealt ${card.value} damage to ${player.name}');
-          break;
-        case CardType.heal:
-          enemyHeal(card.value);
-          _notifyWatchers(CombatEvent(
-            type: CombatEventType.heal,
-            target: enemy,
-            value: card.value,
-            description: '${enemy.name} healed for ${card.value}',
-            card: card,
-          ));
-          GameLogger.info(
-              LogCategory.game, 'Healed ${enemy.name} for ${card.value} HP');
-          break;
-        case CardType.statusEffect:
-          if (card.target == "enemy" || card.target == "self") {
-            applyStatusEffectToEnemy(card);
-          } else if (card.target == "player") {
-            applyStatusEffectToPlayer(card);
-          }
-          break;
-        case CardType.cure:
-          // Implement cure logic if needed
-          break;
-        case CardType.shield:
-        case CardType.shieldAttack:
-          // Implement shield logic if needed
-          break;
-      }
+        }
+        break;
+
+      case CardType.shield:
+        enemy.addShield(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shield,
+          source: enemy,
+          target: enemy,
+          value: card.value,
+          description: '${enemy.name} gains ${card.value} shield',
+          card: card,
+        ));
+        break;
+
+      case CardType.shieldAttack:
+        enemy.addShield(card.value);
+        player.takeDamage(card.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shieldAttack,
+          source: enemy,
+          target: player,
+          value: card.value,
+          description:
+              '${enemy.name} gains ${card.value} shield and deals ${card.value} damage',
+          card: card,
+        ));
+        break;
+
+      case CardType.cure:
+        enemy.clearStatusEffects();
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.status,
+          source: enemy,
+          target: enemy,
+          value: 0,
+          description: '${enemy.name} is cured of all status effects',
+          card: card,
+        ));
+        break;
     }
 
-    isPlayerTurn = true;
-    _startNewPlayerTurn();
+    // Check if combat is over
+    if (enemy.currentHealth <= 0) {
+      _isCombatOver = true;
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.damage,
+        source: player,
+        target: enemy,
+        value: 0,
+        description: '${enemy.name} is defeated!',
+        card: card,
+      ));
+    } else if (player.currentHealth <= 0) {
+      _isCombatOver = true;
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.damage,
+        source: enemy,
+        target: player,
+        value: 0,
+        description: '${player.name} is defeated!',
+        card: card,
+      ));
+    }
   }
 
-  void _startNewPlayerTurn() {
-    GameLogger.info(LogCategory.game, 'Starting new player turn');
-    // Process player status effects (e.g., poison)
-    int? poisonValue = player.statusEffects[StatusEffect.poison];
-    int? burnValue = player.statusEffects[StatusEffect.burn];
-    if (poisonValue != null && poisonValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
-          .showDotEffect(StatusEffect.poison, poisonValue);
+  void applyStatusEffectToPlayer(CardRun card) {
+    if (card.statusEffectToApply != null && card.statusDuration != null) {
+      player.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.status,
+        source: enemy,
+        target: player,
+        value: card.statusDuration!,
+        description:
+            '${player.name} is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns',
+        card: card,
+      ));
     }
-    if (burnValue != null && burnValue > 0) {
-      (CombatSceneLayout.current?.panels[1] as PlayerCombatPanel)
-          .showDotEffect(StatusEffect.burn, 3); // Burn is always 3
+  }
+
+  void applyStatusEffectToEnemy(CardRun card) {
+    if (card.statusEffectToApply != null && card.statusDuration != null) {
+      enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
+      _notifyWatchers(CombatEvent(
+        type: CombatEventType.status,
+        source: player,
+        target: enemy,
+        value: card.statusDuration!,
+        description:
+            '${enemy.name} is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns',
+        card: card,
+      ));
     }
-    player.onTurnStart();
-    player.currentEnergy = player.maxEnergy;
-    _drawHand(player);
-    // Implement any logic needed at the start of a new player turn
+  }
+
+  void update() {
+    // Process status effects that need to be updated every frame
+    if (player.statusEffects.containsKey(StatusEffect.regeneration)) {
+      player.heal(1);
+    }
+    if (enemy.statusEffects.containsKey(StatusEffect.regeneration)) {
+      enemy.heal(1);
+    }
   }
 
   bool isCombatOver() {
-    // Combat is over if either player or enemy health is 0 or less
-    return player.currentHealth <= 0 || enemy.currentHealth <= 0;
+    return _isCombatOver;
   }
 
   String? getCombatResult() {
@@ -333,8 +514,7 @@ class CombatManager {
       return 'Defeat';
     } else if (enemy.currentHealth <= 0) {
       // Get all enemies from DataController
-      final enemies =
-          DataController.instance.get<List<GameCharacter>>('enemies');
+      final enemies = DataController.instance.get<List<EnemyRun>>('enemies');
       if (enemies != null && enemies.isNotEmpty) {
         // Find the current enemy's index
         final currentIndex = enemies.indexWhere((e) => e.name == enemy.name);
@@ -351,24 +531,56 @@ class CombatManager {
     return null;
   }
 
+  void _startPlayerTurn() {
+    player.startTurn();
+    _notifyWatchers(CombatEvent(
+      type: CombatEventType.playerTurn,
+      source: player,
+      target: player,
+      value: player.maxEnergy,
+      card: CardRun(CardSetup(CardTemplate.findByName('Start Turn')!)),
+    ));
+  }
+
+  void _addEvent(CombatEventType type,
+      {required GameCharacter source,
+      required GameCharacter target,
+      int? value,
+      StatusEffect? statusEffect,
+      int? statusDuration,
+      CardRun? card}) {
+    final event = CombatEvent(
+      type: type,
+      source: source,
+      target: target,
+      value: value,
+      statusEffect: statusEffect,
+      statusDuration: statusDuration,
+      card: card,
+    );
+    eventHistory.add(event);
+    GameLogger.debug(LogCategory.combat, 'Combat event: $event');
+    notifyListeners();
+  }
+
   // Helper methods for damage/heal (implement as needed)
   void enemyTakeDamage(int value) {
     // Apply shield before HP
-    if (enemy.shield > 0) {
-      if (enemy.shield >= value) {
-        enemy.shield -= value;
+    if (enemy.currentShield > 0) {
+      if (enemy.currentShield >= value) {
+        enemy.currentShield -= value;
         GameLogger.info(LogCategory.combat,
-            '${enemy.name} loses $value shield. Shield: \\${enemy.shield}');
+            '${enemy.name} loses $value shield. Shield: ${enemy.currentShield}');
         return;
       } else {
-        int remaining = value - enemy.shield;
+        int remaining = value - enemy.currentShield;
         GameLogger.info(LogCategory.combat,
-            '${enemy.name} loses \\${enemy.shield} shield. Shield: 0');
-        enemy.shield = 0;
+            '${enemy.name} loses ${enemy.currentShield} shield. Shield: 0');
+        enemy.currentShield = 0;
         enemy.currentHealth =
             (enemy.currentHealth - remaining).clamp(0, enemy.maxHealth);
         GameLogger.info(LogCategory.combat,
-            '${enemy.name} takes $remaining damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
+            '${enemy.name} takes $remaining damage. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
         return;
       }
     }
@@ -376,34 +588,34 @@ class CombatManager {
     enemy.currentHealth =
         (enemy.currentHealth - value).clamp(0, enemy.maxHealth);
     GameLogger.info(LogCategory.combat,
-        '${enemy.name} takes $value damage. Health: \\${enemy.currentHealth}/\\${enemy.maxHealth}');
+        '${enemy.name} takes $value damage. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
   }
 
   void playerHeal(int value) {
     player.currentHealth =
         (player.currentHealth + value).clamp(0, player.maxHealth);
     GameLogger.info(LogCategory.combat,
-        'Player heals for $value. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+        'Player heals for $value. Health: ${player.currentHealth}/${player.maxHealth}');
   }
 
   // Helper methods for enemy actions
   void playerTakeDamage(int value) {
     // Apply shield before HP
-    if (player.shield > 0) {
-      if (player.shield >= value) {
-        player.shield -= value;
+    if (player.currentShield > 0) {
+      if (player.currentShield >= value) {
+        player.currentShield -= value;
         GameLogger.info(LogCategory.combat,
-            '${player.name} loses $value shield. Shield: \\${player.shield}');
+            '${player.name} loses $value shield. Shield: ${player.currentShield}');
         return;
       } else {
-        int remaining = value - player.shield;
+        int remaining = value - player.currentShield;
         GameLogger.info(LogCategory.combat,
-            '${player.name} loses \\${player.shield} shield. Shield: 0');
-        player.shield = 0;
+            '${player.name} loses ${player.currentShield} shield. Shield: 0');
+        player.currentShield = 0;
         player.currentHealth =
             (player.currentHealth - remaining).clamp(0, player.maxHealth);
         GameLogger.info(LogCategory.combat,
-            '${player.name} takes $remaining damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+            '${player.name} takes $remaining damage. Health: ${player.currentHealth}/${player.maxHealth}');
         return;
       }
     }
@@ -411,7 +623,7 @@ class CombatManager {
     player.currentHealth =
         (player.currentHealth - value).clamp(0, player.maxHealth);
     GameLogger.info(LogCategory.combat,
-        '${player.name} takes $value damage. Health: \\${player.currentHealth}/\\${player.maxHealth}');
+        '${player.name} takes $value damage. Health: ${player.currentHealth}/${player.maxHealth}');
   }
 
   void enemyHeal(int value) {
@@ -421,36 +633,12 @@ class CombatManager {
         'Enemy heals for $value. Health: ${enemy.currentHealth}/${enemy.maxHealth}');
   }
 
-  // Optionally, implement status effect application for statusEffect cards
-  void applyStatusEffectToPlayer(GameCard card) {
-    if (card.statusEffectToApply != null && card.statusDuration != null) {
-      player.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat,
-          'Player is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
-      _notifyWatchers(CombatEvent(
-        type: CombatEventType.status,
-        target: player,
-        value: 0,
-        description:
-            '${enemy.name} applied ${card.statusEffectToApply} to ${player.name} (x${card.statusDuration})',
-        card: card,
-      ));
-    }
-  }
-
-  void applyStatusEffectToEnemy(GameCard card) {
-    if (card.statusEffectToApply != null && card.statusDuration != null) {
-      enemy.addStatusEffect(card.statusEffectToApply!, card.statusDuration!);
-      GameLogger.info(LogCategory.combat,
-          'Enemy is affected by [32m${card.statusEffectToApply}[0m for ${card.statusDuration} (stacked if poison)');
-      _notifyWatchers(CombatEvent(
-        type: CombatEventType.status,
-        target: enemy,
-        value: 0,
-        description:
-            '${enemy.name} applied ${card.statusEffectToApply} to self (x${card.statusDuration})',
-        card: card,
-      ));
-    }
+  void endCombat() {
+    _isCombatOver = true;
+    _addEvent(
+      CombatEventType.combatEnd,
+      source: player,
+      target: enemy,
+    );
   }
 }

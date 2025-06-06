@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/card.dart';
 import 'package:flame/components.dart';
 
 class CardDetailPanel extends PositionComponent with HasVisibility {
@@ -80,7 +80,7 @@ class CardDetailPanel extends PositionComponent with HasVisibility {
     add(descText);
   }
 
-  void setCard(GameCard card) {
+  void setCard(CardRun card) {
     nameText.text = card.name;
     typeText.text = card.type.toString().split('.').last.toUpperCase();
     costText.text = 'Cost: \u26A1${card.cost}';

@@ -1,4 +1,6 @@
 import 'package:flame/components.dart';
+import 'package:card_combat_app/models/card.dart';
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/components/effects/damage_effect.dart';
 import 'package:card_combat_app/components/effects/heal_effect.dart';
@@ -111,11 +113,11 @@ class GameEffects {
   }
 
   static Component createCardVisual(
-    GameCard cardData,
+    CardRun cardData,
     int index,
     Vector2 cardAreaPosition,
     Vector2 cardAreaSize,
-    Function(GameCard) onCardPlayed,
+    Function(CardRun) onCardPlayed,
     bool isPlayerTurn,
   ) {
     const totalWidth = (CardVisualComponent.maxCards *

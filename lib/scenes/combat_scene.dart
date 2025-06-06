@@ -1,22 +1,27 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:card_combat_app/models/enemy.dart';
 import 'package:card_combat_app/components/layout/combat_scene_layout.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'base_scene.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/components/panel/player_combat_panel.dart';
+import 'package:card_combat_app/components/panel/enemy_combat_panel.dart';
 
 class CombatScene extends BaseScene with HasGameReference {
   late final CombatSceneLayout _layout;
-  late final GameCharacter player;
-  late final GameCharacter enemy;
+  late final PlayerRun playerRun;
+  late final EnemyRun enemyRun;
+  late final PlayerCombatPanel playerPanel;
+  late final EnemyCombatPanel enemyPanel;
   bool _combatEnded = false;
 
   CombatScene({Map<String, dynamic>? options})
       : super(
-          sceneBackgroundColor: const Color(0xFF1A1A2E),
+          sceneBackgroundColor: const material.Color(0xFF1A1A2E),
           options: options,
         );
 
@@ -25,14 +30,22 @@ class CombatScene extends BaseScene with HasGameReference {
     await super.onLoad();
     GameLogger.debug(LogCategory.game, 'CombatScene loading...');
 
-    player = DataController.instance.get<GameCharacter>('selectedPlayer')!;
-    enemy = DataController.instance.get<GameCharacter>('selectedEnemy')!;
-    CombatManager().initialize(player: player, enemy: enemy);
+    playerRun = DataController.instance.get<PlayerRun>('selectedPlayer')!;
+    enemyRun = DataController.instance.get<EnemyRun>('selectedEnemy')!;
     _layout = CombatSceneLayout();
     add(_layout);
     CombatManager().startCombat();
     GameLogger.info(LogCategory.game,
-        'Combat started: \x1B[32m${player.name}\x1B[0m vs \x1B[31m${enemy.name}\x1B[0m');
+        'Combat started: \x1B[32m${playerRun.name}\x1B[0m vs \x1B[31m${enemyRun.name}\x1B[0m');
+
+    playerPanel = PlayerCombatPanel(playerRun: playerRun);
+    enemyPanel = EnemyCombatPanel(enemy: enemyRun);
+
+    await add(playerPanel);
+    await add(enemyPanel);
+
+    playerPanel.initialize(CombatManager());
+    enemyPanel.initialize(CombatManager());
   }
 
   void handleCombatEnd() {
@@ -48,19 +61,7 @@ class CombatScene extends BaseScene with HasGameReference {
 
   void endTurn() {
     if (!CombatManager().isPlayerTurn) return;
-
-    CombatManager().endPlayerTurn();
-    _layout.updateUI();
-
-    // Execute enemy turn after a short delay
-    Future.delayed(const Duration(seconds: 1), () {
-      CombatManager().executeEnemyTurn();
-      _layout.updateUI();
-
-      if (CombatManager().isCombatOver()) {
-        handleCombatEnd();
-      }
-    });
+    CombatManager().endTurn();
   }
 
   @override

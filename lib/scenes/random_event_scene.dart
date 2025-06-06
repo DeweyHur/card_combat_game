@@ -8,14 +8,14 @@ import 'package:card_combat_app/components/simple_button_component.dart';
 import 'dart:math';
 
 class RandomEventScene extends BaseScene {
-  late final Player player;
+  late final PlayerRun player;
   late final RandomEvent event;
   bool hasChosen = false;
   final Random _random = Random();
 
   RandomEventScene({required Map<String, dynamic> options})
       : super(sceneBackgroundColor: material.Colors.brown.shade200) {
-    player = options['player'] as Player;
+    player = options['player'] as PlayerRun;
     event = options['event'] as RandomEvent;
   }
 

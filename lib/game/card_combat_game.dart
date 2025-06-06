@@ -1,3 +1,5 @@
+import 'package:card_combat_app/models/enemy.dart';
+import 'package:card_combat_app/models/player.dart';
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
@@ -5,18 +7,15 @@ import 'package:card_combat_app/scenes/scene_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'package:card_combat_app/utils/audio_config.dart';
-import 'package:card_combat_app/models/game_character_loader.dart';
 import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy_action_loader.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
-import 'package:card_combat_app/models/equipment_loader.dart';
-import 'package:card_combat_app/models/card_loader.dart';
-import 'package:flutter/services.dart';
-import 'package:csv/csv.dart';
+import 'package:card_combat_app/models/equipment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:card_combat_app/managers/static_data_manager.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
@@ -28,25 +27,44 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     await super.onLoad();
     GameLogger.info(LogCategory.game, 'CardCombatGame loading...');
 
+    // Initialize static data first
+    await StaticDataManager.initialize();
+    GameLogger.info(LogCategory.game, 'Static data initialized');
+
     final prefs = await SharedPreferences.getInstance();
-    List<GameCharacter> players = [];
-    List<GameCharacter> enemies = [];
+    List<PlayerRun> players = [];
+    List<EnemyRun> enemies = [];
     String? selectedPlayerName;
 
     // Try to load players from local storage
     final playersJson = prefs.getString('players');
     if (playersJson != null) {
       final List<dynamic> decoded = jsonDecode(playersJson);
-      players = decoded.map((e) => GameCharacter.fromJson(e)).toList();
+      for (final data in decoded) {
+        final template =
+            StaticDataManager.findPlayerTemplate(data['name'] as String);
+        if (template != null) {
+          final setup = PlayerSetup(template);
+          final player = PlayerRun(setup);
+          // Load equipment
+          if (data['equipment'] != null) {
+            final equipmentMap = Map<String, dynamic>.from(data['equipment']);
+            equipmentMap.forEach((slot, eqData) {
+              final eq = EquipmentTemplate.fromJson(eqData);
+              if (eq != null) {
+                player.equip(slot, eq);
+              }
+            });
+          }
+          players.add(player);
+        }
+      }
     }
     // Try to load selected player from local storage
     selectedPlayerName = prefs.getString('selectedPlayerName');
 
-    // If not found, load from CSV as before
+    // If no players loaded, create them from templates
     if (players.isEmpty) {
-      final cardData = await loadCardsByOwnerFromCsv('assets/data/cards.csv');
-      final equipmentData =
-          await loadEquipmentFromCsv('assets/data/equipment.csv');
       final enemyActionsByName =
           await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
       final Map<String, List<GameCard>> enemyDecks = {};
@@ -54,22 +72,25 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
         enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
       });
       CombatManager().setEnemyActionsByName(enemyActionsByName);
-      players = await loadCharactersFromCsv('assets/data/players.csv',
-          cardData.cardsByName.values.toList(), equipmentData,
-          isEnemy: false);
-      enemies = await loadEnemiesFromCsv('assets/data/enemies.csv', enemyDecks);
+
+      // Create players from templates
+      for (final template in StaticDataManager.playerTemplates) {
+        final setup = PlayerSetup(template);
+        final player = PlayerRun(setup);
+        players.add(player);
+      }
+
+      // Create enemies from templates
+      for (final template in StaticDataManager.enemyTemplates) {
+        final enemy = EnemyRun(template);
+        enemies.add(enemy);
+      }
+
       // Save to local storage
       prefs.setString(
           'players', jsonEncode(players.map((e) => e.toJson()).toList()));
-      // Save other data as before
-      DataController.instance.set<CardLoaderResult>('cardData', cardData);
-      DataController.instance
-          .set<Map<String, EquipmentData>>('equipmentData', equipmentData);
     } else {
-      // If loaded from local storage, still need to load enemies and cards for the game
-      final cardData = await loadCardsByOwnerFromCsv('assets/data/cards.csv');
-      final equipmentData =
-          await loadEquipmentFromCsv('assets/data/equipment.csv');
+      // If loaded from local storage, still need to load enemies
       final enemyActionsByName =
           await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
       final Map<String, List<GameCard>> enemyDecks = {};
@@ -77,17 +98,19 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
         enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
       });
       CombatManager().setEnemyActionsByName(enemyActionsByName);
-      enemies = await loadEnemiesFromCsv('assets/data/enemies.csv', enemyDecks);
-      DataController.instance.set<CardLoaderResult>('cardData', cardData);
-      DataController.instance
-          .set<Map<String, EquipmentData>>('equipmentData', equipmentData);
+
+      // Create enemies from templates
+      for (final template in StaticDataManager.enemyTemplates) {
+        final enemy = EnemyRun(template);
+        enemies.add(enemy);
+      }
     }
 
     DataController.instance.set<List<GameCharacter>>('players', players);
     DataController.instance.set<List<GameCharacter>>('enemies', enemies);
 
     // Set selected player
-    GameCharacter? selectedPlayer;
+    PlayerRun? selectedPlayer;
     if (selectedPlayerName != null) {
       final found = players.where((p) => p.name == selectedPlayerName);
       if (found.isNotEmpty) {
@@ -98,8 +121,13 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
         if (savedEquipment != null) {
           try {
             final equipmentMap =
-                Map<String, String>.from(jsonDecode(savedEquipment));
-            selectedPlayer.equipment = equipmentMap;
+                Map<String, dynamic>.from(jsonDecode(savedEquipment));
+            equipmentMap.forEach((slot, data) {
+              final eq = EquipmentTemplate.fromJson(data);
+              if (eq != null) {
+                selectedPlayer?.equip(slot, eq);
+              }
+            });
           } catch (e) {
             GameLogger.error(
                 LogCategory.data, 'Error loading saved equipment: $e');
@@ -115,8 +143,13 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
       if (savedEquipment != null) {
         try {
           final equipmentMap =
-              Map<String, String>.from(jsonDecode(savedEquipment));
-          selectedPlayer.equipment = equipmentMap;
+              Map<String, dynamic>.from(jsonDecode(savedEquipment));
+          equipmentMap.forEach((slot, data) {
+            final eq = EquipmentTemplate.fromJson(data);
+            if (eq != null) {
+              selectedPlayer?.equip(slot, eq);
+            }
+          });
         } catch (e) {
           GameLogger.error(
               LogCategory.data, 'Error loading saved equipment: $e');
@@ -131,14 +164,6 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
       prefs.setString('playerEquipment:${selectedPlayer.name}',
           jsonEncode(selectedPlayer.equipment));
     }
-
-    // Also store the parsed players.csv rows for equipment lookup
-    final playersCsvString =
-        await rootBundle.loadString('assets/data/players.csv');
-    final playersCsvRows = const CsvToListConverter(eol: '\n')
-        .convert(playersCsvString, eol: '\n');
-    DataController.instance.set<List<List<dynamic>>>(
-        'playersCsv', playersCsvRows.skip(1).toList());
 
     // Initialize audio configuration
     await AudioConfig.initialize();

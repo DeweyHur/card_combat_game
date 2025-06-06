@@ -9,13 +9,13 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/layout/multiline_text_component.dart';
 
-class PlayerDetailPanel extends BasePanel with AreaFillerMixin {
+class PlayerRunDetailPanel extends BasePanel with AreaFillerMixin {
   late NameEmojiComponent nameEmojiComponent;
   late StatsRow statsRow;
   late MultilineTextComponent descriptionText;
   PlayerRun? player;
 
-  PlayerDetailPanel();
+  PlayerRunDetailPanel();
 
   @override
   Future<void> onLoad() async {

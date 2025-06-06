@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:card_combat_app/components/panel/cards_panel.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
@@ -10,10 +9,11 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 import 'package:card_combat_app/components/action_with_emoji_component.dart';
 import 'package:card_combat_app/components/panel/enemy_combat_panel.dart';
 import 'package:card_combat_app/components/panel/player_combat_panel.dart';
-import 'package:card_combat_app/models/game_character.dart';
+import 'package:card_combat_app/models/player.dart';
+import 'package:card_combat_app/models/enemy.dart';
 
 class CombatSceneLayout extends PositionComponent
-    with HasGameReference, VerticalStackMixin {
+    with HasGameRef, VerticalStackMixin {
   static CombatSceneLayout? current;
   late final List<BasePanel> panels;
   late final TextComponent turnText;
@@ -21,6 +21,7 @@ class CombatSceneLayout extends PositionComponent
   bool _isInitialized = false;
   late final EnemyCombatPanel enemyPanel;
   late final CardsPanel cardsPanel;
+  late final PlayerCombatPanel playerPanel;
 
   CombatSceneLayout() : super(anchor: Anchor.topLeft) {
     CombatSceneLayout.current = this;
@@ -30,11 +31,13 @@ class CombatSceneLayout extends PositionComponent
   Future<void> onLoad() async {
     GameLogger.info(LogCategory.game, 'CombatSceneLayout: onLoad started');
     await super.onLoad();
-    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
-    final enemy = DataController.instance.get<GameCharacter>('selectedEnemy');
+    final player =
+        DataController.instance.getSceneData<PlayerRun>('combat', 'player');
+    final enemy =
+        DataController.instance.getSceneData<EnemyRun>('combat', 'enemy');
     if (player == null || enemy == null) {
       GameLogger.error(LogCategory.game,
-          'CombatSceneLayout: player or enemy not set in DataController');
+          'CombatSceneLayout: player or enemy not set in scene data');
       GameLogger.info(LogCategory.game,
           'CombatSceneLayout: onLoad aborted due to missing player/enemy');
       return;
@@ -47,8 +50,8 @@ class CombatSceneLayout extends PositionComponent
       text: '',
       position: Vector2(size.x * 0.5, size.y * 0.1),
       textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
+        style: const material.TextStyle(
+          color: material.Colors.white,
           fontSize: 24,
         ),
       ),
@@ -58,8 +61,8 @@ class CombatSceneLayout extends PositionComponent
       text: '',
       position: Vector2(size.x * 0.5, size.y * 0.5),
       textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
+        style: const material.TextStyle(
+          color: material.Colors.white,
           fontSize: 24,
         ),
       ),
@@ -80,38 +83,28 @@ class CombatSceneLayout extends PositionComponent
     };
     cardsPanel.onEndTurn = () {
       if (!CombatManager().isPlayerTurn) return;
-      CombatManager().endPlayerTurn();
+      CombatManager().endTurn();
       updateUI();
-      Future.delayed(const Duration(seconds: 1), () {
-        CombatManager().executeEnemyTurn();
-        updateUI();
-        if (CombatManager().isCombatOver()) {
-          // Optionally, show game over message here
-        }
-      });
     };
-    enemyPanel = EnemyCombatPanel();
-    panels = [
-      cardsPanel,
-      PlayerCombatPanel(player: player),
-      enemyPanel,
-    ];
 
-    // Initialize PlayerPanel with CombatManager singleton
-    (panels[1] as PlayerCombatPanel).initialize(player, CombatManager());
+    playerPanel = PlayerCombatPanel(playerRun: player);
+    playerPanel.initialize(CombatManager());
+
+    enemyPanel = EnemyCombatPanel(enemy: enemy);
+    enemyPanel.initialize(CombatManager());
+
+    panels = <BasePanel>[cardsPanel, playerPanel, enemyPanel];
 
     // Add panels to the scene using vertical stack
     resetVerticalStack();
     registerVerticalStackComponent(
-        'enemyPanel', panels[2], size.y * 0.4); // Enemy panel (top)
+        'enemyPanel', enemyPanel, size.y * 0.4); // Enemy panel (top)
     registerVerticalStackComponent('turnText', turnText, 40);
     registerVerticalStackComponent(
-        'cardsPanel', panels[0], size.y * 0.3); // Cards panel (middle)
+        'cardsPanel', cardsPanel, size.y * 0.3); // Cards panel (middle)
     registerVerticalStackComponent('gameMessageText', gameMessageText, 40);
     registerVerticalStackComponent(
-        'playerPanel', panels[1], size.y * 0.15); // Player panel (bottom)
-
-    // Add text components
+        'playerPanel', playerPanel, size.y * 0.15); // Player panel (bottom)
 
     _isInitialized = true;
     GameLogger.info(LogCategory.game,
@@ -126,7 +119,7 @@ class CombatSceneLayout extends PositionComponent
   }
 
   /// Helper to format the enemy's next action with emojis
-  String formatEnemyActionWithEmojis(GameCharacter enemy, GameCard action) {
+  String formatEnemyActionWithEmojis(EnemyRun enemy, dynamic action) {
     return ActionWithEmojiComponent.format(enemy, action);
   }
 
@@ -138,23 +131,20 @@ class CombatSceneLayout extends PositionComponent
       return;
     }
 
-    final enemy = DataController.instance.get('selectedEnemy');
+    final enemy =
+        DataController.instance.getSceneData<EnemyRun>('combat', 'enemy');
     if (enemy != null) {
       turnText.text = CombatManager().isPlayerTurn
           ? "Player's Turn"
           : "${enemy.name}'s Turn";
       // Use the last picked enemy action as the next action
-      final nextAction = CombatManager().lastEnemyAction ??
-          (CombatManager().enemy.deck.isNotEmpty
-              ? CombatManager().enemy.deck.first
-              : null);
+      final nextAction = CombatManager().lastEnemyAction;
       if (nextAction != null) {
-        (panels[2] as EnemyCombatPanel).updateActionWithDescription(
+        enemyPanel.updateActionWithDescription(
           formatEnemyActionWithEmojis(CombatManager().enemy, nextAction),
           nextAction.description,
         );
       }
-      (panels[2] as EnemyCombatPanel).updateHealth();
     }
 
     // Update all panels
@@ -167,7 +157,7 @@ class CombatSceneLayout extends PositionComponent
     GameLogger.info(
         LogCategory.game,
         'CombatSceneLayout: showGameMessage: '
-        '[33m$message[0m');
+        '\u001b[33m$message\u001b[0m');
     gameMessageText.text = message;
     if (!children.contains(gameMessageText)) {
       add(gameMessageText);
@@ -184,6 +174,6 @@ class CombatSceneLayout extends PositionComponent
 
   void registerWatchers(CombatManager manager) {
     manager.addWatcher(enemyPanel);
-    manager.addWatcher(panels[1] as PlayerCombatPanel);
+    manager.addWatcher(playerPanel);
   }
 }

@@ -1,27 +1,30 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/managers/combat_manager.dart';
-import 'package:card_combat_app/components/panel/base_player_panel.dart';
+import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/utils/color_utils.dart';
+import 'package:card_combat_app/models/game_card.dart';
 
-class PlayerCombatPanel extends BasePlayerPanel
+class PlayerCombatPanel extends BasePanel
     with AreaFillerMixin, ShakeMixin
     implements CombatWatcher {
   late CombatManager combatManager;
   bool _isLoaded = false;
   late TextComponent statusEffectText;
+  final PlayerRun playerRun;
 
-  PlayerCombatPanel({required super.player});
+  PlayerCombatPanel({required this.playerRun});
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Add status effect text below the health bar (after statsRow)
+
+    // Add status effect text below the health bar
     statusEffectText = TextComponent(
       text: '',
       textRenderer: TextPaint(
@@ -33,7 +36,7 @@ class PlayerCombatPanel extends BasePlayerPanel
     _isLoaded = true;
   }
 
-  void initialize(GameCharacter player, CombatManager combatManager) {
+  void initialize(CombatManager combatManager) {
     this.combatManager = combatManager;
     if (_isLoaded) {
       updateUI();
@@ -42,15 +45,13 @@ class PlayerCombatPanel extends BasePlayerPanel
 
   @override
   void updateUI() {
-    super.updateUI();
     if (!_isLoaded) return;
-    final player = combatManager.player;
     // Update status effect text for all effects
-    if (player.statusEffects.isNotEmpty) {
-      final effectStrings = player.statusEffects.entries.map((entry) {
+    if (playerRun.statusEffects.isNotEmpty) {
+      final effectStrings = playerRun.statusEffects.entries.map((entry) {
         final effect = entry.key;
         final duration = entry.value;
-        String emoji;
+        String emoji = '';
         switch (effect) {
           case StatusEffect.poison:
             emoji = '☠️';
@@ -64,6 +65,27 @@ class PlayerCombatPanel extends BasePlayerPanel
           case StatusEffect.none:
             emoji = '';
             break;
+          case StatusEffect.stun:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.vulnerable:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.weak:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.strength:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.dexterity:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.regeneration:
+            // TODO: Handle this case.
+            throw UnimplementedError();
+          case StatusEffect.shield:
+            // TODO: Handle this case.
+            throw UnimplementedError();
         }
         return '$emoji ${effect.toString().split('.').last.toUpperCase()} x$duration';
       }).join('   ');
@@ -78,18 +100,18 @@ class PlayerCombatPanel extends BasePlayerPanel
     super.render(canvas);
     drawAreaFiller(
       canvas,
-      colorFromString(player.color).withAlpha(77),
-      borderColor: colorFromString(player.color),
+      colorFromString(playerRun.color).withAlpha(77),
+      borderColor: colorFromString(playerRun.color),
       borderWidth: 2.0,
     );
   }
 
   @override
   void onCombatEvent(CombatEvent event) {
-    if (event.target == player) {
+    if (event.target == playerRun) {
       if (event.type == CombatEventType.damage) {
         final effect = GameEffects.createCardEffect(
-          event.card.type,
+          event.card?.type ?? CardType.attack,
           Vector2(size.x / 2 - 50, size.y / 2 - 50),
           Vector2(100, 100),
           onComplete: () {
@@ -97,24 +119,28 @@ class PlayerCombatPanel extends BasePlayerPanel
           },
           color: Colors.red,
           emoji: '💔',
-          value: event.value,
+          value: event.value ?? 0,
         )..priority = 100;
         add(effect);
-        shakeForType(event.card.type);
+        if (event.card?.type != null) {
+          shakeForType(event.card!.type);
+        }
       } else if (event.type == CombatEventType.heal ||
           event.type == CombatEventType.status) {
         final effect = GameEffects.createCardEffect(
-          event.card.type,
+          event.card?.type ?? CardType.attack,
           Vector2(size.x / 2 - 50, size.y / 2 - 50),
           Vector2(100, 100),
           onComplete: () {
             updateUI();
           },
-          value: event.value,
+          value: event.value ?? 0,
         )..priority = 100;
         add(effect);
-        shakeForType(event.card.type);
-      } else if (event.type == CombatEventType.cure) {
+        if (event.card?.type != null) {
+          shakeForType(event.card!.type);
+        }
+      } else if (event.type == CombatEventType.status) {
         updateUI();
       }
     }

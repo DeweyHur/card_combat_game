@@ -1,8 +1,8 @@
+import 'package:card_combat_app/models/equipment.dart';
+import 'package:card_combat_app/models/player.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/equipment_loader.dart';
-import 'package:card_combat_app/models/game_character.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
@@ -11,36 +11,30 @@ import 'package:card_combat_app/components/mixins/vertical_stack_mixin.dart';
 
 class EquipmentDetailPanel extends PositionComponent
     with TapCallbacks, VerticalStackMixin {
-  EquipmentData equipment;
+  late EquipmentTemplate equipment;
   SimpleButtonComponent? actionButton;
   SimpleButtonComponent? inventoryButton;
 
-  EquipmentDetailPanel({
-    required this.equipment,
-    Vector2? position,
-    Vector2? size,
-  }) : super(position: position, size: size);
+  EquipmentDetailPanel();
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    // Add background
-    final background = RectangleComponent(
-      size: size,
-      paint: Paint()..color = Colors.black.withAlpha(217),
-      anchor: Anchor.topLeft,
-    );
-    registerVerticalStackComponent('background', background, size.y);
+    GameLogger.debug(LogCategory.game,
+        '[EQUIP_PANEL] Panel loading for equipment: ${equipment.name}');
 
     // Add equipment details
-    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
+    final player = DataController.instance.get<PlayerRun>('selectedPlayer');
     if (player == null) {
       GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
       return;
     }
+    GameLogger.debug(
+        LogCategory.game, '[EQUIP_PANEL] Selected player: ${player.name}');
 
-    final isEquipped = player.equipment[equipment.type] == equipment.name;
+    final isEquipped = player.equipment[equipment.type] == equipment;
+    GameLogger.debug(LogCategory.game,
+        '[EQUIP_PANEL] Equipment type: ${equipment.type}, isEquipped: $isEquipped');
 
     // Add name
     final nameText = TextComponent(
@@ -52,8 +46,6 @@ class EquipmentDetailPanel extends PositionComponent
           fontWeight: FontWeight.bold,
         ),
       ),
-      anchor: Anchor.topLeft,
-      position: Vector2(20, 20),
     );
     registerVerticalStackComponent('name', nameText, 40);
 
@@ -80,8 +72,6 @@ class EquipmentDetailPanel extends PositionComponent
           fontSize: 18,
         ),
       ),
-      anchor: Anchor.topLeft,
-      position: Vector2(20, 90),
     );
     registerVerticalStackComponent('rarity', rarityText, 30);
 
@@ -92,18 +82,16 @@ class EquipmentDetailPanel extends PositionComponent
         textRenderer: TextPaint(
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 16,
           ),
         ),
-        anchor: Anchor.topLeft,
-        position: Vector2(20, 120),
       );
-      registerVerticalStackComponent('description', descriptionText, 30);
+      registerVerticalStackComponent('description', descriptionText, 60);
     }
 
     // Add cards if any
     if (equipment.cards.isNotEmpty) {
-      final cardsHeader = TextComponent(
+      final cardsText = TextComponent(
         text: 'Cards:',
         textRenderer: TextPaint(
           style: const TextStyle(
@@ -112,10 +100,8 @@ class EquipmentDetailPanel extends PositionComponent
             fontWeight: FontWeight.bold,
           ),
         ),
-        anchor: Anchor.topLeft,
-        position: Vector2(20, 150),
       );
-      registerVerticalStackComponent('cards_header', cardsHeader, 30);
+      registerVerticalStackComponent('cards_header', cardsText, 30);
 
       for (int i = 0; i < equipment.cards.length; i++) {
         final cardText = TextComponent(
@@ -126,111 +112,119 @@ class EquipmentDetailPanel extends PositionComponent
               fontSize: 16,
             ),
           ),
-          anchor: Anchor.topLeft,
-          position: Vector2(40, 180 + i * 25),
         );
         registerVerticalStackComponent('card_$i', cardText, 25);
       }
     }
 
-    // Add action buttons
-    _updateActionButtons(isEquipped);
-    _addInventoryButton();
-  }
-
-  void _updateActionButtons(bool isEquipped) {
-    // Remove existing button if any
-    if (actionButton != null) {
-      hideVerticalStackComponent('action_button');
-    }
-
-    // Create new button
+    // Add action button
     actionButton = SimpleButtonComponent.text(
       text: isEquipped ? 'Unequip' : 'Equip',
       size: Vector2(200, 50),
       color: isEquipped ? Colors.red : Colors.green,
       onPressed: () {
-        final player =
-            DataController.instance.get<GameCharacter>('selectedPlayer');
-        if (player == null) {
-          GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
-          return;
-        }
-
         if (isEquipped) {
           player.unequip(equipment.type);
         } else {
-          player.equip(equipment.type, equipment.name);
+          player.equip(equipment.type, equipment);
         }
-        // Return to previous scene after equipping/unequipping
-        SceneManager().popScene();
+        updateUI();
       },
     );
-    registerVerticalStackComponent('action_button', actionButton!, 50);
+    registerVerticalStackComponent('action', actionButton!, 60);
+
+    // Add inventory button
+    inventoryButton = SimpleButtonComponent.text(
+      text: 'Change Equipment',
+      size: Vector2(200, 50),
+      color: Colors.blue,
+      onPressed: () {
+        final selectedPlayer =
+            DataController.instance.get<PlayerRun>('selectedPlayer');
+        if (selectedPlayer != null && equipment.type.isNotEmpty) {
+          DataController.instance
+              .setSceneData('inventory', 'player', selectedPlayer);
+          DataController.instance
+              .setSceneData('inventory', 'slot', equipment.type);
+          SceneManager().pushScene('inventory', options: {
+            'player': selectedPlayer,
+            'slot': equipment.type,
+          });
+        }
+      },
+    );
+    registerVerticalStackComponent('inventory', inventoryButton!, 60);
   }
 
-  void _addInventoryButton() {
-    // Only show inventory button if we're not already in the inventory scene
-    final inventoryPlayer =
-        DataController.instance.get<GameCharacter>('inventory.player');
-    final inventorySlot = DataController.instance.get<String>('inventory.slot');
+  void updateUI() {
+    final player = DataController.instance.get<PlayerRun>('selectedPlayer');
+    if (player == null) return;
 
-    if (inventoryPlayer == null || inventorySlot == null) {
-      inventoryButton = SimpleButtonComponent.text(
-        text: 'Change Equipment',
+    // Update description
+    if (equipment.description.isNotEmpty) {
+      final descriptionText = TextComponent(
+        text: 'Description: ${equipment.description}',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      );
+      registerVerticalStackComponent('description', descriptionText, 60);
+    }
+
+    // Update cards
+    if (equipment.cards.isNotEmpty) {
+      final cardsText = TextComponent(
+        text: 'Cards:',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      registerVerticalStackComponent('cards_header', cardsText, 30);
+
+      for (int i = 0; i < equipment.cards.length; i++) {
+        final cardText = TextComponent(
+          text: '• ${equipment.cards[i]}',
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        );
+        registerVerticalStackComponent('card_$i', cardText, 25);
+      }
+    }
+
+    // Update action button
+    final isEquipped = player.equipment[equipment.type] == equipment;
+    if (actionButton != null) {
+      remove(actionButton!);
+      actionButton = SimpleButtonComponent.text(
+        text: isEquipped ? 'Unequip' : 'Equip',
         size: Vector2(200, 50),
-        color: Colors.blue,
+        color: isEquipped ? Colors.red : Colors.green,
         onPressed: () {
-          final selectedPlayer =
-              DataController.instance.get<GameCharacter>('selectedPlayer');
-          if (selectedPlayer != null && equipment.type.isNotEmpty) {
-            SceneManager().pushScene('inventory', options: {
-              'player': selectedPlayer,
-              'slot': equipment.type,
-            });
+          if (isEquipped) {
+            player.unequip(equipment.type);
+          } else {
+            player.equip(equipment.type, equipment);
           }
+          updateUI();
         },
       );
-      registerVerticalStackComponent('inventory_button', inventoryButton!, 50);
+      registerVerticalStackComponent('action', actionButton!, 60);
     }
-
-    // Add a close button in the top right
-    final closeButton = SimpleButtonComponent.text(
-      text: 'X',
-      size: Vector2(40, 40),
-      color: Colors.grey.shade800,
-      onPressed: () {
-        hideVerticalStackComponent('background');
-        hideVerticalStackComponent('name');
-        hideVerticalStackComponent('type');
-        hideVerticalStackComponent('rarity');
-        if (equipment.description.isNotEmpty) {
-          hideVerticalStackComponent('description');
-        }
-        if (equipment.cards.isNotEmpty) {
-          hideVerticalStackComponent('cards_header');
-          for (int i = 0; i < equipment.cards.length; i++) {
-            hideVerticalStackComponent('card_$i');
-          }
-        }
-        hideVerticalStackComponent('action_button');
-        if (inventoryPlayer == null || inventorySlot == null) {
-          hideVerticalStackComponent('inventory_button');
-        }
-        hideVerticalStackComponent('close_button');
-      },
-    );
-    registerVerticalStackComponent('close_button', closeButton, 40);
   }
 
-  void updateEquipment(EquipmentData newEquipment) {
+  void updateEquipment(EquipmentTemplate newEquipment) {
     equipment = newEquipment;
-    final player = DataController.instance.get<GameCharacter>('selectedPlayer');
-    if (player == null) {
-      GameLogger.error(LogCategory.game, '[EQUIP_PANEL] No player found');
-      return;
-    }
-    final isEquipped = player.equipment[equipment.type] == equipment.name;
-    _updateActionButtons(isEquipped);
+    updateUI();
   }
 }

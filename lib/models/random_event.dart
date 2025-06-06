@@ -24,8 +24,8 @@ class EventChoice {
 
 class EventOutcome {
   final double successChance;
-  final String Function(Player) successReward;
-  final String Function(Player) failurePenalty;
+  final String Function(PlayerRun) successReward;
+  final String Function(PlayerRun) failurePenalty;
 
   EventOutcome({
     required this.successChance,

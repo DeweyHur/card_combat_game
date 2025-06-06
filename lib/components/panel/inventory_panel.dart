@@ -1,26 +1,21 @@
+import 'package:card_combat_app/models/equipment.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart' show Colors, TextStyle;
-import 'package:card_combat_app/models/equipment_loader.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/components/panel/base_panel.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
 
-class InventoryPanel extends PositionComponent
-    with HasGameReference, TapCallbacks {
-  final List<EquipmentData> items;
+class InventoryPanel extends BasePanel {
   final String? filter;
-  final void Function(EquipmentData) onSelect;
   final List<SimpleButtonComponent> itemButtons = [];
 
   InventoryPanel({
-    required this.items,
-    this.filter,
-    required this.onSelect,
-    Vector2? position,
     Vector2? size,
-  }) : super(position: position, size: size ?? Vector2(600, 400));
+    this.filter,
+  }) : super(size: size);
 
   @override
   Future<void> onLoad() async {
@@ -56,8 +51,8 @@ class InventoryPanel extends PositionComponent
       position: Vector2(20, 20),
     ));
 
-    final equipmentMap =
-        DataController.instance.get<Map<String, EquipmentData>>('equipment');
+    final equipmentMap = DataController.instance
+        .get<Map<String, EquipmentTemplate>>('equipmentData');
     if (equipmentMap == null) {
       GameLogger.error(LogCategory.game, '[INVENTORY] No equipment data found');
       return;
@@ -86,18 +81,34 @@ class InventoryPanel extends PositionComponent
     // Create buttons for each equipment
     double y = 80;
     for (final equipment in filteredEquipment) {
-      GameLogger.info(LogCategory.game,
-          '[INVENTORY] Item: ${equipment.name} (${equipment.type})');
       final button = SimpleButtonComponent.text(
-        text: '${equipment.name} (${equipment.rarity})',
-        size: Vector2(size.x - 48, 28),
-        color: Colors.blueGrey.shade800,
-        onPressed: () => onSelect(equipment),
-        position: Vector2(24, y),
+        text: equipment.name,
+        size: Vector2(size.x - 40, 50),
+        color: Colors.blue,
+        onPressed: () {
+          DataController.instance.set('selectedEquipmentName', equipment.name);
+        },
+        position: Vector2(20, y),
       );
-      itemButtons.add(button);
       add(button);
-      y += 36;
+      itemButtons.add(button);
+      y += 60;
     }
+
+    // Add back button at the bottom
+    add(SimpleButtonComponent.text(
+      text: 'Back',
+      size: Vector2(200, 50),
+      color: Colors.blue,
+      onPressed: () {
+        SceneManager().popScene();
+      },
+      position: Vector2(size.x / 2, size.y - 40),
+    ));
+  }
+
+  @override
+  void updateUI() {
+    _updateEquipmentList();
   }
 }

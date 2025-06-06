@@ -1,3 +1,4 @@
+import 'package:card_combat_app/models/game_character.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:card_combat_app/models/game_card.dart';
 

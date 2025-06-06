@@ -1,48 +1,73 @@
 import 'package:flame/components.dart';
 
-class _VerticalStackEntry {
-  final PositionComponent component;
-  final double yPos;
-  final double height;
-
-  _VerticalStackEntry(this.component, this.yPos, this.height);
-}
-
 mixin VerticalStackMixin on PositionComponent {
-  double _currentTopPos = 0.0;
-  final Map<String, _VerticalStackEntry> _verticalStackEntries = {};
+  final Map<String, PositionComponent> _components = {};
+  final Map<String, double> _componentHeights = {};
+  PositionComponent? _backgroundComponent;
+  double _currentHeight = 0;
 
-  // Register and add a component to the stack
-  void registerVerticalStackComponent(String key, PositionComponent component, double height) {
-    component.size = Vector2(size.x, height);
-    final yPos = _currentTopPos;
-    component.position = Vector2(component.size.x / 2, yPos);
-    component.anchor = Anchor.topCenter;
-    _verticalStackEntries[key] = _VerticalStackEntry(component, yPos, height);
-    add(component);
-    _currentTopPos += height;
-  }
-
-  // Show a registered component
-  void showVerticalStackComponent(String key) {
-    final entry = _verticalStackEntries[key];
-    if (entry != null && !children.contains(entry.component)) {
-      entry.component.position = Vector2(entry.component.size.x / 2, entry.yPos);
-      add(entry.component);
-    }
-  }
-
-  // Hide a registered component
-  void hideVerticalStackComponent(String key) {
-    final entry = _verticalStackEntries[key];
-    if (entry != null && children.contains(entry.component)) {
-      entry.component.removeFromParent();
-    }
-  }
-
-  // Reset the stack
   void resetVerticalStack() {
-    _currentTopPos = 0.0;
-    _verticalStackEntries.clear();
+    _components.clear();
+    _componentHeights.clear();
+    _currentHeight = 0;
+    _backgroundComponent = null;
   }
-} 
+
+  void registerVerticalBackgroundComponent(
+      String key, PositionComponent component) {
+    if (_backgroundComponent != null) {
+      _backgroundComponent!.removeFromParent();
+    }
+    _backgroundComponent = component;
+    component.position = Vector2.zero();
+    component.size = Vector2(size.x, 0);
+    add(component);
+    _updateBackgroundSize();
+  }
+
+  void registerVerticalStackComponent(
+      String key, PositionComponent component, double height) {
+    if (_components.containsKey(key)) {
+      _components[key]!.removeFromParent();
+    }
+    _components[key] = component;
+    _componentHeights[key] = height;
+    component.position = Vector2(0, _currentHeight);
+    component.size = Vector2(size.x, height);
+    add(component);
+    _currentHeight += height;
+    _updateBackgroundSize();
+  }
+
+  void showVerticalStackComponent(String key) {
+    if (_components.containsKey(key)) {
+      final component = _components[key]!;
+      if (!component.isMounted) {
+        add(component);
+        _updateBackgroundSize();
+      }
+    }
+  }
+
+  void hideVerticalStackComponent(String key) {
+    if (_components.containsKey(key)) {
+      final component = _components[key]!;
+      if (component.isMounted) {
+        component.removeFromParent();
+        _updateBackgroundSize();
+      }
+    }
+  }
+
+  void _updateBackgroundSize() {
+    if (_backgroundComponent != null) {
+      double totalHeight = 0;
+      for (final component in _components.values) {
+        if (component.isMounted) {
+          totalHeight += _componentHeights[component.key] ?? 0;
+        }
+      }
+      _backgroundComponent!.size = Vector2(size.x, totalHeight);
+    }
+  }
+}

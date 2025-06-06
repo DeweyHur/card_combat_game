@@ -2,7 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/effects/fading_text_component.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 class DoTEffect extends PositionComponent {
   final StatusEffect effect;

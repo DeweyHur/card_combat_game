@@ -1,4 +1,4 @@
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/game_character.dart';
 
 abstract class CharacterBase {
   final String name;
@@ -27,7 +27,8 @@ abstract class CharacterBase {
 
   void addStatusEffect(StatusEffect effect, int amount) {
     if (effect == StatusEffect.poison) {
-      statusEffects[StatusEffect.poison] = (statusEffects[StatusEffect.poison] ?? 0) + amount;
+      statusEffects[StatusEffect.poison] =
+          (statusEffects[StatusEffect.poison] ?? 0) + amount;
     } else {
       statusEffects[effect] = amount;
     }
@@ -73,7 +74,8 @@ abstract class CharacterBase {
             currentHp -= value;
             if (currentHp < 0) currentHp = 0;
             statusEffects[StatusEffect.poison] = value - 1;
-            if (statusEffects[StatusEffect.poison]! <= 0) effectsToRemove.add(StatusEffect.poison);
+            if (statusEffects[StatusEffect.poison]! <= 0)
+              effectsToRemove.add(StatusEffect.poison);
           }
           break;
         default:
@@ -90,14 +92,15 @@ abstract class CharacterBase {
     if (statusEffects.isEmpty) {
       return '✨ No Status Effects';
     }
-    
+
     final statusStrings = statusEffects.entries.map((entry) {
       final effect = entry.key;
       final duration = entry.value;
-      String effectText = '${_getStatusEmoji(effect)} ${effect.toString().split('.').last}';
+      String effectText =
+          '${_getStatusEmoji(effect)} ${effect.toString().split('.').last}';
       return '$effectText ($duration)';
     }).join(', ');
-    
+
     return '✨ Status: $statusStrings';
   }
 
@@ -111,8 +114,29 @@ abstract class CharacterBase {
         return '❄️';
       case StatusEffect.none:
         return '✨';
+      case StatusEffect.stun:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.vulnerable:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.weak:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.strength:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.dexterity:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.regeneration:
+        // TODO: Handle this case.
+        throw UnimplementedError();
+      case StatusEffect.shield:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 
   bool get isAlive => currentHp > 0;
-} 
+}
