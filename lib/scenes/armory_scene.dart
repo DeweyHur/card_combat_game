@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:card_combat_app/managers/static_data_manager.dart';
 
 class ArmoryScene extends BaseScene with TapCallbacks {
-  late final ArmorySceneLayout _layout;
+  ArmorySceneLayout? _layout;
   static const String _lastSelectedPlayerKey = 'lastSelectedPlayer';
 
   ArmoryScene({Map<String, dynamic>? options})
@@ -67,13 +67,15 @@ class ArmoryScene extends BaseScene with TapCallbacks {
       playerSetup: playerSetup,
       options: options,
     );
-    add(_layout);
+    add(_layout!);
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    _layout.size = size; // Update layout size when game is resized
+    if (_layout != null) {
+      _layout!.size = size; // Update layout size when game is resized
+    }
   }
 
   @override
@@ -83,8 +85,6 @@ class ArmoryScene extends BaseScene with TapCallbacks {
     final currentSetup =
         DataController.instance.get<PlayerSetup>('selectedPlayerSetup');
     GameLogger.info(LogCategory.game,
-        '[ARMORY] Scene mounted with player setup: ${currentSetup?.template.name}');
-    GameLogger.info(LogCategory.game,
-        '[ARMORY] Player template stats - Health: ${currentSetup?.template.maxHealth}, Attack: ${currentSetup?.template.attack}, Defense: ${currentSetup?.template.defense}');
+        '[ARMORY] Scene mounted with player setup: [32m[1m[4m[7m${currentSetup?.template.name}[0m');
   }
 }

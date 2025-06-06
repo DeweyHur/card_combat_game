@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/models/enemy.dart';
 
 class StatsRow extends PositionComponent {
@@ -54,15 +53,11 @@ class StatsRow extends PositionComponent {
     // Get attack and defense based on character type
     int attack = 0;
     int defense = 0;
-
-    if (character is PlayerRun) {
-      attack = (character as PlayerRun).attack;
-      defense = (character as PlayerRun).defense;
-    } else if (character is EnemyRun) {
+    if (character is EnemyRun) {
       attack = (character as EnemyRun).template.attack;
       defense = (character as EnemyRun).template.defense;
     }
-
+    // For PlayerRun, attack/defense are not available in the template, so leave as 0 or N/A
     attackText.text = 'ATK: $attack';
     defenseText.text = 'DEF: $defense';
   }

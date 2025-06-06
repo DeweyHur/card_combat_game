@@ -85,8 +85,35 @@ class EquipmentTemplate {
       final List<List<dynamic>> rows =
           const CsvToListConverter().convert(rawData);
       final dataRows = rows.skip(1); // Skip header row
-      _templates =
-          dataRows.map((row) => EquipmentTemplate.fromCsvRow(row)).toList();
+
+      // Create a map to store equipment by name, keeping only the highest rarity version
+      final Map<String, EquipmentTemplate> equipmentMap = {};
+      final rarityOrder = {
+        'common': 0,
+        'rare': 1,
+        'epic': 2,
+        'legendary': 3,
+      };
+
+      for (final row in dataRows) {
+        final item = EquipmentTemplate.fromCsvRow(row);
+        final existingItem = equipmentMap[item.name];
+
+        if (existingItem == null) {
+          equipmentMap[item.name] = item;
+        } else {
+          // Compare rarities and keep the higher one
+          final existingRarity =
+              rarityOrder[existingItem.rarity.toLowerCase()] ?? 0;
+          final newRarity = rarityOrder[item.rarity.toLowerCase()] ?? 0;
+
+          if (newRarity > existingRarity) {
+            equipmentMap[item.name] = item;
+          }
+        }
+      }
+
+      _templates = equipmentMap.values.toList();
       return _templates!;
     } catch (e) {
       GameLogger.error(LogCategory.data, 'Error loading equipment data: $e');

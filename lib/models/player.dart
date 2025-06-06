@@ -16,8 +16,6 @@ class PlayerTemplate {
 
   final String name;
   final int maxHealth;
-  final int attack;
-  final int defense;
   final String emoji;
   final String color;
   final String description;
@@ -26,14 +24,11 @@ class PlayerTemplate {
   final String special;
   final List<String> equipmentSlots;
   final List<String> startingEquipment;
-  final String rarity;
   final int inventorySize;
 
   const PlayerTemplate({
     required this.name,
     required this.maxHealth,
-    required this.attack,
-    required this.defense,
     required this.emoji,
     required this.color,
     required this.description,
@@ -42,32 +37,23 @@ class PlayerTemplate {
     required this.special,
     required this.equipmentSlots,
     required this.startingEquipment,
-    required this.rarity,
     required this.inventorySize,
   });
 
   factory PlayerTemplate.fromCsvRow(List<dynamic> row) {
-    final equipmentStr = row.length > 10 ? row[10] as String : '';
-    final equipmentList = equipmentStr
-        .split('|')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    // CSV order: name,maxHealth,emoji,color,description,maxEnergy,handSize,special,equipmentSlots,startingEquipment,inventorySize
     return PlayerTemplate(
       name: row[0] as String,
       maxHealth: int.parse(row[1].toString()),
-      attack: int.parse(row[2].toString()),
-      defense: int.parse(row[3].toString()),
-      emoji: row[4] as String,
-      color: row[5] as String,
-      description: row[6] as String,
-      maxEnergy: int.parse(row[7].toString()),
-      handSize: int.parse(row[8].toString()),
-      special: row[9].toString(),
-      equipmentSlots: row[11].toString().split('|'),
-      startingEquipment: equipmentList,
-      rarity: row.length > 12 ? row[12].toString() : 'common',
-      inventorySize: row.length > 13 ? int.parse(row[13].toString()) : 20,
+      emoji: row[2] as String,
+      color: row[3] as String,
+      description: row[4] as String,
+      maxEnergy: int.parse(row[5].toString()),
+      handSize: int.parse(row[6].toString()),
+      special: row[7].toString(),
+      equipmentSlots: row[8].toString().split(':'),
+      startingEquipment: row[9].toString().split('|'),
+      inventorySize: int.parse(row[10].toString()),
     );
   }
 
@@ -83,13 +69,6 @@ class PlayerTemplate {
 
   static PlayerTemplate? findBySpecial(String special) {
     return StaticDataModel.find<PlayerTemplate>(_templates, 'special', special);
-  }
-
-  static List<PlayerTemplate> findByRarity(String rarity) {
-    return _templates
-            ?.where((template) => template.rarity == rarity)
-            .toList() ??
-        [];
   }
 }
 
@@ -171,8 +150,6 @@ class PlayerRun extends GameCharacter
 
   // Non-common data moved from GameCharacter
   final String name;
-  final int attack;
-  final int defense;
   final String emoji;
   final String color;
   final String description;
@@ -209,8 +186,6 @@ class PlayerRun extends GameCharacter
 
   PlayerRun(this.setup)
       : name = setup.template.name,
-        attack = setup.template.attack,
-        defense = setup.template.defense,
         emoji = setup.template.emoji,
         color = setup.template.color,
         description = setup.template.description,
@@ -333,8 +308,6 @@ class PlayerRun extends GameCharacter
         'name': name,
         'maxHealth': maxHealth,
         'currentHealth': currentHealth,
-        'attack': attack,
-        'defense': defense,
         'emoji': emoji,
         'color': color,
         'description': description,
