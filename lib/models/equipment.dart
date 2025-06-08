@@ -54,10 +54,10 @@ class EquipmentTemplate {
         .toList();
 
     return EquipmentTemplate(
-      name: row[0] as String,
-      description: row[1] as String,
-      rarity: row[2] as String,
-      type: row[3] as String,
+      name: (row[0] as String).trim(),
+      description: (row[1] as String).trim(),
+      rarity: (row[2] as String).trim(),
+      type: (row[3] as String).trim(),
       cards: cardsList,
     );
   }
@@ -79,53 +79,38 @@ class EquipmentTemplate {
     );
   }
 
-  static Future<List<EquipmentTemplate>> loadFromCsv(String assetPath) async {
-    try {
-      final rawData = await rootBundle.loadString(assetPath);
-      final List<List<dynamic>> rows =
-          const CsvToListConverter().convert(rawData);
-      final dataRows = rows.skip(1); // Skip header row
-
-      // Create a map to store equipment by name, keeping only the highest rarity version
-      final Map<String, EquipmentTemplate> equipmentMap = {};
-      final rarityOrder = {
-        'common': 0,
-        'rare': 1,
-        'epic': 2,
-        'legendary': 3,
-      };
-
-      for (final row in dataRows) {
-        final item = EquipmentTemplate.fromCsvRow(row);
-        final existingItem = equipmentMap[item.name];
-
-        if (existingItem == null) {
-          equipmentMap[item.name] = item;
-        } else {
-          // Compare rarities and keep the higher one
-          final existingRarity =
-              rarityOrder[existingItem.rarity.toLowerCase()] ?? 0;
-          final newRarity = rarityOrder[item.rarity.toLowerCase()] ?? 0;
-
-          if (newRarity > existingRarity) {
-            equipmentMap[item.name] = item;
-          }
-        }
+  static Future<List<EquipmentTemplate>> loadFromCsv() async {
+    final rows = await StaticDataModel.loadCsvData('assets/data/equipment.csv');
+    GameLogger.info(LogCategory.data,
+        'EquipmentTemplate.loadFromCsv received ${rows.length} rows');
+    final templates = <EquipmentTemplate>[];
+    for (final row in rows) {
+      GameLogger.info(LogCategory.data, 'Processing equipment row: ${row}');
+      try {
+        final template = EquipmentTemplate(
+          name: row[0],
+          description: row[1],
+          rarity: row[2],
+          type: row[3],
+          cards: row[4].split('|'),
+        );
+        templates.add(template);
+      } catch (e) {
+        GameLogger.error(
+            LogCategory.data, 'Error processing equipment row: ${e}');
       }
-
-      _templates = equipmentMap.values.toList();
-      return _templates!;
-    } catch (e) {
-      GameLogger.error(LogCategory.data, 'Error loading equipment data: $e');
-      rethrow;
     }
+    GameLogger.info(
+        LogCategory.data, 'Loaded ${templates.length} equipment templates');
+    return templates;
   }
 
   static EquipmentTemplate? findByName(String name) {
     if (_templates == null) return null;
     try {
+      final normalizedName = name.trim();
       return _templates!.firstWhere(
-        (template) => template.name == name,
+        (template) => template.name.trim() == normalizedName,
         orElse: () => throw Exception('Equipment not found: $name'),
       );
     } catch (e) {

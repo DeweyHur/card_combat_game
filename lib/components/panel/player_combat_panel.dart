@@ -1,3 +1,4 @@
+import 'package:card_combat_app/models/card.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/player.dart';
@@ -8,7 +9,6 @@ import 'package:card_combat_app/components/effects/game_effects.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/components/mixins/shake_mixin.dart';
 import 'package:card_combat_app/utils/color_utils.dart';
-import 'package:card_combat_app/models/game_card.dart';
 
 class PlayerCombatPanel extends BasePanel
     with AreaFillerMixin, ShakeMixin

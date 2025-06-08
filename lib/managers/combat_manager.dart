@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:card_combat_app/controllers/data_controller.dart';
 import 'package:card_combat_app/models/enemy.dart';
 import 'package:flutter/foundation.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/enemy_action.dart';
 
 // --- Combat Event System ---
 enum CombatEventType {
@@ -63,8 +63,9 @@ class CombatEvent {
     parts.add('from: ${source.name}');
     parts.add('to: ${target.name}');
     if (value != null) parts.add('value: $value');
-    if (statusEffect != null)
+    if (statusEffect != null) {
       parts.add('effect: ${statusEffect.toString().split('.').last}');
+    }
     if (statusDuration != null) parts.add('duration: $statusDuration');
     if (card != null) parts.add('card: ${card!.name}');
     if (description != null) parts.add('description: $description');
@@ -90,8 +91,8 @@ class CombatManager extends ChangeNotifier {
   final List<CombatEvent> eventHistory = [];
 
   // Store enemy actions by name for probability-based selection
-  Map<String, List<dynamic>>? _enemyActionsByName; // dynamic for EnemyAction
-  void setEnemyActionsByName(Map<String, List<dynamic>> actions) {
+  Map<String, List<EnemyActionRun>> _enemyActionsByName = {};
+  void setEnemyActionsByName(Map<String, List<EnemyActionRun>> actions) {
     _enemyActionsByName = actions;
   }
 
@@ -321,125 +322,23 @@ class CombatManager extends ChangeNotifier {
     if (_isCombatOver) return;
 
     // Get enemy actions for this enemy
-    final actions = _enemyActionsByName?[enemy.name];
-    if (actions == null || actions.isEmpty) {
+    final actions = getEnemyActions(enemy.name);
+    if (actions.isEmpty) {
       GameLogger.error(
           LogCategory.combat, 'No actions found for enemy ${enemy.name}');
       return;
     }
 
-    // Pick a random action based on probability
-    final random = Random();
-    final totalWeight = actions.fold<int>(
-        0, (sum, action) => sum + (action['probability'] as int));
-    var roll = random.nextInt(totalWeight);
-    dynamic selectedAction;
-    for (final action in actions) {
-      roll -= action['probability'] as int;
-      if (roll < 0) {
-        selectedAction = action;
-        break;
-      }
-    }
-
+    // Select an action based on probability
+    final selectedAction = selectEnemyAction(enemy.name);
     if (selectedAction == null) {
       GameLogger.error(LogCategory.combat,
           'Failed to select action for enemy ${enemy.name}');
       return;
     }
 
-    // Convert action to CardRun
-    final cardTemplate =
-        CardTemplate.findByName(selectedAction['name'] as String);
-    if (cardTemplate == null) {
-      GameLogger.error(LogCategory.combat,
-          'Card template not found for action: ${selectedAction['name']}');
-      return;
-    }
-    final cardSetup = CardSetup(cardTemplate);
-    final card = CardRun(cardSetup);
-    lastEnemyAction = card;
-
     // Execute the action
-    switch (card.type) {
-      case CardType.attack:
-        player.takeDamage(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.damage,
-          source: enemy,
-          target: player,
-          value: card.value,
-          description: '${player.name} takes ${card.value} damage',
-          card: card,
-        ));
-        break;
-
-      case CardType.heal:
-        enemy.heal(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.heal,
-          source: enemy,
-          target: enemy,
-          value: card.value,
-          description: '${enemy.name} heals for ${card.value}',
-          card: card,
-        ));
-        break;
-
-      case CardType.statusEffect:
-        if (card.statusEffectToApply != null && card.statusDuration != null) {
-          player.addStatusEffect(
-              card.statusEffectToApply!, card.statusDuration!);
-          _notifyWatchers(CombatEvent(
-            type: CombatEventType.status,
-            source: enemy,
-            target: player,
-            value: card.statusDuration!,
-            description:
-                '${player.name} is affected by ${card.statusEffectToApply} for ${card.statusDuration} turns',
-            card: card,
-          ));
-        }
-        break;
-
-      case CardType.shield:
-        enemy.addShield(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.shield,
-          source: enemy,
-          target: enemy,
-          value: card.value,
-          description: '${enemy.name} gains ${card.value} shield',
-          card: card,
-        ));
-        break;
-
-      case CardType.shieldAttack:
-        enemy.addShield(card.value);
-        player.takeDamage(card.value);
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.shieldAttack,
-          source: enemy,
-          target: player,
-          value: card.value,
-          description:
-              '${enemy.name} gains ${card.value} shield and deals ${card.value} damage',
-          card: card,
-        ));
-        break;
-
-      case CardType.cure:
-        enemy.clearStatusEffects();
-        _notifyWatchers(CombatEvent(
-          type: CombatEventType.status,
-          source: enemy,
-          target: enemy,
-          value: 0,
-          description: '${enemy.name} is cured of all status effects',
-          card: card,
-        ));
-        break;
-    }
+    _executeEnemyAction(selectedAction);
 
     // Check if combat is over
     if (enemy.currentHealth <= 0) {
@@ -450,7 +349,7 @@ class CombatManager extends ChangeNotifier {
         target: enemy,
         value: 0,
         description: '${enemy.name} is defeated!',
-        card: card,
+        card: lastEnemyAction,
       ));
     } else if (player.currentHealth <= 0) {
       _isCombatOver = true;
@@ -460,7 +359,7 @@ class CombatManager extends ChangeNotifier {
         target: player,
         value: 0,
         description: '${player.name} is defeated!',
-        card: card,
+        card: lastEnemyAction,
       ));
     }
   }
@@ -640,5 +539,128 @@ class CombatManager extends ChangeNotifier {
       source: player,
       target: enemy,
     );
+  }
+
+  List<EnemyActionRun> getEnemyActions(String enemyName) {
+    return _enemyActionsByName[enemyName] ?? [];
+  }
+
+  EnemyActionRun? selectEnemyAction(String enemyName) {
+    final actions = getEnemyActions(enemyName);
+    if (actions.isEmpty) {
+      GameLogger.error(
+          LogCategory.combat, 'No actions found for enemy: $enemyName');
+      return null;
+    }
+
+    // Calculate total probability
+    final totalProbability =
+        actions.fold<double>(0, (sum, action) => sum + action.probability);
+
+    // Generate random value between 0 and total probability
+    final random = Random().nextDouble() * totalProbability;
+
+    // Select action based on probability
+    double cumulativeProbability = 0;
+    for (final action in actions) {
+      cumulativeProbability += action.probability;
+      if (random <= cumulativeProbability) {
+        return action;
+      }
+    }
+
+    // Fallback to first action if something goes wrong
+    return actions.first;
+  }
+
+  void _executeEnemyAction(EnemyActionRun action) {
+    // Convert the enemy action to a card and store it
+    lastEnemyAction = action.toCardRun();
+
+    // Handle card effects based on type
+    switch (action.type.toLowerCase()) {
+      case 'attack':
+        player.takeDamage(action.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.damage,
+          source: enemy,
+          target: player,
+          value: action.value,
+          description: action.description,
+        ));
+        break;
+
+      case 'heal':
+        enemy.heal(action.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.heal,
+          source: enemy,
+          target: enemy,
+          value: action.value,
+          description: action.description,
+        ));
+        break;
+
+      case 'statuseffect':
+        if (action.statusEffect.isNotEmpty && action.statusDuration > 0) {
+          player.addStatusEffect(
+              StatusEffect.values.firstWhere(
+                (e) =>
+                    e.toString().split('.').last.toLowerCase() ==
+                    action.statusEffect.toLowerCase(),
+                orElse: () => StatusEffect.weak,
+              ),
+              action.statusDuration);
+          _notifyWatchers(CombatEvent(
+            type: CombatEventType.status,
+            source: enemy,
+            target: player,
+            value: action.statusDuration,
+            statusEffect: StatusEffect.values.firstWhere(
+              (e) =>
+                  e.toString().split('.').last.toLowerCase() ==
+                  action.statusEffect.toLowerCase(),
+              orElse: () => StatusEffect.weak,
+            ),
+            statusDuration: action.statusDuration,
+            description: action.description,
+          ));
+        }
+        break;
+
+      case 'shield':
+        enemy.addShield(action.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shield,
+          source: enemy,
+          target: enemy,
+          value: action.value,
+          description: action.description,
+        ));
+        break;
+
+      case 'shieldattack':
+        enemy.addShield(action.value);
+        player.takeDamage(action.value);
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.shieldAttack,
+          source: enemy,
+          target: player,
+          value: action.value,
+          description: action.description,
+        ));
+        break;
+
+      case 'cure':
+        enemy.clearStatusEffects();
+        _notifyWatchers(CombatEvent(
+          type: CombatEventType.status,
+          source: enemy,
+          target: enemy,
+          value: 0,
+          description: action.description,
+        ));
+        break;
+    }
   }
 }

@@ -11,8 +11,12 @@ import 'card.dart'; // For CardRun, CardTemplate, CardSetup
 
 // Static data loaded from CSV
 class PlayerTemplate {
-  static List<PlayerTemplate>? _templates;
-  static List<PlayerTemplate> get templates => _templates ?? [];
+  static List<PlayerTemplate> _templates = [];
+  static List<PlayerTemplate> get templates {
+    GameLogger.debug(LogCategory.data,
+        'Getting player templates, count: ${_templates.length}');
+    return _templates;
+  }
 
   final String name;
   final int maxHealth;
@@ -41,26 +45,39 @@ class PlayerTemplate {
   });
 
   factory PlayerTemplate.fromCsvRow(List<dynamic> row) {
+    GameLogger.debug(
+        LogCategory.data, 'Creating player template from row: $row');
     // CSV order: name,maxHealth,emoji,color,description,maxEnergy,handSize,special,equipmentSlots,startingEquipment,inventorySize
-    return PlayerTemplate(
-      name: row[0] as String,
-      maxHealth: int.parse(row[1].toString()),
-      emoji: row[2] as String,
-      color: row[3] as String,
-      description: row[4] as String,
-      maxEnergy: int.parse(row[5].toString()),
-      handSize: int.parse(row[6].toString()),
-      special: row[7].toString(),
-      equipmentSlots: row[8].toString().split(':'),
-      startingEquipment: row[9].toString().split('|'),
-      inventorySize: int.parse(row[10].toString()),
-    );
+    try {
+      return PlayerTemplate(
+        name: row[0].toString().trim(),
+        maxHealth: int.parse(row[1].toString().trim()),
+        emoji: row[2].toString().trim(),
+        color: row[3].toString().trim(),
+        description: row[4].toString().trim(),
+        maxEnergy: int.parse(row[5].toString().trim()),
+        handSize: int.parse(row[6].toString().trim()),
+        special: row[7].toString().trim(),
+        equipmentSlots: row[8].toString().trim().split(':'),
+        startingEquipment: row[9].toString().trim().split('|'),
+        inventorySize: int.parse(row[10].toString().trim()),
+      );
+    } catch (e) {
+      GameLogger.error(
+          LogCategory.data, 'Error creating player template from row: $e');
+      rethrow;
+    }
   }
 
   static Future<List<PlayerTemplate>> loadFromCsv(String assetPath) async {
+    GameLogger.debug(
+        LogCategory.data, 'Loading player templates from $assetPath');
     final rows = await StaticDataModel.loadCsvData(assetPath);
+    GameLogger.debug(LogCategory.data, 'Loaded ${rows.length} rows from CSV');
     _templates = rows.map((row) => PlayerTemplate.fromCsvRow(row)).toList();
-    return _templates!;
+    GameLogger.debug(
+        LogCategory.data, 'Created ${_templates.length} player templates');
+    return _templates;
   }
 
   static PlayerTemplate? findByName(String name) {
@@ -79,12 +96,23 @@ class PlayerSetup implements NameEmojiInterface {
 
   PlayerSetup(this.template) {
     // Initialize equipment from template
-    for (final slot in template.equipmentSlots) {
-      final equipmentName =
-          template.startingEquipment[template.equipmentSlots.indexOf(slot)];
+    final equipmentNames = template.startingEquipment;
+    final slots = template.equipmentSlots;
+
+    // Ensure we don't exceed array bounds
+    final count = equipmentNames.length < slots.length
+        ? equipmentNames.length
+        : slots.length;
+
+    for (var i = 0; i < count; i++) {
+      final slot = slots[i];
+      final equipmentName = equipmentNames[i];
       final equipment = EquipmentTemplate.findByName(equipmentName);
       if (equipment != null) {
         this.equipment[slot] = equipment;
+      } else {
+        GameLogger.error(
+            LogCategory.data, 'Error finding equipment: $equipmentName');
       }
     }
   }
@@ -149,7 +177,9 @@ class PlayerRun extends GameCharacter
   final List<CardRun> discardPile = [];
 
   // Non-common data moved from GameCharacter
+  @override
   final String name;
+  @override
   final String emoji;
   final String color;
   final String description;

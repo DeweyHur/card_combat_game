@@ -1,8 +1,12 @@
+import 'package:card_combat_app/models/card.dart';
 import 'package:flame/components.dart';
-import 'package:card_combat_app/models/game_card.dart';
 
 mixin ShakeMixin on PositionComponent {
-  Future<void> shake({bool horizontal = true, double intensity = 12, int times = 8, Duration duration = const Duration(milliseconds: 16)}) async {
+  Future<void> shake(
+      {bool horizontal = true,
+      double intensity = 12,
+      int times = 8,
+      Duration duration = const Duration(milliseconds: 16)}) async {
     final originalPosition = position.clone();
     for (int i = 0; i < times; i++) {
       position.add(horizontal
@@ -37,4 +41,4 @@ mixin ShakeMixin on PositionComponent {
         break;
     }
   }
-} 
+}

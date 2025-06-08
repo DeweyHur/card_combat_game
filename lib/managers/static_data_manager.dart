@@ -2,7 +2,7 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/models/enemy.dart';
 import 'package:card_combat_app/models/equipment.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/models/card.dart';
 
 /// Manages the initialization of all static game data
 class StaticDataManager {
@@ -11,11 +11,17 @@ class StaticDataManager {
 
     try {
       // Load all static data in parallel
+      await CardRun.loadLibrary('assets/data/cards.csv');
+      GameLogger.info(LogCategory.data,
+          'Game cards loaded successfully: ${CardRun.allCards.length} cards');
+
+      final equipment = await EquipmentTemplate.loadFromCsv();
+      GameLogger.info(LogCategory.data,
+          'Equipment data loaded successfully: ${equipment.length} items');
+
       await Future.wait([
         PlayerTemplate.loadFromCsv('assets/data/players.csv'),
         EnemyTemplate.loadFromCsv('assets/data/enemies.csv'),
-        EquipmentTemplate.loadFromCsv('assets/data/equipment.csv'),
-        GameCard.loadLibrary('assets/data/cards.csv'),
       ]);
 
       GameLogger.info(LogCategory.data, 'Static data initialized successfully');
@@ -57,8 +63,8 @@ class StaticDataManager {
     }
   }
 
-  static GameCard? findCardTemplate(String name) {
-    return GameCard.findByName(name);
+  static CardRun? findCardTemplate(String name) {
+    return CardRun.findByName(name);
   }
 
   // Getters for templates
@@ -66,5 +72,5 @@ class StaticDataManager {
   static List<EnemyTemplate> get enemyTemplates => EnemyTemplate.templates;
   static List<EquipmentTemplate> get equipmentTemplates =>
       EquipmentTemplate.templates;
-  static List<GameCard> get cardTemplates => GameCard.allCards;
+  static List<CardRun> get cardTemplates => CardRun.allCards;
 }

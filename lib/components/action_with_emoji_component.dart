@@ -1,77 +1,48 @@
+import 'package:card_combat_app/models/card.dart';
 import 'package:card_combat_app/models/enemy.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:card_combat_app/models/game_card.dart';
-import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/models/name_emoji_interface.dart';
+import 'package:flutter/material.dart' as material;
 
-class ActionWithEmojiComponent extends Component {
+class ActionWithEmojiComponent extends PositionComponent {
   final EnemyRun enemy;
-  final GameCard action;
+  final CardRun action;
   late TextComponent textComponent;
 
   ActionWithEmojiComponent({
     required this.enemy,
     required this.action,
-  });
+    required Vector2 position,
+    required Vector2 size,
+  }) : super(position: position, size: size);
 
-  static String format(EnemyRun enemy, GameCard action) {
-    final buffer = StringBuffer();
-    // Enemy emoji
-    buffer.write('${(enemy as NameEmojiInterface).emoji} ');
-    // Action type emoji
+  static String format(EnemyRun enemy, CardRun action) {
+    final emoji = _getEmojiForAction(action);
+    final value = action.value;
     switch (action.type) {
       case CardType.attack:
-        buffer.write('💥');
-        break;
+        return '$emoji ${enemy.name} attacks for $value damage';
       case CardType.heal:
-        buffer.write('💚');
-        break;
+        return '$emoji ${enemy.name} heals for $value HP';
       case CardType.statusEffect:
-        buffer.write('🌀');
-        break;
+        return '$emoji ${enemy.name} applies ${action.statusEffect} for ${action.statusDuration} turns';
       case CardType.cure:
-        buffer.write('✨');
-        break;
+        return '$emoji ${enemy.name} removes all status effects';
       case CardType.shield:
-        buffer.write('🛡️');
-        break;
+        return '$emoji ${enemy.name} gains $value shield';
       case CardType.shieldAttack:
-        buffer.write('🔰');
-        break;
+        return '$emoji ${enemy.name} attacks for $value damage and gains shield';
     }
-    buffer.write(' ');
-    // Action name
-    buffer.write(action.name);
-    // Add value if relevant
+  }
+
+  static String _getEmojiForAction(CardRun action) {
     if (action.type == CardType.attack || action.type == CardType.heal) {
-      buffer.write(' (${action.value})');
+      return '⚔️';
     }
-    // Status effect emoji
     if (action.type == CardType.statusEffect &&
-        action.statusEffectToApply != null) {
-      buffer.write(' ');
-      switch (action.statusEffectToApply) {
-        case StatusEffect.poison:
-          buffer.write('☠️');
-          break;
-        case StatusEffect.burn:
-          buffer.write('🔥');
-          break;
-        case StatusEffect.freeze:
-          buffer.write('❄️');
-          break;
-        case StatusEffect.none:
-        case null:
-          break;
-        default:
-          break;
-      }
-      if (action.statusDuration != null) {
-        buffer.write(' x${action.statusDuration}');
-      }
+        action.statusEffect == 'poison') {
+      return '☠️';
     }
-    return buffer.toString();
+    return '🎯';
   }
 
   @override
@@ -80,9 +51,9 @@ class ActionWithEmojiComponent extends Component {
     textComponent = TextComponent(
       text: format(enemy, action),
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: const material.TextStyle(
           fontSize: 16,
-          color: Colors.white,
+          color: material.Colors.white,
         ),
       ),
     );

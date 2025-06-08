@@ -5,6 +5,8 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/components/layout/expedition_map_component.dart';
 import 'package:flame/components.dart';
 import 'package:card_combat_app/scenes/scene_manager.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/models/player.dart';
 
 class ExpeditionScene extends BaseScene {
   late final MapStage mapStage;
@@ -13,9 +15,12 @@ class ExpeditionScene extends BaseScene {
   int playerCol = 0;
   ExpeditionMapComponent? mapComponent;
   List<(int, int)> selectableNodes = [];
+  late final PlayerRun player;
 
-  ExpeditionScene({Map<String, dynamic>? options})
-      : super(sceneBackgroundColor: Colors.blueGrey.shade900, options: options);
+  ExpeditionScene({required Map<String, dynamic> options})
+      : super(sceneBackgroundColor: Colors.blueGrey.shade900) {
+    player = options['player'] as PlayerRun;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -109,6 +114,7 @@ class ExpeditionScene extends BaseScene {
           });
           break;
         case MapNodeType.camp:
+          DataController.instance.set<PlayerRun>('currentPlayerRun', player);
           SceneManager().pushScene('camp_event', options: {
             'nodeType': node.type.toString(),
             'row': row,

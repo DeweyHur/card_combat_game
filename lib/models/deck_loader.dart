@@ -1,18 +1,20 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
-import 'game_card.dart';
+import 'package:card_combat_app/models/card.dart';
 
 /// This loader is now only used for enemy decks, as player decks are built from equipment.
 /// You may remove this file if you migrate enemy decks to a new system.
 
-/// Loads player decks from a long-format CSV (player,card,count), matching card names to loaded GameCard objects.
-Future<Map<String, List<GameCard>>> loadPlayerDecksFromCsv(String assetPath, List<GameCard> allCards) async {
+/// Loads player decks from a long-format CSV (player,card,count), matching card names to loaded CardRun objects.
+Future<Map<String, List<CardRun>>> loadPlayerDecksFromCsv(
+    String assetPath, List<CardRun> allCards) async {
   final csvString = await rootBundle.loadString(assetPath);
-  final rows = const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
+  final rows =
+      const CsvToListConverter(eol: '\n').convert(csvString, eol: '\n');
 
   // Skip header
   final dataRows = rows.skip(1);
-  final Map<String, List<GameCard>> playerDecks = {};
+  final Map<String, List<CardRun>> playerDecks = {};
 
   for (final row in dataRows) {
     final player = row[0] as String;
@@ -24,4 +26,4 @@ Future<Map<String, List<GameCard>>> loadPlayerDecksFromCsv(String assetPath, Lis
   }
 
   return playerDecks;
-} 
+}

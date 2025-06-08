@@ -2,9 +2,19 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:csv/csv.dart';
 import 'base_models.dart';
 import 'game_character.dart'; // For StatusEffect
-import 'game_card.dart'; // For CardType
+
+enum CardType {
+  attack,
+  heal,
+  statusEffect,
+  cure,
+  shield, // Adds shield to the player
+  shieldAttack, // Attacks using shield value
+}
 
 // Static data loaded from CSV
 class CardTemplate extends StaticDataModel {
@@ -49,6 +59,8 @@ class CardTemplate extends StaticDataModel {
 
   static Future<List<CardTemplate>> loadFromCsv(String assetPath) async {
     final rows = await StaticDataModel.loadCsvData(assetPath);
+    GameLogger.debug(LogCategory.data, 'FULL CARD ROWS OBJECT:');
+    GameLogger.debug(LogCategory.data, rows.toString());
     _templates = rows.map((row) => CardTemplate.fromCsvRow(row)).toList();
     return _templates!;
   }
@@ -125,11 +137,14 @@ class CardSetup extends LocalSetupModel {
 
 // Active card state during a run
 class CardRun extends RunDataModel with ChangeNotifier {
+  static Map<String, CardRun>? _allCards;
+  static List<CardRun> get allCards => _allCards?.values.toList() ?? [];
+
   final CardSetup setup;
   bool isExhausted = false;
   bool isUpgraded = false;
 
-  // Combat-related properties from GameCard
+  // Combat-related properties
   final CardType type;
   final StatusEffect? statusEffectToApply;
   final int? statusDuration;
@@ -141,6 +156,9 @@ class CardRun extends RunDataModel with ChangeNotifier {
   final String description;
   final String rarity;
   final String imagePath;
+
+  String get statusEffect =>
+      statusEffectToApply?.toString().split('.').last.toLowerCase() ?? '';
 
   CardRun(this.setup)
       : type = _mapCardType(setup.template.type),
@@ -264,5 +282,80 @@ class CardRun extends RunDataModel with ChangeNotifier {
         GameLogger.error(LogCategory.data, 'Error loading saved data: $e');
       }
     }
+  }
+
+  // Static methods for loading cards
+  static Future<void> loadLibrary(String assetPath) async {
+    _allCards = await loadCardsByNameFromCsv(assetPath);
+  }
+
+  static CardRun? findByName(String name) {
+    return _allCards != null ? _allCards![name] : null;
+  }
+
+  static Future<Map<String, List<CardRun>>> loadCardsByOwnerFromCsv(
+      String assetPath) async {
+    final csvString = await rootBundle.loadString(assetPath);
+    final rows = const CsvToListConverter().convert(csvString);
+    final dataRows = rows.skip(1);
+    final Map<String, List<CardRun>> ownerCards = {};
+    final Map<String, CardRun> cardsByName = {};
+    for (final row in dataRows) {
+      try {
+        if (row.length < 9) {
+          GameLogger.warning(
+              LogCategory.data, 'Skipping malformed card row: $row');
+          continue;
+        }
+        final owner = row[0] as String;
+        final name = row[1] as String;
+        final template = CardTemplate.findByName(name);
+        if (template == null) {
+          GameLogger.warning(
+              LogCategory.data, 'Card template not found: $name');
+          continue;
+        }
+        final card = CardRun(CardSetup(template));
+        ownerCards.putIfAbsent(owner, () => []);
+        ownerCards[owner]!.add(card);
+        cardsByName[name] = card;
+      } catch (e) {
+        GameLogger.warning(
+            LogCategory.data, 'Error parsing card row: $row, error: $e');
+        continue;
+      }
+    }
+    return ownerCards;
+  }
+
+  static Future<Map<String, CardRun>> loadCardsByNameFromCsv(
+      String assetPath) async {
+    final csvString = await rootBundle.loadString(assetPath);
+    final rows = const CsvToListConverter().convert(csvString);
+    final dataRows = rows.skip(1);
+    final Map<String, CardRun> cardsByName = {};
+    for (final row in dataRows) {
+      try {
+        if (row.length < 9) {
+          GameLogger.warning(
+              LogCategory.data, 'Skipping malformed card row: $row');
+          continue;
+        }
+        final name = row[1] as String;
+        final template = CardTemplate.findByName(name);
+        if (template == null) {
+          GameLogger.warning(
+              LogCategory.data, 'Card template not found: $name');
+          continue;
+        }
+        final card = CardRun(CardSetup(template));
+        cardsByName[name] = card;
+      } catch (e) {
+        GameLogger.warning(
+            LogCategory.data, 'Error parsing card row: $row, error: $e');
+        continue;
+      }
+    }
+    return cardsByName;
   }
 }

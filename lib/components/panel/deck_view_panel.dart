@@ -1,81 +1,92 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' as material;
+import 'dart:ui';
+import 'package:card_combat_app/models/card.dart';
+import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/simple_button_component.dart';
-import 'package:card_combat_app/models/game_card.dart';
 
-class DeckViewPanel extends PositionComponent {
-  final List<GameCard> cards;
-  final Function(GameCard) onCardRemoved;
-  final Function() onClose;
+class DeckViewPanel extends BasePanel {
+  final List<CardRun> cards;
+  final Function(CardRun)? onCardRemoved;
+  final Function()? onClose;
 
   DeckViewPanel({
+    required Vector2 position,
+    required Vector2 size,
     required this.cards,
-    required this.onCardRemoved,
-    required this.onClose,
-    Vector2? position,
-    Vector2? size,
+    this.onCardRemoved,
+    this.onClose,
   }) : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Add background
+    // Add semi-transparent black background
     add(RectangleComponent(
+      position: Vector2.zero(),
       size: size,
-      paint: material.Paint()..color = material.Colors.black.withAlpha(217),
-      anchor: Anchor.topLeft,
+      paint: Paint()..color = material.Colors.black.withOpacity(0.8),
     ));
 
     // Add title
     add(TextComponent(
-      text: 'Deck',
+      text: 'Your Deck',
+      position: Vector2(size.x / 2, 20),
+      anchor: Anchor.center,
       textRenderer: TextPaint(
-        style: const material.TextStyle(
-          color: material.Colors.white,
+        style: material.TextStyle(
           fontSize: 24,
-          fontWeight: material.FontWeight.bold,
+          color: material.Colors.white,
         ),
       ),
-      anchor: Anchor.topLeft,
-      position: Vector2(20, 20),
     ));
+
+    // Add card list
+    final cardY = 60.0;
+    final cardSpacing = 40.0;
+    for (var i = 0; i < cards.length; i++) {
+      final card = cards[i];
+      final y = cardY + i * cardSpacing;
+
+      // Card name
+      add(TextComponent(
+        text: card.name,
+        position: Vector2(20, y),
+        textRenderer: TextPaint(
+          style: material.TextStyle(
+            fontSize: 16,
+            color: material.Colors.white,
+          ),
+        ),
+      ));
+
+      // Remove button
+      add(SimpleButtonComponent.text(
+        text: 'Remove',
+        position: Vector2(size.x - 100, y),
+        size: Vector2(80, 30),
+        color: material.Colors.red,
+        onPressed: () {
+          onCardRemoved?.call(card);
+        },
+      ));
+    }
 
     // Add close button
     add(SimpleButtonComponent.text(
       text: 'Close',
+      position: Vector2(size.x / 2, size.y - 40),
       size: Vector2(100, 40),
-      color: material.Colors.red,
-      onPressed: onClose,
-      position: Vector2(size.x - 60, 20),
+      color: material.Colors.grey,
+      onPressed: () {
+        onClose?.call();
+      },
     ));
+  }
 
-    // Add card list
-    double yOffset = 80;
-    for (var card in cards) {
-      // Add card name
-      add(TextComponent(
-        text: card.name,
-        textRenderer: TextPaint(
-          style: const material.TextStyle(
-            color: material.Colors.white,
-            fontSize: 16,
-          ),
-        ),
-        anchor: Anchor.topLeft,
-        position: Vector2(20, yOffset),
-      ));
-
-      // Add remove button
-      add(SimpleButtonComponent.text(
-        text: 'Remove',
-        size: Vector2(80, 30),
-        color: material.Colors.red,
-        onPressed: () => onCardRemoved(card),
-        position: Vector2(size.x - 60, yOffset),
-      ));
-
-      yOffset += 40;
-    }
+  @override
+  void updateUI() {
+    // No updates needed as the card list is static
   }
 }

@@ -8,17 +8,19 @@ import 'package:card_combat_app/utils/game_logger.dart';
 import 'package:card_combat_app/managers/sound_manager.dart';
 import 'package:card_combat_app/utils/audio_config.dart';
 import 'package:card_combat_app/models/game_character.dart';
-import 'package:card_combat_app/models/game_card.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
-import 'package:card_combat_app/models/enemy_action_loader.dart';
-import 'package:card_combat_app/managers/combat_manager.dart';
+import 'package:card_combat_app/models/enemy_action.dart';
 import 'package:card_combat_app/models/equipment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:card_combat_app/managers/static_data_manager.dart';
+import 'package:card_combat_app/models/card.dart';
+import 'package:flame/components.dart';
 
 class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
   final SoundManager _soundManager = SoundManager();
+  late final SceneManager sceneManager;
+  late final Map<String, List<CardRun>> enemyDecks;
 
   CardCombatGame();
 
@@ -51,9 +53,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
             final equipmentMap = Map<String, dynamic>.from(data['equipment']);
             equipmentMap.forEach((slot, eqData) {
               final eq = EquipmentTemplate.fromJson(eqData);
-              if (eq != null) {
-                player.equip(slot, eq);
-              }
+              player.equip(slot, eq);
             });
           }
           players.add(player);
@@ -65,14 +65,6 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
 
     // If no players loaded, create them from templates
     if (players.isEmpty) {
-      final enemyActionsByName =
-          await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
-      final Map<String, List<GameCard>> enemyDecks = {};
-      enemyActionsByName.forEach((enemyName, actions) {
-        enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
-      });
-      CombatManager().setEnemyActionsByName(enemyActionsByName);
-
       // Create players from templates
       for (final template in StaticDataManager.playerTemplates) {
         final setup = PlayerSetup(template);
@@ -91,18 +83,21 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
           'players', jsonEncode(players.map((e) => e.toJson()).toList()));
     } else {
       // If loaded from local storage, still need to load enemies
-      final enemyActionsByName =
-          await loadEnemyActionsFromCsv('assets/data/enemy_actions.csv');
-      final Map<String, List<GameCard>> enemyDecks = {};
-      enemyActionsByName.forEach((enemyName, actions) {
-        enemyDecks[enemyName] = actions.map(enemyActionToGameCard).toList();
-      });
-      CombatManager().setEnemyActionsByName(enemyActionsByName);
-
       // Create enemies from templates
       for (final template in StaticDataManager.enemyTemplates) {
         final enemy = EnemyRun(template);
         enemies.add(enemy);
+      }
+    }
+
+    // Load enemy actions and convert them to cards
+    await EnemyActionTemplate.loadFromCsv('assets/data/enemy_actions.csv');
+    enemyDecks = {};
+    for (final template in EnemyActionTemplate.templates) {
+      final actionRun = EnemyActionRun.fromTemplate(template, 'enemy');
+      final card = actionRun.toCardRun();
+      if (card != null) {
+        enemyDecks.putIfAbsent(template.type, () => []).add(card);
       }
     }
 
@@ -124,9 +119,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
                 Map<String, dynamic>.from(jsonDecode(savedEquipment));
             equipmentMap.forEach((slot, data) {
               final eq = EquipmentTemplate.fromJson(data);
-              if (eq != null) {
-                selectedPlayer?.equip(slot, eq);
-              }
+              selectedPlayer?.equip(slot, eq);
             });
           } catch (e) {
             GameLogger.error(
@@ -146,9 +139,7 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
               Map<String, dynamic>.from(jsonDecode(savedEquipment));
           equipmentMap.forEach((slot, data) {
             final eq = EquipmentTemplate.fromJson(data);
-            if (eq != null) {
-              selectedPlayer?.equip(slot, eq);
-            }
+            selectedPlayer?.equip(slot, eq);
           });
         } catch (e) {
           GameLogger.error(
@@ -174,8 +165,11 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
     GameLogger.info(LogCategory.audio, 'Sound system initialized');
 
     // Initialize scene manager and load initial scene
-    SceneManager().initialize(this);
-    SceneManager().moveScene('title');
+    sceneManager = SceneManager();
+    sceneManager.initialize(this);
+
+    // Start with main menu
+    sceneManager.pushScene('title');
   }
 
   @override

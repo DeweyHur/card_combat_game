@@ -1,21 +1,28 @@
+import 'package:card_combat_app/models/card.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:card_combat_app/scenes/base_scene.dart';
 import 'package:flame/components.dart';
 import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/components/panel/camp_event_panel.dart';
-import 'package:card_combat_app/models/game_card.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 class CampEventScene extends BaseScene {
-  late final PlayerRun playerRun;
-
-  CampEventScene({required Map<String, dynamic> options})
-      : super(sceneBackgroundColor: material.Colors.brown.shade200) {
-    playerRun = options['player'] as PlayerRun;
-  }
+  CampEventScene({Map<String, dynamic>? options})
+      : super(
+            sceneBackgroundColor: material.Colors.brown.shade200,
+            options: options);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+
+    final playerRun =
+        DataController.instance.get<PlayerRun>('currentPlayerRun');
+    if (playerRun == null) {
+      GameLogger.error(LogCategory.game, 'No player run found for camp event');
+      return;
+    }
 
     // Add background
     add(RectangleComponent(
@@ -24,27 +31,15 @@ class CampEventScene extends BaseScene {
       anchor: Anchor.topLeft,
     ));
 
-    // Convert CardRun list to GameCard list
-    final gameCards = playerRun.deck.map((cardRun) {
-      final template = cardRun.setup.template;
-      return GameCard(
-        name: template.name,
-        description: template.description,
-        type: _mapCardType(template.type),
-        value: template.damage,
-        cost: template.cost,
-        color: _determineCardColor(template.rarity),
-        target: _determineCardTarget(template.type),
-      );
-    }).toList();
-
     // Add camp event panel
     add(CampEventPanel(
       player: playerRun,
-      playerCards: gameCards,
+      playerCards: playerRun.deck,
       position: Vector2(size.x * 0.1, size.y * 0.1),
       size: Vector2(size.x * 0.8, size.y * 0.8),
     ));
+
+    GameLogger.info(LogCategory.game, 'Camp event scene loaded');
   }
 
   CardType _mapCardType(String type) {
