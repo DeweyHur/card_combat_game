@@ -3,6 +3,7 @@ import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/models/enemy.dart';
 import 'package:card_combat_app/models/equipment.dart';
 import 'package:card_combat_app/models/card.dart';
+import 'package:card_combat_app/controllers/data_controller.dart';
 
 /// Manages the initialization of all static game data
 class StaticDataManager {
@@ -18,6 +19,11 @@ class StaticDataManager {
       final equipment = await EquipmentTemplate.loadFromCsv();
       GameLogger.info(LogCategory.data,
           'Equipment data loaded successfully: ${equipment.length} items');
+
+      // Store equipment data in DataController
+      final equipmentMap =
+          Map.fromEntries(equipment.map((e) => MapEntry(e.name, e)));
+      DataController.instance.set('equipmentData', equipmentMap);
 
       await Future.wait([
         PlayerTemplate.loadFromCsv('assets/data/players.csv'),

@@ -45,6 +45,14 @@ class EquipmentTemplate {
     required this.cards,
   });
 
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'rarity': rarity,
+        'type': type,
+        'cards': cards.join('|'),
+      };
+
   factory EquipmentTemplate.fromCsvRow(List<dynamic> row) {
     final cardsStr = row.length > 4 ? row[4] as String : '';
     final cardsList = cardsStr
@@ -87,13 +95,7 @@ class EquipmentTemplate {
     for (final row in rows) {
       GameLogger.info(LogCategory.data, 'Processing equipment row: ${row}');
       try {
-        final template = EquipmentTemplate(
-          name: row[0],
-          description: row[1],
-          rarity: row[2],
-          type: row[3],
-          cards: row[4].split('|'),
-        );
+        final template = EquipmentTemplate.fromCsvRow(row);
         templates.add(template);
       } catch (e) {
         GameLogger.error(
@@ -102,6 +104,7 @@ class EquipmentTemplate {
     }
     GameLogger.info(
         LogCategory.data, 'Loaded ${templates.length} equipment templates');
+    _templates = templates; // Initialize the static field
     return templates;
   }
 

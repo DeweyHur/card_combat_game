@@ -152,8 +152,11 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
           .set<GameCharacter>('selectedPlayer', selectedPlayer);
       prefs.setString('selectedPlayerName', selectedPlayer.name);
       // Save the player's equipment to local storage
-      prefs.setString('playerEquipment:${selectedPlayer.name}',
-          jsonEncode(selectedPlayer.equipment));
+      final equipmentData = selectedPlayer.equipment.map(
+        (slot, item) => MapEntry(slot, item.toJson()),
+      );
+      prefs.setString(
+          'playerEquipment:${selectedPlayer.name}', jsonEncode(equipmentData));
     }
 
     // Initialize audio configuration

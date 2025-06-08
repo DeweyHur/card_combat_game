@@ -1,4 +1,14 @@
 name,description,rarity,type,cards
+Combat Gauntlets,Sturdy gauntlets for basic protection,common,Chest,Defensive Stance|Guard
+Combat Belt,A simple belt for holding gear,common,Belt,Battle Stance|Power Strike
+Battle Axe,A basic axe for new adventurers,common,Weapon,Battle Strike|Power Strike
+Shield Manual,A beginner's guide to shield use,common,Offhand,Defensive Stance|Guard
+Village Amulet,A lucky amulet from the village,common,Accessory,Healing Touch|Village Blessing
+Village Talisman,A protective talisman from the village,common,Accessory,Herbal Remedy|Village Blessing
+Stealth Cloak,A basic cloak for stealth operations,common,Chest,Shadow Step|Stealth Strike
+Stealth Tool,A basic tool for stealth operations,common,Offhand,Precision Strike|Shadow Step
+Spellbook,A basic book of spells,common,Offhand,Fireball|Arcane Bolt
+Herbal Kit,A small healing kit,common,Offhand,Herbal Remedy|Healing Touch
 Mystic Amulet,An amulet of great power,legendary,Accessory,Arcane Bolt|Mystic Shield|Time Warp
 Battle Trinkets,A set of combat trinkets,legendary,Accessory,Warrior's Strike|Tactical Retreat|Battle Cry
 Elemental Ring,A ring of elemental power,legendary,Accessory,Fire Bolt|Ice Bolt|Lightning Bolt
@@ -16,19 +26,12 @@ Temple's Blessing,A blessing from the temple,rare,Accessory,Temple's Grace|Divin
 Village Amulet,A charm from the village,rare,Accessory,Village Blessing|Healing Touch|Herbal Remedy
 Warrior's Spirit,A spirit of an ancient warrior,rare,Accessory,Warrior's Blessing|Battle Cry|Warrior's Rage
 Village Talisman,A charm from the village,common,Accessory,Village Blessing|Healing Touch|Herbal Remedy
-Combat Gauntlets,Sturdy gauntlets for basic protection,common,Chest,Defensive Stance|Guard
-Combat Belt,A simple belt for holding gear,common,Belt,Battle Stance|Power Strike
-Battle Axe,A basic axe for new adventurers,common,Weapon,Battle Strike|Power Strike
-Shield Manual,A beginner's guide to shield use,common,Offhand,Defensive Stance|Guard
-Village Amulet,A lucky amulet from the village,common,Accessory,Healing Touch|Village Blessing
-Village Talisman,A protective talisman from the village,common,Accessory,Herbal Remedy|Village Blessing
 Shadow Cloak,A cloak of shadows,epic,Chest,Shadow Strike|Shadow Step|Ghost Strike
 Time Shield,A shield that bends time,epic,Offhand,Time Barrier|Time Mastery|Defensive Stance
 Warrior's Belt,A belt of combat prowess,epic,Belt,Power Strike|Battle Stance|Warrior's Rage
 Crystal Shield,A shield of pure crystal,rare,Offhand,Crystal Barrier|Crystal Strike|Defensive Stance
 Enchanted Gauntlets,Gauntlets with defensive magic,rare,Chest,Defensive Stance|Magic Shield|Guard
 Glacial Shield,A shield made of ice,rare,Offhand,Glacial Barrier|Frost Strike|Ice Storm
-Stealth Cloak,A cloak of stealth,rare,Chest,Shadow Step|Stealth Strike|Ghost Walk
 Mage's Grimoire,A book of powerful spells,legendary,Offhand,Fireball|Ice Storm|Arcane Knowledge
 Time Knowledge,A guide to time manipulation,epic,Offhand,Time Mastery|Time Warp|Ancient Knowledge
 Alchemist's Notes,Notes from a master alchemist,rare,Offhand,Alchemical Knowledge|Fire Potion|Poison Blade
@@ -38,7 +41,6 @@ Arena Manual,A manual of combat techniques,rare,Offhand,Arena Training|Battle Cr
 Cavern Knowledge,A guide to the mystic caverns,rare,Offhand,Cavern Mastery|Shadow Step|Ancient Knowledge
 Cloud Magic,A book of cloud magic,rare,Offhand,Cloud Mastery|Cloud Step|Wind Walk
 Forge Knowledge,A book of magical forging,rare,Offhand,Forge Mastery|Power Strike|Battle Strike
-Spellbook,A book of spells,rare,Offhand,Fireball|Arcane Bolt
 Spirit Guide,A guide to the spirit realm,rare,Offhand,Spirit Walk|Shadow Step|Ancient Knowledge
 Arena Manual,A manual of combat techniques,common,Offhand,Arena Training|Battle Cry|Warrior's Strike
 Shield Manual,A guide to magical defense,common,Offhand,Magic Shield|Defensive Stance|Guard
@@ -65,9 +67,6 @@ Healing Herbs,A bundle of magical herbs,common,Offhand,Healing Potion|Herbal Rem
 Healer's Kit,A complete healing kit,epic,Offhand,Healing Touch|Herbal Remedy|Purify
 Rogue's Tools,A set of stealth tools,epic,Offhand,Precision Strike|Shadow Step|Poison Blade
 Curse Breaker,A tool to break curses,rare,Offhand,Curse Removal|Purify|Cleanse
-Herbal Kit,A small healing kit,rare,Offhand,Herbal Remedy|Healing Touch
-Stealth Tool,A single stealth tool,rare,Offhand,Precision Strike|Shadow Step
-Herbal Kit,A small healing kit,common,Offhand,Herbal Remedy|Healing Touch
 Dragon Slayer,A legendary weapon,legendary,Weapon,Dragon Slayer|Dragon's Breath|Warrior's Rage
 Time Blade,A blade that manipulates time,legendary,Weapon,Time Strike|Time Warp|Time Mastery
 Champion's Blade,A blade of a legendary champion,epic,Weapon,Champion's Strike|Warrior's Rage|Battle Cry

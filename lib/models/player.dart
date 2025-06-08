@@ -336,23 +336,15 @@ class PlayerRun extends GameCharacter
   @override
   Map<String, dynamic> toJson() => {
         'name': name,
-        'maxHealth': maxHealth,
         'currentHealth': currentHealth,
-        'emoji': emoji,
-        'color': color,
-        'description': description,
-        'maxEnergy': maxEnergy,
-        'currentEnergy': currentEnergy,
-        'handSize': handSize,
-        'equipment': _equipment.map((type, item) => MapEntry(type, item.name)),
-        'inventory': _inventory.map((item) => item.name).toList(),
-        'statusEffects': statusEffects.entries
-            .map((e) => {
-                  'type': e.key.toString().split('.').last,
-                  'count': e.value,
-                })
-            .toList(),
+        'currentEnergy': _currentEnergy,
         'wins': _wins,
+        'equipment':
+            _equipment.map((type, item) => MapEntry(type, item.toJson())),
+        'inventory': _inventory.map((item) => item.toJson()).toList(),
+        'statusEffects': statusEffects.map(
+          (type, count) => MapEntry(type.toString().split('.').last, count),
+        ),
       };
 
   @override
