@@ -1,5 +1,5 @@
 name,description,rarity,type,cards
-Combat Gauntlets,Sturdy gauntlets for basic protection,common,Chest,Defensive Stance|Guard
+Combat Gauntlets,Sturdy gauntlets for basic protection,common,Offhand,Defensive Stance|Guard
 Combat Belt,A simple belt for holding gear,common,Belt,Battle Stance|Power Strike
 Battle Axe,A basic axe for new adventurers,common,Weapon,Battle Strike|Power Strike
 Shield Manual,A beginner's guide to shield use,common,Offhand,Defensive Stance|Guard
@@ -30,7 +30,7 @@ Shadow Cloak,A cloak of shadows,epic,Chest,Shadow Strike|Shadow Step|Ghost Strik
 Time Shield,A shield that bends time,epic,Offhand,Time Barrier|Time Mastery|Defensive Stance
 Warrior's Belt,A belt of combat prowess,epic,Belt,Power Strike|Battle Stance|Warrior's Rage
 Crystal Shield,A shield of pure crystal,rare,Offhand,Crystal Barrier|Crystal Strike|Defensive Stance
-Enchanted Gauntlets,Gauntlets with defensive magic,rare,Chest,Defensive Stance|Magic Shield|Guard
+Enchanted Gauntlets,Gauntlets with defensive magic,rare,Offhand,Defensive Stance|Magic Shield|Guard
 Glacial Shield,A shield made of ice,rare,Offhand,Glacial Barrier|Frost Strike|Ice Storm
 Mage's Grimoire,A book of powerful spells,legendary,Offhand,Fireball|Ice Storm|Arcane Knowledge
 Time Knowledge,A guide to time manipulation,epic,Offhand,Time Mastery|Time Warp|Ancient Knowledge
@@ -92,7 +92,7 @@ Battle Axe,A weapon from the ancient battle,common,Weapon,Battle Strike|Warrior'
 // Barbarian-specific equipment
 Berserker's Axe,A mighty axe that grows stronger with each hit,epic,Weapon,Battle Strike|Warrior's Rage|Power Surge
 Warrior's Helm,A helmet that enhances combat prowess,epic,Head,Battle Cry|Defensive Stance|Warrior's Spirit
-Rage Gauntlets,Gauntlets that channel the warrior's rage,epic,Chest,Rage Strike|Power Surge|Battle Stance
+Rage Gauntlets,Gauntlets that channel the warrior's rage,epic,Offhand,Rage Strike|Power Surge|Battle Stance
 Battle Belt,A belt that enhances combat abilities,epic,Belt,Battle Stance|Power Strike|Warrior's Strike
 
 // Paladin-specific equipment

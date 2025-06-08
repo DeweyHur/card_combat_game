@@ -24,10 +24,27 @@ class CardCombatGame extends FlameGame with TapDetector, HasCollisionDetection {
 
   CardCombatGame();
 
+  Future<void> _clearSavedEquipmentData() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Clear all player equipment data
+    final keys = prefs.getKeys();
+    for (final key in keys) {
+      if (key.startsWith('playerEquipment:') || key.startsWith('playerRun:')) {
+        await prefs.remove(key);
+        GameLogger.info(
+            LogCategory.data, 'Cleared saved equipment data for key: $key');
+      }
+    }
+  }
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     GameLogger.info(LogCategory.game, 'CardCombatGame loading...');
+
+    // Clear saved equipment data to ensure we're using latest types
+    await _clearSavedEquipmentData();
+    GameLogger.info(LogCategory.game, 'Cleared saved equipment data');
 
     // Initialize static data first
     await StaticDataManager.initialize();

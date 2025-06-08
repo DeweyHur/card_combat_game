@@ -210,7 +210,8 @@ class EquipmentRun implements RunDataModel {
       return;
     }
     if (!_inventory.contains(item)) {
-      GameLogger.error(LogCategory.game, 'Item not in inventory');
+      GameLogger.error(LogCategory.game,
+          'Item "${item.name}" (${item.type}) not in inventory');
       return;
     }
     // Unequip current item if any
