@@ -2,6 +2,8 @@ import 'package:flame/components.dart';
 import 'package:card_combat_app/models/player.dart';
 import 'package:card_combat_app/components/panel/base_panel.dart';
 import 'package:card_combat_app/components/panel/player_setup_detail_panel.dart';
+import 'package:card_combat_app/components/panel/equipment_grid_panel.dart';
+import 'package:card_combat_app/components/panel/equipment_detail_panel.dart';
 import 'package:card_combat_app/components/mixins/area_filler_mixin.dart';
 import 'package:card_combat_app/utils/color_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,62 +11,84 @@ import 'package:card_combat_app/components/simple_button_component.dart';
 import 'package:flutter/material.dart';
 import 'package:card_combat_app/models/equipment.dart';
 import 'package:card_combat_app/controllers/data_controller.dart';
+import 'package:card_combat_app/utils/game_logger.dart';
+import 'package:card_combat_app/components/panel/player_setup_selection_panel.dart';
+import 'package:card_combat_app/components/panel/equipment_slot_panel.dart';
+import 'package:card_combat_app/components/panel/equipment_setup_detail_panel.dart';
+import 'package:card_combat_app/scenes/scene_manager.dart';
 
 class ArmorySceneLayout extends BasePanel with AreaFillerMixin {
   final PlayerSetup playerSetup;
-  late PlayerSetupDetailPanel playerSetupDetailPanel;
-  final Map<String, List<EquipmentTemplate>> equipmentByType = {};
-  final Map<String, SimpleButtonComponent> typeButtons = {};
-  Map<String, EquipmentTemplate>? _equipmentData;
   final Map<String, dynamic>? options;
-  static const String _lastSelectedPlayerKey = 'lastSelectedPlayer';
+  late final PlayerSetupSelectionPanel playerSetupSelectionPanel;
+  late final EquipmentSlotPanel equipmentSlotPanel;
+  late final EquipmentSetupDetailPanel equipmentSetupDetailPanel;
+  late final SimpleButtonComponent backButton;
+  dynamic Function(dynamic)? _slotWatcher;
 
   ArmorySceneLayout({
     required this.playerSetup,
     this.options,
-  });
+  }) : super(size: Vector2(800, 600));
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    playerSetupDetailPanel = PlayerSetupDetailPanel();
-    playerSetupDetailPanel.updateSetup(playerSetup);
+
+    // Create player setup selection panel
+    playerSetupSelectionPanel = PlayerSetupSelectionPanel();
     registerVerticalStackComponent(
-        'playerSetupDetailPanel', playerSetupDetailPanel, 80);
+        'playerSetupSelectionPanel', playerSetupSelectionPanel, 100);
 
-    // Load equipment data
-    _equipmentData = DataController.instance
-        .get<Map<String, EquipmentTemplate>>('equipmentData');
-    if (_equipmentData != null) {
-      equipmentByType.clear();
-      for (final equipment in _equipmentData!.values) {
-        equipmentByType.putIfAbsent(equipment.type, () => []).add(equipment);
+    // Create equipment slot panel
+    equipmentSlotPanel = EquipmentSlotPanel();
+    registerVerticalStackComponent(
+        'equipmentSlotPanel', equipmentSlotPanel, 400);
+
+    // Create equipment setup detail panel
+    equipmentSetupDetailPanel = EquipmentSetupDetailPanel();
+    registerVerticalStackComponent(
+        'equipmentSetupDetailPanel', equipmentSetupDetailPanel, 100);
+
+    // Create back button
+    backButton = SimpleButtonComponent.text(
+      text: 'Back',
+      size: Vector2(100, 40),
+      color: Colors.red,
+      onPressed: () {
+        GameLogger.debug(LogCategory.ui, 'Back button pressed');
+        SceneManager().popScene();
+      },
+      position: Vector2(20, 20),
+    );
+    add(backButton);
+
+    // Watch for slot selection
+    _slotWatcher = (_) {
+      final selectedSlot = DataController.instance.get<String>('selectedSlot');
+      final setup =
+          DataController.instance.get<PlayerSetup>('selectedPlayerSetup');
+      if (setup != null && selectedSlot != null) {
+        final equipment = setup.equipment[selectedSlot];
+        equipmentSetupDetailPanel.updateSelection(selectedSlot, equipment);
       }
-    }
+    };
+    DataController.instance.watch('selectedSlot', _slotWatcher!);
 
-    // Create type buttons
-    for (final type in equipmentByType.keys) {
-      final button = SimpleButtonComponent.text(
-        text: type,
-        size: Vector2(200, 50),
-        color: Colors.blue,
-        onPressed: () {
-          // Handle type selection
-        },
-      );
-      typeButtons[type] = button;
-      registerVerticalStackComponent('typeButton_$type', button, 40);
-    }
+    GameLogger.debug(LogCategory.ui, '[ARMORY] Layout loaded successfully');
+  }
 
-    // Save last selected player
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastSelectedPlayerKey, playerSetup.template.name);
+  @override
+  void onRemove() {
+    if (_slotWatcher != null) {
+      DataController.instance.unwatch('selectedSlot', _slotWatcher!);
+    }
+    super.onRemove();
   }
 
   @override
   void updateUI() {
-    // Update UI components if needed
-    playerSetupDetailPanel.updateSetup(playerSetup);
+    // Implementation needed
   }
 
   @override
